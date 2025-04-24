@@ -39,7 +39,7 @@
       background: radial-gradient(circle at 30% 30%, #fff 0%, #ccc 30%, #999 60%, #666 100%);
       box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.2);
       transform-style: preserve-3d;
-      animation: spinBall 6s linear infinite;
+      animation: spinBall 2s linear infinite;
     }
     @keyframes spinBall { to { transform: rotateY(360deg); } }
     /* Orbiting letter */
@@ -51,9 +51,9 @@
       font-size: 1.2rem;
       pointer-events: none;
       opacity: 0;
+      text-shadow: 0 0 6px rgba(255,255,255,0.8);
+      transition: opacity 0.1s;
     }
-    /* Slight shimmer */
-    .sphere .letter { text-shadow: 0 0 6px rgba(255,255,255,0.8); }
     /* Positions closer to center */
     #film { top: 35%; left: 35%; }
     #photography { top: 35%; right: 35%; }
@@ -92,7 +92,7 @@
     for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){
       const x0=i*W/cols,y0=j*H/rows,w0=W/cols,h0=H/rows;
       const pts=[{x:x0,y:y0},{x:x0+w0,y:y0},{x:x0+w0,y:y0+h0},{x:x0,y:y0+h0}];
-      rects.push({pts,speed:0.002+Math.random()*0.003,phase:Math.random()*Math.PI*2,amp:10+Math.random()*20,hue:colors[(i+j)%colors.length]});
+      rects.push({pts,speed:0.005+Math.random()*0.005,phase:Math.random()*Math.PI*2,amp:10+Math.random()*20,hue:colors[(i+j)%colors.length]});
     }
     function draw(t){ ctx.clearRect(0,0,W,H);
       rects.forEach(r=>{ const {pts,amp,hue,speed,phase}=r;
@@ -119,17 +119,14 @@
         this.animate();
       }
       animate() {
-        this.time += 0.02;
-        // update orbit position
+        this.time += 0.1; // faster orbit
         const angle = this.time;
         const x = Math.cos(angle) * 70;
         const y = Math.sin(angle) * 20;
-        // if passed behind halfway, update letter
-        if(angle % (2*Math.PI) < 0.1) {
+        if(angle % (2*Math.PI) < 0.2) {
           this.index = (this.index + 1) % this.letters.length;
           this.letterEl.textContent = this.letters[this.index];
         }
-        // apply transform and opacity based on y
         const opacity = (y + 20) / 40;
         this.letterEl.style.transform = `translate(${x}px, ${y}px)`;
         this.letterEl.style.opacity = opacity;
