@@ -24,46 +24,23 @@
     const canvas = document.getElementById('renderCanvas');
     const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
     const scene = new BABYLON.Scene(engine);
-    scene.clearColor = new BABYLON.Color4(0.03, 0.01, 0.08, 1); // deeper, trippy background
+    scene.clearColor = new BABYLON.Color4(0.03, 0.01, 0.08, 1);
 
     // Camera
     const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), scene);
-    camera.setTarget(new BABYLON.Vector3(0, 0, 1));
     camera.attachControl(canvas, true);
 
     // Lighting
     const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), scene);
     hemiLight.intensity = 0.7;
 
-    // Frame Setup
-    const frames = [];
+    // Parameters
     const frameCount = 10;
-    for (let i = 0; i < frameCount; i++) {
-      const group = new BABYLON.TransformNode('frameGroup' + i, scene);
-      const border = BABYLON.MeshBuilder.CreateBox('border' + i, { width: 3, height: 2, depth: 0.1 }, scene);
-      border.parent = group;
-      border.renderOutline = true;
-      border.outlineColor = BABYLON.Color3.White();
-      border.outlinesWidth = 0.05;
-      const mat = new BABYLON.StandardMaterial('frameMat' + i, scene);
-      mat.diffuseColor = new BABYLON.Color3(0.7 + Math.random() * 0.3, 0.2 + Math.random() * 0.5, 0.5 + Math.random() * 0.4);
-      border.material = mat;
-      const plane = BABYLON.MeshBuilder.CreatePlane('plane' + i, { width: 2.5, height: 1.5 }, scene);
-      plane.parent = group;
-      plane.position.z = 0.06;
-      const dt = new BABYLON.DynamicTexture('dt' + i, { width: 512, height: 256 }, scene, false);
-      dt.drawText('Placeholder Text', null, 140, 'bold 36px monospace', '#FFFFFF', 'transparent', true);
-      const dtMat = new BABYLON.StandardMaterial('dtMat' + i, scene);
-      dtMat.diffuseTexture = dt;
-      dtMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
-      plane.material = dtMat;
-      frames.push(group);
-    }
+    const samples = 300;
+    const totalLength = frameCount * 15 * 2 + 40;
 
     // Create winding tube path
     const tubePath = [];
-    const totalLength = frameCount * 15 * 2 + 40; // doubled journey + padding
-    const samples = 300;
     for (let i = 0; i <= samples; i++) {
       const t = i / samples;
       const z = t * totalLength;
@@ -77,7 +54,37 @@
     tubeMat.alpha = 0.15;
     tube.material = tubeMat;
 
-    // Add random trippy objects
+    // Setup frames along the tube
+    const frames = [];
+    for (let i = 0; i < frameCount; i++) {
+      // Create frame group
+      const group = new BABYLON.TransformNode('frameGroup' + i, scene);
+      const border = BABYLON.MeshBuilder.CreateBox('border' + i, { width: 3, height: 2, depth: 0.1 }, scene);
+      border.parent = group;
+      border.renderOutline = true;
+      border.outlineColor = BABYLON.Color3.White();
+      border.outlinesWidth = 0.05;
+      const mat = new BABYLON.StandardMaterial('frameMat' + i, scene);
+      mat.diffuseColor = new BABYLON.Color3(0.7 + Math.random() * 0.3, 0.2 + Math.random() * 0.5, 0.5 + Math.random() * 0.4);
+      border.material = mat;
+      // Inner plane for images/text
+      const plane = BABYLON.MeshBuilder.CreatePlane('plane' + i, { width: 2.5, height: 1.5 }, scene);
+      plane.parent = group;
+      plane.position.z = 0.06;
+      const dt = new BABYLON.DynamicTexture('dt' + i, { width: 512, height: 256 }, scene, false);
+      dt.drawText('Your Image Here', null, 140, 'bold 36px monospace', '#FFFFFF', 'transparent', true);
+      const dtMat = new BABYLON.StandardMaterial('dtMat' + i, scene);
+      dtMat.diffuseTexture = dt;
+      dtMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
+      plane.material = dtMat;
+      // Position along tube path
+      const idx = Math.floor((i + 1) * (samples / (frameCount + 1)));
+      group.position.copyFrom(tubePath[idx]);
+      // Store
+      frames.push(group);
+    }
+
+    // Add random trippy objects, spaced further apart
     const shapes = ['box', 'sphere', 'torus', 'cylinder'];
     for (let i = 0; i < 60; i++) {
       const type = shapes[Math.floor(Math.random() * shapes.length)];
@@ -88,8 +95,9 @@
         case 'torus': mesh = BABYLON.MeshBuilder.CreateTorus('obj' + i, { diameter: 2, thickness: 0.5 }, scene); break;
         case 'cylinder': mesh = BABYLON.MeshBuilder.CreateCylinder('obj' + i, { diameter: 1.5, height: 3 }, scene); break;
       }
-      const px = (Math.random() - 0.5) * 16;
-      const py = (Math.random() - 0.5) * 10;
+      // Increase spatial range
+      const px = (Math.random() - 0.5) * 40;
+      const py = (Math.random() - 0.5) * 20;
       const pz = Math.random() * totalLength;
       mesh.position = new BABYLON.Vector3(px, py, pz);
       mesh.rotation = new BABYLON.Vector3(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
@@ -98,7 +106,7 @@
       mesh.material = mmat;
     }
 
-    // ScrollTrigger setup
+    // ScrollTrigger to move camera through tube
     gsap.registerPlugin(ScrollTrigger);
     gsap.to({}, {
       scrollTrigger: {
@@ -112,21 +120,20 @@
           camera.position.copyFrom(tubePath[idx]);
           const next = tubePath[Math.min(idx + 1, samples)];
           camera.setTarget(next);
-          // rotate frames a bit as we pass
+          // Slight frame rotation
           frames.forEach((fg, i) => fg.rotation.y = prog * Math.PI * 2 * ((i % 2) ? -1 : 1));
         }
       }
     });
 
-    // Render Loop
+    // Render Loop & Resize
     engine.runRenderLoop(() => scene.render());
     window.addEventListener('resize', () => engine.resize());
 
     /*
       CUSTOMIZATION:
-      - Replace placeholder text via dt.drawText()
-      - Load images: use new BABYLON.Texture('path.jpg', scene) and assign to plane.material.diffuseTexture
-      - Tweak colors, radii, shapes count as desired
+      - Replace 'Your Image Here' and use BABYLON.Texture('path/to.jpg', scene) on plane.material.diffuseTexture.
+      - Adjust 'px'/'py' multipliers to change object spread.
     */
   </script>
 </body>
