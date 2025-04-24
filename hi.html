@@ -8,29 +8,47 @@
     html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background: #000; }
     #hiCanvas { position:absolute; top:0; left:0; width:100%; height:100%; }
     #title {
-      position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
-      font-family: 'Segoe UI', sans-serif; font-size: 3rem; color: #fff;
-      letter-spacing: 2px; padding: 0.5rem 1rem;
-      background: rgba(0,0,0,0.7); border: 4px solid #fff; border-radius: 4px;
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 3rem;
+      color: #fff;
+      letter-spacing: 2px;
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.7);
+      border: 4px solid #fff;
+      border-radius: 4px;
       animation: dropIn 1s ease-out forwards;
     }
     @keyframes dropIn { to { top: 20px; } }
     .planet-container {
-      position: absolute; width: 150px; height: 180px; text-align: center;
-      cursor: pointer; pointer-events: all;
+      position: absolute;
+      width: 150px;
+      height: 180px;
+      text-align: center;
+      cursor: pointer;
+      pointer-events: all;
     }
     .planet-scene {
-      width: 150px; height: 150px;
+      width: 150px;
+      height: 150px;
     }
     .planet-label {
-      margin-top: 8px; font-family: 'Segoe UI', sans-serif;
-      color: #fff; font-size: 1rem;
+      margin-top: 8px;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      font-size: 1rem;
+      text-shadow: 0 0 8px rgba(0,0,0,0.8);
     }
-    /* Adjusted positions for extra spacing */
-    #film { top: 25%; left: 30%; }
-    #photography { top: 25%; left: 70%; transform: translateX(-100%); }
-    #music { bottom: 25%; left: 30%; transform: translateY(-100%); }
-    #contact { bottom: 25%; left: 70%; transform: translate(-100%, -100%); }
+    /* Adjusted positions with equal spacing */
+    #film { top: 30%; left: 25%; transform: translate(-50%, -50%); }
+    #photography { top: 30%; left: 75%; transform: translate(-50%, -50%); }
+    #music { top: 70%; left: 25%; transform: translate(-50%, -50%); }
+    #contact { top: 70%; left: 75%; transform: translate(-50%, -50%); }
   </style>
 </head>
 <body>
@@ -128,7 +146,7 @@
       container.addEventListener('click', ()=> window.location.href = onClickUrl);
     }
 
-    // Updated texture URLs for correct maps
+    // Initialize planets
     createPlanet('scene-film', 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
                                'https://threejs.org/examples/textures/planets/earthbump1k.jpg', 'film.html');
     createPlanet('scene-photography', 'https://threejs.org/examples/textures/planets/jupiter.jpg',
