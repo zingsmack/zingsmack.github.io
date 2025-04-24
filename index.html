@@ -84,11 +84,70 @@
         transform: perspective(400px) rotateX(0deg)   rotateY(0deg)   skew(0deg,0deg);
       }
     }
+.lens-container {
+  position: relative;
+  cursor: none; /* optional: hide default cursor */
+}
+
+/* the “normal” text sits on top */
+.text {
+  position: relative;
+  z-index: 2;
+}
+
+/* the “lens” copy is underneath, clipped to a circle */
+.lens {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  
+  /* start hidden */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  
+  /* clip to a movable circle */
+  clip-path: circle(0px at var(--mx) var(--my));
+  
+  /* extra magnification + twist */
+  transform-origin: var(--mx) var(--my);
+  transform: scale(1) rotate(0deg);
+  
+  /* match your warp styling */
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: moveGradient 8s infinite ease-in-out,
+             hueShift    6s infinite linear,
+             distort     5s infinite ease-in-out;
+}
+
+/* show the lens on hover */
+.lens-container:hover .lens {
+  opacity: 1;
+}
+
+/* you can tweak these */
+.lens-container {
+  --radius: 100px;
+}
+
+/* clamp the clip-circle size */
+.lens {
+  clip-path: circle(var(--radius) at var(--mx) var(--my));
+}
+    
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
-  <div class="overlay warp">LEONLIII is currently renovating this area</div>
+  
+  <div class="overlay warp lens-container">
+  <span class="text">Under Renovations</span>
+  <span class="lens">Under Renovations</span>
+</div>
 
   <script>
     // Utility to linearly interpolate
@@ -141,5 +200,33 @@
 
     requestAnimationFrame(draw);
   </script>
+  <script>
+  const container = document.querySelector('.lens-container');
+  const lens      = container.querySelector('.lens');
+  let twistAngle  = 0;
+
+  container.addEventListener('mousemove', e => {
+    const rect = container.getBoundingClientRect();
+    // mouse x/y relative to container
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // update CSS variables to move the clip-circle
+    container.style.setProperty('--mx', `${x}px`);
+    container.style.setProperty('--my', `${y}px`);
+    
+    // slowly oscillate twist
+    twistAngle = (twistAngle + 2) % 360;
+    lens.style.transform = `translate(0,0) scale(1.5) rotate(${twistAngle}deg)`;
+  });
+
+  // hide lens when leaving
+  container.addEventListener('mouseleave', () => {
+    lens.style.opacity = 0;
+  });
+  container.addEventListener('mouseenter', () => {
+    lens.style.opacity = 1;
+  });
+</script>
 </body>
 </html>
