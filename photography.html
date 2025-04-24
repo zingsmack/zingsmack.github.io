@@ -108,7 +108,25 @@
 
     // Cat head model
     let catMesh = null;
-    BABYLON.SceneLoader.ImportMesh('', 'https://models.babylonjs.com/Cat.glb', '', scene, meshes => {
+    // Show debug layer for troubleshooting
+    scene.debugLayer.show({ embedMode: true });
+    // Attempt to load cat head model with error callback
+    BABYLON.SceneLoader.ImportMesh(
+      '',
+      'https://models.babylonjs.com/Cat.glb', // realistic cat head model URL
+      '',
+      scene,
+      meshes => {
+        catMesh = meshes[0];
+        console.log('Cat model loaded:', meshes);
+        catMesh.position = new BABYLON.Vector3(10, 0, totalLength * 0.5);
+        catMesh.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+      },
+      null,
+      (scene, message, exception) => {
+        console.error('Error loading cat model:', message, exception);
+      }
+    );'', 'https://models.babylonjs.com/Cat.glb', '', scene, meshes => {
       catMesh = meshes[0];
       catMesh.position = new BABYLON.Vector3(10,0,totalLength*0.5);
       catMesh.scaling = new BABYLON.Vector3(0.5,0.5,0.5);
