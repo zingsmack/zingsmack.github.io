@@ -1,81 +1,38 @@
+<!-- File: photography.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Picture Frame Gallery</title>
-  <style>
-    body { margin: 0; height: 500vh; overflow-x: hidden; }
-    canvas { display: block; position: fixed; top: 0; left: 0; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Immersive Portrait Corridor</title>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+  <!-- Three.js canvas -->
+  <canvas id="webgl-canvas"></canvas>
 
-  <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.152.0/build/three.module.js';
+  <!-- Hidden menu overlay -->
+  <div id="menu-overlay" class="hidden">
+    <button id="close-menu">×</button>
+    <nav>
+      <ul>
+        <li><a href="#frame1">Portrait #1</a></li>
+        <li><a href="#frame2">Portrait #2</a></li>
+        <li><a href="#frame3">Portrait #3</a></li>
+        <li><a href="#frame4">Portrait #4</a></li>
+        <li><a href="#frame5">Portrait #5</a></li>
+      </ul>
+    </nav>
+  </div>
+  <button id="menu-toggle">☰</button>
 
-    // --- Scene & Renderer Setup ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdddddd); // initial environment
+  <!-- Dependencies -->
+  <script src="https://unpkg.com/three@0.152.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.152.0/examples/js/controls/DeviceOrientationControls.js"></script>
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 0, 5);
-
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    // --- Frames Configuration ---
-    const frameCount = 5;
-    const spacing = 6;
-    const frames = [];
-    
-    for (let i = 0; i < frameCount; i++) {
-      // Create frame plane
-      const geometry = new THREE.PlaneGeometry(3, 4);
-      const texture = new THREE.TextureLoader().load('images/one.jpg');
-      const material = new THREE.MeshBasicMaterial({ map: texture });
-      const mesh = new THREE.Mesh(geometry, material);
-
-      // Position frames in a line along Z, spread on X
-      mesh.position.set((i - (frameCount - 1) / 2) * spacing, 0, -i * (spacing + 2));
-      
-      // PLACEHOLDER for portrait image #" + (i+1) + "
-      // TODO: Replace 'images/one.jpg' with your portrait image #" + (i+1) + "
-      frames.push(mesh);
-      scene.add(mesh);
-    }
-
-    // --- Scroll-based Camera Movement & Environment Animation ---
-    window.addEventListener('scroll', () => {
-      const scrollY = window.scrollY;
-      const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const t = scrollY / maxScroll;
-
-      // Move camera through the frames
-      const totalDepth = (frameCount - 1) * (spacing + 2);
-      camera.position.z = 5 + t * totalDepth;
-
-      // Animate background color as environment change (simple example)
-      // TODO: Replace with dynamic environment maps or skyboxes per section
-      const startColor = new THREE.Color(0xdddddd);
-      const endColor   = new THREE.Color(0x333366);
-      scene.background = startColor.lerp(endColor, t);
-    });
-
-    // --- Responsive Resize ---
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // --- Render Loop ---
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-    }
-    animate();
-  </script>
+  <!-- Your gallery script -->
+  <script src="js/gallery.js"></script>
 </body>
 </html>
