@@ -5,26 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hi Page</title>
   <style>
-    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background: #000; }
-    #hiCanvas { position:absolute; top:0; left:0; width:100%; height:100%; }
+    /* Fullscreen background canvas */
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+    #hiCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    /* Title styling */
     #title {
       position: absolute;
       top: -100px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
+      left: 0; right: 0;
+      margin: auto;
+      width: max-content;
       text-align: center;
       font-family: 'Segoe UI', sans-serif;
       font-size: 3rem;
       color: #fff;
       letter-spacing: 2px;
       padding: 0.5rem 1rem;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.7);
       border: 4px solid #fff;
       border-radius: 4px;
       animation: dropIn 1s ease-out forwards;
     }
     @keyframes dropIn { to { top: 20px; } }
+
+    /* Planet container and label styling */
     .planet-container {
       position: absolute;
       width: 150px;
@@ -42,9 +47,10 @@
       font-family: 'Segoe UI', sans-serif;
       color: #fff;
       font-size: 1rem;
-      text-shadow: 0 0 8px rgba(0,0,0,0.8);
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
     }
-    /* Adjusted positions with equal spacing */
+
+    /* Evenly spaced positions */
     #film { top: 30%; left: 25%; transform: translate(-50%, -50%); }
     #photography { top: 30%; left: 75%; transform: translate(-50%, -50%); }
     #music { top: 70%; left: 25%; transform: translate(-50%, -50%); }
@@ -55,7 +61,7 @@
   <canvas id="hiCanvas"></canvas>
   <div id="title">welcome to level I consciousness</div>
 
-  <!-- Planet containers -->
+  <!-- Four planet containers -->
   <div class="planet-container" id="film" onclick="location.href='film.html'">
     <div class="planet-scene" id="scene-film"></div>
     <div class="planet-label">FILM</div>
@@ -76,65 +82,93 @@
   <!-- Three.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
   <script>
-    // Background drawing
+    // Animated background grid (as before)
     const canvas = document.getElementById('hiCanvas'), ctx = canvas.getContext('2d');
     let W, H;
-    function resizeCanvas(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
-    window.addEventListener('resize', resizeCanvas); resizeCanvas();
-    const cols=4, rows=4, baseHue=30;
-    const colors=[baseHue,(baseHue+150)%360,(baseHue+210)%360,(baseHue+90)%360];
-    const rects=[];
-    for(let i=0;i<cols;i++) for(let j=0;j<rows;j++){
-      const x0=i*W/cols, y0=j*H/rows, w0=W/cols, h0=H/rows;
-      rects.push({ pts:[{x:x0,y:y0},{x:x0+w0,y:y0},{x:x0+w0,y:y0+h0},{x:x0,y:y0+h0}],
-        speed:0.005+Math.random()*0.005, phase:Math.random()*Math.PI*2,
-        amp:10+Math.random()*20, hue:colors[(i+j)%colors.length] });
+    function resizeCanvas() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const cols = 4, rows = 4, baseHue = 30;
+    const colors = [baseHue, (baseHue + 150) % 360, (baseHue + 210) % 360, (baseHue + 90) % 360];
+    const rects = [];
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const x0 = i * W / cols, y0 = j * H / rows;
+        rects.push({
+          pts: [
+            { x: x0, y: y0 },
+            { x: x0 + W / cols, y: y0 },
+            { x: x0 + W / cols, y: y0 + H / rows },
+            { x: x0, y: y0 + H / rows }
+          ],
+          speed: 0.005 + Math.random() * 0.005,
+          phase: Math.random() * Math.PI * 2,
+          amp: 10 + Math.random() * 20,
+          hue: colors[(i + j) % colors.length]
+        });
+      }
     }
-    function drawBG(t){ ctx.clearRect(0,0,W,H);
-      rects.forEach(r=>{
-        const t1=t*r.speed+r.phase;
-        const pts = r.pts.map(p=>({ x:p.x+Math.sin(t1+p.x*0.01+p.y*0.01)*r.amp,
-                                    y:p.y+Math.cos(t1+p.y*0.01+p.x*0.01)*r.amp }));
-        ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
-        pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.closePath();
-        ctx.fillStyle=`hsl(${r.hue},85%,50%)`; ctx.fill();
-        ctx.lineWidth=8; ctx.strokeStyle='#000'; ctx.stroke();
-      }); requestAnimationFrame(drawBG);
+
+    function drawBG(time) {
+      ctx.clearRect(0, 0, W, H);
+      rects.forEach(r => {
+        const t = time * r.speed + r.phase;
+        const pts = r.pts.map(p => ({
+          x: p.x + Math.sin(t + p.x * 0.01 + p.y * 0.01) * r.amp,
+          y: p.y + Math.cos(t + p.y * 0.01 + p.x * 0.01) * r.amp
+        }));
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        pts.slice(1).forEach(pt => ctx.lineTo(pt.x, pt.y));
+        ctx.closePath();
+        ctx.fillStyle = `hsl(${r.hue},85%,50%)`;
+        ctx.fill();
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
+      });
+      requestAnimationFrame(drawBG);
     }
     requestAnimationFrame(drawBG);
 
-    // Planet creation
-    function createPlanet(sceneId, textureUrl, bumpUrl, onClickUrl) {
+    // Function to create a planet scene
+    function createPlanet(sceneId, colorMap, bumpMap, link) {
       const container = document.getElementById(sceneId);
       const size = container.clientWidth;
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(45,1,0.1,100);
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
       camera.position.z = 2;
-      const renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true });
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setSize(size, size);
       container.appendChild(renderer.domElement);
 
-      const geo = new THREE.SphereGeometry(0.7, 64, 64);
       const loader = new THREE.TextureLoader();
-      const mat = new THREE.MeshPhongMaterial({
-        map: loader.load(textureUrl, undefined, undefined, err=>console.error('Map load error for', sceneId, err)),
-        bumpMap: loader.load(bumpUrl, undefined, undefined, err=>console.error('Bump load error for', sceneId, err)), bumpScale: 0.05,
+      const geometry = new THREE.SphereGeometry(0.7, 64, 64);
+      const material = new THREE.MeshPhongMaterial({
+        map: loader.load(colorMap),
+        bumpMap: loader.load(bumpMap),
+        bumpScale: 0.05,
         shininess: 20,
-        emissive: new THREE.Color(0x222222), emissiveIntensity: 0.3
+        emissive: new THREE.Color(0x222222),
+        emissiveIntensity: 0.3
       });
-      const sphere = new THREE.Mesh(geo, mat);
+      const sphere = new THREE.Mesh(geometry, material);
       scene.add(sphere);
+
       const glow = new THREE.Mesh(
         new THREE.SphereGeometry(0.75, 64, 64),
         new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2, side: THREE.BackSide })
       );
       scene.add(glow);
 
+      // Lighting
       scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-      const dir = new THREE.DirectionalLight(0xffffff, 0.6);
-      dir.position.set(5,5,5);
-      scene.add(dir);
+      const directional = new THREE.DirectionalLight(0xffffff, 0.6);
+      directional.position.set(5, 5, 5);
+      scene.add(directional);
 
+      // Animate
       function animate() {
         requestAnimationFrame(animate);
         sphere.rotation.y += 0.01;
@@ -143,28 +177,28 @@
       }
       animate();
 
-      container.addEventListener('click', ()=> window.location.href = onClickUrl);
+      container.addEventListener('click', () => window.location.href = link);
     }
 
-    // Initialize planets with correct texture URLs
+    // Initialize each planet with Solarsystemscope textures
     createPlanet('scene-film',
       'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
       'https://threejs.org/examples/textures/planets/earthbump1k.jpg',
       'film.html'
     );
     createPlanet('scene-photography',
-      'https://threejs.org/examples/textures/planets/jupiter.jpg',
-      'https://threejs.org/examples/textures/planets/jupiterbump2k.jpg',
+      'https://www.solarsystemscope.com/textures/download/2k_jupiter.jpg',
+      'https://www.solarsystemscope.com/textures/download/2k_jupiter_bump.jpg',
       'photography.html'
     );
     createPlanet('scene-music',
-      'https://threejs.org/examples/textures/planets/mars_1k_color.jpg',
-      'https://threejs.org/examples/textures/planets/marsbump1k.jpg',
+      'https://www.solarsystemscope.com/textures/download/2k_mars.jpg',
+      'https://www.solarsystemscope.com/textures/download/2k_mars_bump.jpg',
       'music.html'
     );
     createPlanet('scene-contact',
-      'https://threejs.org/examples/textures/planets/neptune.jpg',
-      'https://threejs.org/examples/textures/planets/neptunemap.jpg',
+      'https://www.solarsystemscope.com/textures/download/2k_neptune.jpg',
+      'https://www.solarsystemscope.com/textures/download/2k_neptune_bump.jpg',
       'contact.html'
     );
   </script>
