@@ -3,86 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level I consciousness</title>
+  <title>Hi Page</title>
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background: #000; }
     canvas { display: block; }
+    /* Title animation */
+    #title {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 3rem;
+      color: #fff;
+      letter-spacing: 2px;
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.7);
+      border: 4px solid #fff;
+      border-radius: 4px;
+      animation: dropIn 1s ease-out forwards;
+    }
+    @keyframes dropIn {
+      to { top: 20px; }
+    }
+    /* Sphere text wrappers */
+    .sphere {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+      perspective: 400px;
+    }
+    .sphere .ring {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: spin 8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotateY(360deg); } }
+    .sphere .ring span {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform-origin: 0  -50px;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+    /* Positions */
+    #film { top: 15%; left: 20%; }
+    #photography { top: 15%; right: 20%; }
+    #music { bottom: 15%; left: 20%; }
+    #contact { bottom: 15%; right: 20%; }
   </style>
 </head>
 <body>
-  <div>U N D E R C O N S T R U C T I O N</div>
   <canvas id="hiCanvas"></canvas>
+  <div id="title">welcome to level I consciousness</div>
+
+  <!-- Film sphere NW -->
+  <div class="sphere" id="film" onclick="location.href='film.html'">
+    <div class="ring" id="ring-film"></div>
+  </div>
+  <!-- Photography sphere NE -->
+  <div class="sphere" id="photography" onclick="location.href='photography.html'">
+    <div class="ring" id="ring-photo"></div>
+  </div>
+  <!-- Music SW -->
+  <div class="sphere" id="music" onclick="location.href='music.html'">
+    <div class="ring" id="ring-music"></div>
+  </div>
+  <!-- Contact SE -->
+  <div class="sphere" id="contact" onclick="location.href='contact.html'">
+    <div class="ring" id="ring-contact"></div>
+  </div>
+
   <script>
+    // Canvas background
     const canvas = document.getElementById('hiCanvas');
     const ctx = canvas.getContext('2d');
     let W, H;
-    function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
     window.addEventListener('resize', resize);
     resize();
-
-    // Define grid
-    const cols = 4;
-    const rows = 4;
-    // Generate bold color palette (split complementary)
-    const baseHue = 30; // pick warm base
-    const colors = [baseHue, (baseHue + 150) % 360, (baseHue + 210) % 360, (baseHue + 90) % 360];
-
-    // Rectangle objects
-    const rects = [];
-    for (let i = 0; i < cols; i++) {
-      for (let j = 0; j < rows; j++) {
-        const x0 = (i / cols) * W;
-        const y0 = (j / rows) * H;
-        const w0 = W / cols;
-        const h0 = H / rows;
-        // initial corners
-        const pts = [
-          { x: x0,     y: y0     },
-          { x: x0 + w0, y: y0     },
-          { x: x0 + w0, y: y0 + h0},
-          { x: x0,     y: y0 + h0}
-        ];
-        rects.push({
-          pts,
-          speed: 0.002 + Math.random() * 0.003,
-          phase: Math.random() * Math.PI * 2,
-          amp: 10 + Math.random() * 20,
-          hue: colors[(i + j) % colors.length]
-        });
-      }
+    const cols=4, rows=4, baseHue=30;
+    const colors=[baseHue,(baseHue+150)%360,(baseHue+210)%360,(baseHue+90)%360];
+    const rects=[];
+    for(let i=0;i<cols;i++) for(let j=0;j<rows;j++){
+      const x0=i*W/cols, y0=j*H/rows, w0=W/cols, h0=H/rows;
+      const pts=[{x:x0,y:y0},{x:x0+w0,y:y0},{x:x0+w0,y:y0+h0},{x:x0,y:y0+h0}];
+      rects.push({pts,speed:0.002+Math.random()*0.003,phase:Math.random()*Math.PI*2,amp:10+Math.random()*20,hue:colors[(i+j)%colors.length]});
     }
-
-    function draw(time) {
-      ctx.clearRect(0, 0, W, H);
-      // Draw each rectangle with animated corners
-      rects.forEach(r => {
-        const { pts, speed, phase, amp, hue } = r;
-        const t = time * speed + phase;
-        // compute animated points
-        const aniPts = pts.map(p => {
-          // each corner moves independently via sin of t plus offset
-          const ox = Math.sin(t + p.x * 0.01 + p.y * 0.01) * amp;
-          const oy = Math.cos(t + p.y * 0.01 + p.x * 0.01) * amp;
-          return { x: p.x + ox, y: p.y + oy };
-        });
-        // draw fill
-        ctx.beginPath();
-        ctx.moveTo(aniPts[0].x, aniPts[0].y);
-        for (let k = 1; k < aniPts.length; k++) ctx.lineTo(aniPts[k].x, aniPts[k].y);
-        ctx.closePath();
-        ctx.fillStyle = `hsl(${hue},85%,50%)`;
-        ctx.fill();
-        // draw border
-        ctx.lineWidth = 6;
-        ctx.strokeStyle = '#000';
-        ctx.stroke();
-      });
-      requestAnimationFrame(draw);
+    function draw(t){ ctx.clearRect(0,0,W,H);
+      rects.forEach(r=>{
+        const t1=t*r.speed+r.phase, {pts,amp,hue}=r;
+        const ani=pts.map(p=>({x:p.x+Math.sin(t1+p.x*0.01+p.y*0.01)*amp,y:p.y+Math.cos(t1+p.y*0.01+p.x*0.01)*amp}));
+        ctx.beginPath(); ctx.moveTo(ani[0].x,ani[0].y);
+        for(let k=1;k<ani.length;k++) ctx.lineTo(ani[k].x,ani[k].y);
+        ctx.closePath(); ctx.fillStyle=`hsl(${hue},85%,50%)`; ctx.fill();
+        ctx.lineWidth=6; ctx.strokeStyle='#000'; ctx.stroke();
+      }); requestAnimationFrame(draw);
     }
     requestAnimationFrame(draw);
+
+    // Helper: create ring text
+    function initRing(id, text) {
+      const ring = document.getElementById(id);
+      const len = text.length;
+      for(let i=0;i<len;i++){
+        const span = document.createElement('span');
+        span.textContent = text[i];
+        const angle = (360/len)*i;
+        span.style.transform = `rotate(${angle}deg)`;
+        ring.appendChild(span);
+      }
+    }
+    initRing('ring-film','FILM');
+    initRing('ring-photo','PHOTOGRAPHY');
+    initRing('ring-music','MUSIC');
+    initRing('ring-contact','CONTACT');
   </script>
 </body>
 </html>
