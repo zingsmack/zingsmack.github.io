@@ -26,11 +26,11 @@
       margin-top: 8px; font-family: 'Segoe UI', sans-serif;
       color: #fff; font-size: 1rem;
     }
-    /* Positions closer to center (NW, NE, SW, SE) */
-    #film { top: 30%; left: 30%; }
-    #photography { top: 30%; left: 70%; transform: translateX(-100%); }
-    #music { top: 70%; left: 30%; transform: translateY(-100%); }
-    #contact { top: 70%; left: 70%; transform: translate(-100%, -100%); }
+    /* Adjusted positions for extra spacing */
+    #film { top: 25%; left: 30%; }
+    #photography { top: 25%; left: 70%; transform: translateX(-100%); }
+    #music { bottom: 25%; left: 30%; transform: translateY(-100%); }
+    #contact { bottom: 25%; left: 70%; transform: translate(-100%, -100%); }
   </style>
 </head>
 <body>
@@ -99,8 +99,8 @@
       const geo = new THREE.SphereGeometry(0.7, 64, 64);
       const loader = new THREE.TextureLoader();
       const mat = new THREE.MeshPhongMaterial({
-        map: loader.load(textureUrl),
-        bumpMap: loader.load(bumpUrl), bumpScale: 0.05,
+        map: loader.load(textureUrl, undefined, undefined, err=>console.error('Map load error for', sceneId, err)),
+        bumpMap: loader.load(bumpUrl, undefined, undefined, err=>console.error('Bump load error for', sceneId, err)), bumpScale: 0.05,
         shininess: 20,
         emissive: new THREE.Color(0x222222), emissiveIntensity: 0.3
       });
@@ -128,15 +128,15 @@
       container.addEventListener('click', ()=> window.location.href = onClickUrl);
     }
 
-    // Initialize planets
+    // Updated texture URLs for correct maps
     createPlanet('scene-film', 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
                                'https://threejs.org/examples/textures/planets/earthbump1k.jpg', 'film.html');
     createPlanet('scene-photography', 'https://threejs.org/examples/textures/planets/jupiter.jpg',
-                               'https://threejs.org/examples/textures/planets/jupitermap.jpg', 'photography.html');
+                               'https://threejs.org/examples/textures/planets/jupiterbump.jpg', 'photography.html');
     createPlanet('scene-music', 'https://threejs.org/examples/textures/planets/mars_1k_color.jpg',
-                               'https://threejs.org/examples/textures/planets/mars_1k_1.jpg', 'music.html');
+                               'https://threejs.org/examples/textures/planets/marsbump1k.jpg', 'music.html');
     createPlanet('scene-contact', 'https://threejs.org/examples/textures/planets/neptune.jpg',
-                               'https://threejs.org/examples/textures/planets/neptunemap.jpg', 'contact.html');
+                               'https://threejs.org/examples/textures/planets/neptunebump.jpg', 'contact.html');
   </script>
 </body>
 </html>
