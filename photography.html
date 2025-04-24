@@ -70,7 +70,7 @@ for(let i=0;i<count;i++){
   dt.drawText('Your Portrait',50,400,'bold 48px Arial','#FFF','transparent');
   const mat = new BABYLON.StandardMaterial('mat'+i,scene);
   mat.diffuseTexture = dt; mat.emissiveColor.set(1,1,1);
-  p.material = mat;
+  // frames now always face the camera via billboardMode; no manual rotation needed;
   frames.push(node);
 }
 
