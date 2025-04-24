@@ -1,1 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Photography Showcase</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow-x: hidden; }
+    #renderCanvas { width: 100vw; height: 100vh; display: block; position: fixed; top: 0; left: 0; }
+    .spacer { height: 500vh; /* make scroll length: adjust to taste */ }
+  </style>
+</head>
+<body>
+  <canvas id="renderCanvas"></canvas>
+  <div class="spacer"></div>
+
+  <!-- BabylonJS & GSAP Libraries -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+
+  <script>
+    // Engine & Scene Setup
+    const canvas = document.getElementById('renderCanvas');
+    const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+    const scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(0.05, 0.02, 0.1, 1); // deep purple background
+
+    // Camera
+    const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, -10), scene);
+    camera.setTarget(BABYLON.Vector3.Zero());
+    camera.attachControl(canvas, true);
+
+    // Lighting
+    const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), scene);
+    hemiLight.intensity = 0.8;
+
+    // Optional: Add subtle glow or post-process for cartoon effect
+    const outlineRenderer = new BABYLON.OutlineRenderer(scene);
+
+    // Create Floating Frames
+    const frames = [];
+    const frameCount = 10;
+    for (let i = 0; i < frameCount; i++) {
+      const frameGroup = new BABYLON.TransformNode('frameGroup' + i, scene);
+
+      // Outer border box
+      const border = BABYLON.MeshBuilder.CreateBox('border' + i, { width: 3, height: 2, depth: 0.1 }, scene);
+      border.parent = frameGroup;
+      border.outlinesWidth = 0.05;
+      border.renderOutline = true;
+      border.outlineColor = BABYLON.Color3.White();
+      const frameMat = new BABYLON.StandardMaterial('frameMat' + i, scene);
+      frameMat.diffuseColor = new BABYLON.Color3(
+        0.8 + Math.random() * 0.2,
+        0.3 + Math.random() * 0.4,
+        0.6 + Math.random() * 0.3
+      ); // pastel-ish colors
+      frameMat.specularColor = BABYLON.Color3.Black();
+      border.material = frameMat;
+
+      // Inner plane for text or image
+      const innerPlane = BABYLON.MeshBuilder.CreatePlane('plane' + i, { width: 2.5, height: 1.5 }, scene);
+      innerPlane.parent = frameGroup;
+      innerPlane.position.z = 0.06;
+      
+      // Dynamic texture for placeholder text
+      const dt = new BABYLON.DynamicTexture('dt' + i, { width: 512, height: 256 }, scene, false);
+      dt.hasAlpha = true;
+      dt.drawText(
+        'Placeholder Text',
+        null, 140,
+        "bold 36px " + 'monospace',
+        "#FFFFFF",
+        "transparent",
+        true
+      );
+      const dtMat = new BABYLON.StandardMaterial('dtMat' + i, scene);
+      dtMat.diffuseTexture = dt;
+      dtMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
+      innerPlane.material = dtMat;
+
+      // Positioning in 3D space
+      frameGroup.position = new BABYLON.Vector3(
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 10,
+        i * 15 + 20
+      );
+
+      frames.push(frameGroup);
+    }
+
+    // Scroll-triggered Animations using GSAP + ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Move camera along Z as user scrolls
+    gsap.to(camera.position, {
+      z: frameCount * 15 + 10,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.spacer',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true
+      }
+    });
+
+    // Rotate each frame group gently
+    frames.forEach((fg, idx) => {
+      gsap.to(fg.rotation, {
+        y: Math.PI * 2,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.spacer',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: true
+        }
+      });
+    });
+
+    // Render Loop
+    engine.runRenderLoop(() => {
+      scene.render();
+    });
+
+    // Resize
+    window.addEventListener('resize', () => {
+      engine.resize();
+    });
+
+    /*
+      HOW TO CUSTOMIZE:
+      - To replace placeholder text: modify dt.drawText() with your own strings.
+      - To use images instead of text: create a BABYLON.Texture('path/to/your.jpg', scene) and assign to innerPlane.material.diffuseTexture.
+      - Adjust frameCount, spacing, colors, and positions as desired.
+    */
+  </script>
+</body>
+</html>
 
