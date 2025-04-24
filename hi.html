@@ -146,15 +146,27 @@
       container.addEventListener('click', ()=> window.location.href = onClickUrl);
     }
 
-    // Initialize planets
-    createPlanet('scene-film', 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
-                               'https://threejs.org/examples/textures/planets/earthbump1k.jpg', 'film.html');
-    createPlanet('scene-photography', 'https://threejs.org/examples/textures/planets/jupiter.jpg',
-                               'https://threejs.org/examples/textures/planets/jupiterbump.jpg', 'photography.html');
-    createPlanet('scene-music', 'https://threejs.org/examples/textures/planets/mars_1k_color.jpg',
-                               'https://threejs.org/examples/textures/planets/marsbump1k.jpg', 'music.html');
-    createPlanet('scene-contact', 'https://threejs.org/examples/textures/planets/neptune.jpg',
-                               'https://threejs.org/examples/textures/planets/neptunebump.jpg', 'contact.html');
+    // Initialize planets with correct texture URLs
+    createPlanet('scene-film',
+      'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+      'https://threejs.org/examples/textures/planets/earthbump1k.jpg',
+      'film.html'
+    );
+    createPlanet('scene-photography',
+      'https://threejs.org/examples/textures/planets/jupiter.jpg',
+      'https://threejs.org/examples/textures/planets/jupiterbump2k.jpg',
+      'photography.html'
+    );
+    createPlanet('scene-music',
+      'https://threejs.org/examples/textures/planets/mars_1k_color.jpg',
+      'https://threejs.org/examples/textures/planets/marsbump1k.jpg',
+      'music.html'
+    );
+    createPlanet('scene-contact',
+      'https://threejs.org/examples/textures/planets/neptune.jpg',
+      'https://threejs.org/examples/textures/planets/neptunemap.jpg',
+      'contact.html'
+    );
   </script>
 </body>
 </html>
