@@ -91,4 +91,39 @@
         const grad = ctx.createRadialGradient(x,y,rad*0.2,x,y,rad);
         const hue  = (t*0.02 + i*60) % 360;
         grad.addColorStop(0, `hsla(${hue},70%,60%,0.6)`);
-        grad.addColorStop(1, `hsla(${(hue+60)%360},80%,40%,0
+        grad.addColorStop(1, `hsla(${(hue+60)%360},80%,40%,0)`);
+        ctx.beginPath();
+        ctx.fillStyle = grad;
+        ctx.arc(x,y,rad,0,2*Math.PI);
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // ─── Mouse-driven filter control ─────────────────
+    const overlay = document.querySelector('.overlay');
+    const turb    = document.getElementById('turb');
+
+    overlay.addEventListener('mousemove', e => {
+      const fw = e.clientX / window.innerWidth;   // 0 → 1
+      const fh = e.clientY / window.innerHeight;  // 0 → 1
+
+      // baseFrequency: more towards edges → stronger turbulence
+      const bf1 = 0.005 + fw * 0.08;
+      const bf2 = 0.005 + fh * 0.08;
+      turb.setAttribute('baseFrequency', `${bf1} ${bf2}`);
+
+      // seed: flicker every few px
+      const seed = Math.floor((e.clientX + e.clientY) / 20) % 1000;
+      turb.setAttribute('seed', seed);
+
+      // also animate displacement scale via CSS variable hack
+      const scale = 5 + fw*45;
+      overlay.style.filter = `url(#warpFilter)`;
+      document.querySelector('feDisplacementMap')
+              .setAttribute('scale', scale);
+    });
+  </script>
+</body>
+</html>
