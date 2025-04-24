@@ -1,1 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stage One</title>
+  <style>
+    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background: #000; }
+    canvas { display:block; }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Split complementary hues (base hue 200)
+    const baseHue = 200;
+    const colors = [baseHue, (baseHue + 150) % 360, (baseHue + 210) % 360];
+    const lineCount = 5;
+    const amp = 20;
+    const speed = 0.002;
+    const lines = [];
+    
+    // Initialize horizontal and vertical lines
+    for (let i = 0; i <= lineCount; i++) {
+      const t = i / lineCount;
+      lines.push({ type:'h', y:t, phase: Math.random()*Math.PI*2 });
+      lines.push({ type:'v', x:t, phase: Math.random()*Math.PI*2 });
+    }
+
+    let angle = 0;
+    function draw(time) {
+      ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      // center, rotate and scale to cover full viewport
+      ctx.translate(W/2, H/2);
+      angle += 0.0002 * time;
+      ctx.rotate(angle);
+      const s = Math.SQRT2;
+      ctx.scale(s, s);
+      ctx.translate(-W/2, -H/2);
+
+      // compute wave offset for lines
+      const ptsH = lines.filter(l => l.type==='h').map(l => {
+        const y0 = l.y * H;
+        const path = [];
+        const step = 10;
+        for (let x = 0; x <= W; x += step) {
+          const y = y0 + Math.sin((x * 0.02) + l.phase + time*speed) * amp;
+          path.push({x,y});
+        }
+        return path;
+      });
+      const ptsV = lines.filter(l => l.type==='v').map(l => {
+        const x0 = l.x * W;
+        const path = [];
+        const step = 10;
+        for (let y = 0; y <= H; y += step) {
+          const x = x0 + Math.sin((y * 0.02) + l.phase + time*speed) * amp;
+          path.push({x,y});
+        }
+        return path;
+      });
+
+      // fill the grid cells with colors
+      const cellW = W/lineCount;
+      const cellH = H/lineCount;
+      for (let i=0;i<lineCount;i++){
+        for (let j=0;j<lineCount;j++){
+          const hue = colors[(i+j)%colors.length];
+          ctx.fillStyle = `hsl(${hue},70%,60%)`;
+          ctx.fillRect(i*cellW, j*cellH, cellW, cellH);
+        }
+      }
+
+      // draw wavy lines
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#000';
+      ptsH.forEach(path=>{
+        ctx.beginPath();
+        path.forEach((p,k)=> k? ctx.lineTo(p.x,p.y): ctx.moveTo(p.x,p.y));
+        ctx.stroke();
+      });
+      ptsV.forEach(path=>{
+        ctx.beginPath();
+        path.forEach((p,k)=> k? ctx.lineTo(p.x,p.y): ctx.moveTo(p.x,p.y));
+        ctx.stroke();
+      });
+
+      ctx.restore();
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>
 
