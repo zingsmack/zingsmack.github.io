@@ -16,18 +16,21 @@
     }
     @keyframes dropIn { to { top: 20px; } }
     .planet-container {
-      position: absolute; width: 150px; height: 150px; text-align: center;
+      position: absolute; width: 150px; height: 180px; text-align: center;
       cursor: pointer; pointer-events: all;
+    }
+    .planet-scene {
+      width: 150px; height: 150px;
     }
     .planet-label {
       margin-top: 8px; font-family: 'Segoe UI', sans-serif;
       color: #fff; font-size: 1rem;
     }
-    /* Position containers closer to center */
-    #film { top: 40%; left: 40%; }
-    #photography { top: 40%; right: 40%; }
-    #music { bottom: 40%; left: 40%; }
-    #contact { bottom: 40%; right: 40%; }
+    /* Positions closer to center (NW, NE, SW, SE) */
+    #film { top: 30%; left: 30%; }
+    #photography { top: 30%; left: 70%; transform: translateX(-100%); }
+    #music { top: 70%; left: 30%; transform: translateY(-100%); }
+    #contact { top: 70%; left: 70%; transform: translate(-100%, -100%); }
   </style>
 </head>
 <body>
@@ -35,27 +38,27 @@
   <div id="title">welcome to level I consciousness</div>
 
   <!-- Planet containers -->
-  <div class="planet-container" id="film">
-    <div id="scene-film"></div>
+  <div class="planet-container" id="film" onclick="location.href='film.html'">
+    <div class="planet-scene" id="scene-film"></div>
     <div class="planet-label">FILM</div>
   </div>
-  <div class="planet-container" id="photography">
-    <div id="scene-photography"></div>
+  <div class="planet-container" id="photography" onclick="location.href='photography.html'">
+    <div class="planet-scene" id="scene-photography"></div>
     <div class="planet-label">PHOTOGRAPHY</div>
   </div>
-  <div class="planet-container" id="music">
-    <div id="scene-music"></div>
+  <div class="planet-container" id="music" onclick="location.href='music.html'">
+    <div class="planet-scene" id="scene-music"></div>
     <div class="planet-label">MUSIC</div>
   </div>
-  <div class="planet-container" id="contact">
-    <div id="scene-contact"></div>
+  <div class="planet-container" id="contact" onclick="location.href='contact.html'">
+    <div class="planet-scene" id="scene-contact"></div>
     <div class="planet-label">CONTACT</div>
   </div>
 
   <!-- Three.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
   <script>
-    // Background distortion reused
+    // Background drawing
     const canvas = document.getElementById('hiCanvas'), ctx = canvas.getContext('2d');
     let W, H;
     function resizeCanvas(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
@@ -82,53 +85,50 @@
     }
     requestAnimationFrame(drawBG);
 
-    // Create realistic spinning planets with bump & glow
-    function createPlanet(containerId, textureUrl, bumpUrl, onClickUrl) {
-      const parent = document.getElementById(containerId);
-      const size = parent.clientWidth;
+    // Planet creation
+    function createPlanet(sceneId, textureUrl, bumpUrl, onClickUrl) {
+      const container = document.getElementById(sceneId);
+      const size = container.clientWidth;
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45,1,0.1,100);
       camera.position.z = 2;
       const renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true });
-      renderer.setSize(size,size);
-      parent.querySelector('div').appendChild(renderer.domElement);
+      renderer.setSize(size, size);
+      container.appendChild(renderer.domElement);
 
-      // Sphere geometry
       const geo = new THREE.SphereGeometry(0.7, 64, 64);
-      const texLoader = new THREE.TextureLoader();
+      const loader = new THREE.TextureLoader();
       const mat = new THREE.MeshPhongMaterial({
-        map: texLoader.load(textureUrl),
-        bumpMap: texLoader.load(bumpUrl), bumpScale: 0.05,
+        map: loader.load(textureUrl),
+        bumpMap: loader.load(bumpUrl), bumpScale: 0.05,
         shininess: 20,
         emissive: new THREE.Color(0x222222), emissiveIntensity: 0.3
       });
       const sphere = new THREE.Mesh(geo, mat);
       scene.add(sphere);
+      const glow = new THREE.Mesh(
+        new THREE.SphereGeometry(0.75, 64, 64),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2, side: THREE.BackSide })
+      );
+      scene.add(glow);
 
-      // Glow: larger semi-transparent mesh
-      const glowMat = new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.2, side:THREE.BackSide });
-      const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(0.75,64,64), glowMat);
-      scene.add(glowMesh);
-
-      // Lights
       scene.add(new THREE.AmbientLight(0xffffff, 0.6));
       const dir = new THREE.DirectionalLight(0xffffff, 0.6);
       dir.position.set(5,5,5);
       scene.add(dir);
 
-      // Animate
       function animate() {
         requestAnimationFrame(animate);
-        sphere.rotation.y += 0.02;
-        glowMesh.rotation.y = sphere.rotation.y;
+        sphere.rotation.y += 0.01;
+        glow.rotation.y = sphere.rotation.y;
         renderer.render(scene, camera);
       }
       animate();
 
-      parent.addEventListener('click', ()=> window.location.href=onClickUrl);
+      container.addEventListener('click', ()=> window.location.href = onClickUrl);
     }
 
-    // Use example textures; swap with custom maps as needed
+    // Initialize planets
     createPlanet('scene-film', 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
                                'https://threejs.org/examples/textures/planets/earthbump1k.jpg', 'film.html');
     createPlanet('scene-photography', 'https://threejs.org/examples/textures/planets/jupiter.jpg',
