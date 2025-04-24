@@ -82,20 +82,29 @@
       frames.push(node);
     }
 
-    // Scroll-triggered camera movement
+        // Scroll-triggered camera movement along the tunnel path
     gsap.registerPlugin(ScrollTrigger);
-    gsap.to(camera.position, {
-      z: tubePath[pathLength].z,
-      ease: 'none',
+    gsap.to({}, {
       scrollTrigger: {
         trigger: '.spacer',
         start: 'top top',
         end: 'bottom bottom',
-        scrub: true
+        scrub: true,
+        onUpdate: self => {
+          const prog = self.progress;
+          // compute index along path
+          const idx = Math.floor(prog * pathLength);
+          // set camera position and target along path
+          camera.position.copyFrom(tubePath[idx]);
+          const nextIdx = Math.min(idx + 1, pathLength);
+          camera.setTarget(tubePath[nextIdx]);
+          // rotate frames as you pass them
+          frames.forEach((node, i) => {
+            node.rotation.y = prog * Math.PI * 2 * ((i % 2) ? -1 : 1);
+          });
+        }
       }
     });
-
-    // Optional: frames rotate slightly on scroll
     frames.forEach((node, i) => {
       gsap.to(node.rotation, {
         y: Math.PI * 2,
