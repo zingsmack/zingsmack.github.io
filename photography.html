@@ -16,32 +16,31 @@
 
   <!-- BabylonJS & GSAP Libraries -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <!-- glTF loader for .glb support -->
   <script src="https://cdn.babylonjs.com/loaders/babylon.glTF2FileLoader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
 
   <script>
-    // ENGINE & SCENE SETUP
+    // Engine & Scene Setup
     const canvas = document.getElementById('renderCanvas');
     const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
     const scene = new BABYLON.Scene(engine);
     scene.clearColor = new BABYLON.Color4(0.03, 0.01, 0.08, 1);
 
-    // CAMERA
+    // Camera
     const camera = new BABYLON.FreeCamera('camera1', BABYLON.Vector3.Zero(), scene);
     camera.attachControl(canvas, true);
 
-    // LIGHT
-    const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0,1,0), scene);
+    // Lighting
+    const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), scene);
     hemiLight.intensity = 0.7;
 
-    // PARAMETERS
+    // Parameters
     const frameCount = 10;
     const samples = 300;
     const totalLength = frameCount * 15 * 2 + 40;
 
-    // BUILD TUBE PATH
+    // Build tube path
     const tubePath = [];
     for (let i = 0; i <= samples; i++) {
       const t = i / samples;
@@ -53,88 +52,101 @@
     }
     const tube = BABYLON.MeshBuilder.CreateTube('tube', { path: tubePath, radius: 6, tessellation: 64, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
     const tubeMat = new BABYLON.StandardMaterial('tubeMat', scene);
-    tubeMat.emissiveColor = new BABYLON.Color3(0.2,0.1,0.5);
+    tubeMat.emissiveColor = new BABYLON.Color3(0.2, 0.1, 0.5);
     tubeMat.alpha = 0.15;
     tube.material = tubeMat;
 
-    // PORTRAIT FRAMES ALONG TUBE
+    // Portrait frames along tube
     const frames = [];
     for (let i = 0; i < frameCount; i++) {
-      const group = new BABYLON.TransformNode('frame'+i, scene);
-      const border = BABYLON.MeshBuilder.CreateBox('border'+i,{width:2,height:3,depth:0.1},scene);
+      const group = new BABYLON.TransformNode('frameGroup' + i, scene);
+      // Frame border
+      const border = BABYLON.MeshBuilder.CreateBox('border' + i, { width: 2, height: 3, depth: 0.1 }, scene);
       border.parent = group;
       border.renderOutline = true;
       border.outlineColor = BABYLON.Color3.White();
       border.outlinesWidth = 0.05;
-      border.material = new BABYLON.StandardMaterial('mat'+i,scene);
-      border.material.diffuseColor = new BABYLON.Color3(0.7+Math.random()*0.3,0.2+Math.random()*0.5,0.5+Math.random()*0.4);
-
-      const plane = BABYLON.MeshBuilder.CreatePlane('plane'+i,{width:1.8,height:2.8},scene);
+      const borderMat = new BABYLON.StandardMaterial('borderMat' + i, scene);
+      borderMat.diffuseColor = new BABYLON.Color3(
+        0.7 + Math.random() * 0.3,
+        0.2 + Math.random() * 0.5,
+        0.5 + Math.random() * 0.4
+      );
+      border.material = borderMat;
+      // Inner plane placeholder
+      const plane = BABYLON.MeshBuilder.CreatePlane('plane' + i, { width: 1.8, height: 2.8 }, scene);
       plane.parent = group;
       plane.position.z = 0.06;
-      const dt = new BABYLON.DynamicTexture('dt'+i,{width:512,height:768},scene,false);
-      dt.drawText('Portrait Here',null,400,'bold 48px monospace','#FFF','transparent',true);
-      const dtMat = new BABYLON.StandardMaterial('dtMat'+i,scene);
+      const dt = new BABYLON.DynamicTexture('dt' + i, { width: 512, height: 768 }, scene, false);
+      dt.drawText('Portrait Here', null, 400, 'bold 48px monospace', '#FFFFFF', 'transparent', true);
+      const dtMat = new BABYLON.StandardMaterial('dtMat' + i, scene);
       dtMat.diffuseTexture = dt;
-      dtMat.emissiveColor = new BABYLON.Color3(1,1,1);
+      dtMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
       plane.material = dtMat;
-
-      const idx = Math.floor((i+1) * samples/(frameCount+1));
+      // Position frame
+      const idx = Math.floor((i + 1) * (samples / (frameCount + 1)));
       group.position.copyFrom(tubePath[idx]);
       frames.push(group);
     }
 
-    // BACKGROUND OBJECTS
-    const shapes = ['box','sphere','torus','cylinder'];
-    for (let i=0;i<60;i++){
-      const type = shapes[i%shapes.length];
-      const opts = type==='sphere'?{diameter:2.5}:type==='torus'?{diameter:2,thickness:0.5}:type==='cylinder'?{diameter:1.5,height:3}:{size:2};
-      const mesh = BABYLON.MeshBuilder['Create'+type.charAt(0).toUpperCase()+type.slice(1)]('obj'+i,opts,scene);
-      mesh.position = new BABYLON.Vector3((Math.random()-0.5)*40,(Math.random()-0.5)*20,Math.random()*totalLength);
-      mesh.rotation = new BABYLON.Vector3(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
-      const mmat = new BABYLON.StandardMaterial('omat'+i,scene);
-      mmat.emissiveColor = new BABYLON.Color3(Math.random(),Math.random(),Math.random());
+    // Background objects
+    const shapes = ['box', 'sphere', 'torus', 'cylinder'];
+    for (let i = 0; i < 60; i++) {
+      const type = shapes[i % shapes.length];
+      let mesh;
+      if (type === 'box') mesh = BABYLON.MeshBuilder.CreateBox('obj' + i, { size: 2 }, scene);
+      else if (type === 'sphere') mesh = BABYLON.MeshBuilder.CreateSphere('obj' + i, { diameter: 2.5 }, scene);
+      else if (type === 'torus') mesh = BABYLON.MeshBuilder.CreateTorus('obj' + i, { diameter: 2, thickness: 0.5 }, scene);
+      else mesh = BABYLON.MeshBuilder.CreateCylinder('obj' + i, { diameter: 1.5, height: 3 }, scene);
+      mesh.position = new BABYLON.Vector3((Math.random() - 0.5) * 40, (Math.random() - 0.5) * 20, Math.random() * totalLength);
+      mesh.rotation = new BABYLON.Vector3(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      const mmat = new BABYLON.StandardMaterial('omat' + i, scene);
+      mmat.emissiveColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
       mesh.material = mmat;
     }
 
-    // LOAD LOCAL CAT HEAD MODEL
-    // Download a free cat head GLB from:
-    // https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/CesiumMan (or substitute any .glb)
-    // Place your 'CatHead.glb' in the same folder as this HTML
-    let catMesh;
-        // LOAD LOCAL DUCK MODEL (rename your Duck.glb accordingly)
-    // Place your 'Duck.glb' in the same folder as this HTML
+    // Load local Duck model
+    // Place 'Duck.glb' in the same directory as this HTML
     let duckMesh;
-    BABYLON.SceneLoader.ImportMesh('', './Duck.glb', '', scene,
+    BABYLON.SceneLoader.ImportMesh(
+      '',
+      './Duck.glb',
+      '',
+      scene,
       meshes => {
         duckMesh = meshes[0];
         duckMesh.position = new BABYLON.Vector3(10, 0, totalLength * 0.5);
         duckMesh.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
-      }, null,
+      },
+      null,
       (scene, msg) => console.error('Failed to load Duck model:', msg)
     );
-        catMesh.scaling = new BABYLON.Vector3(0.5,0.5,0.5);
-      }, null,
-      (scene, msg) => console.error('Failed to load model:', msg)
-    );
 
-    // SCROLL-DRIVEN ANIMATIONS
+    // Scroll-driven animations
     gsap.registerPlugin(ScrollTrigger);
-    gsap.to({},{
-      scrollTrigger:{trigger:'.spacer',start:'top top',end:'bottom bottom',scrub:true,
-        onUpdate(self){
-          const prog=self.progress;
-          const idx=Math.floor(prog*samples);
-          camera.position.copyFrom(tubePath[idx]);
-          camera.setTarget(tubePath[Math.min(idx+1,samples)]);
-          frames.forEach((f,i)=>f.rotation.y=prog*Math.PI*2*((i%2)?-1:1));
-          if(catMesh) catMesh.rotation.y = prog * Math.PI * 4;
+    gsap.to(
+      {},
+      {
+        scrollTrigger: {
+          trigger: '.spacer',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: true,
+          onUpdate: self => {
+            const prog = self.progress;
+            const idx = Math.floor(prog * samples);
+            camera.position.copyFrom(tubePath[idx]);
+            camera.setTarget(tubePath[Math.min(idx + 1, samples)]);
+            frames.forEach((f, i) => (f.rotation.y = prog * Math.PI * 2 * ((i % 2 ? -1 : 1))));
+            if (duckMesh) duckMesh.rotation.y = prog * Math.PI * 4;
+          }
         }
       }
-    });
+    );
 
-    engine.runRenderLoop(()=>scene.render());
-    window.addEventListener('resize',()=>engine.resize());
+    // Render loop & resize
+    engine.runRenderLoop(() => scene.render());
+    window.addEventListener('resize', () => engine.resize());
   </script>
 </body>
 </html>
