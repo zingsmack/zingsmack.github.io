@@ -30,9 +30,7 @@
     // Initialize horizontal and vertical lines
     for (let i = 0; i <= lineCount; i++) {
       const t = i / lineCount;
-      // horizontal
       lines.push({ type:'h', y:t, phase: Math.random()*Math.PI*2 });
-      // vertical
       lines.push({ type:'v', x:t, phase: Math.random()*Math.PI*2 });
     }
 
@@ -40,10 +38,12 @@
     function draw(time) {
       ctx.clearRect(0, 0, W, H);
       ctx.save();
-      // center & rotate
+      // center, rotate and scale to cover full viewport
       ctx.translate(W/2, H/2);
       angle += 0.0002 * time;
       ctx.rotate(angle);
+      const s = Math.SQRT2;
+      ctx.scale(s, s);
       ctx.translate(-W/2, -H/2);
 
       // compute wave offset for lines
@@ -68,18 +68,7 @@
         return path;
       });
 
-      // draw filled regions
-      const allH = ptsH;
-      const allV = ptsV;
-      // loop through cells
-      for (let i = 0; i < allH.length-1; i++) {
-        for (let j = 0; j < allV.length-1; j++) {
-          // pick polygon corners
-          const tl = {x: allV[j][i].x, y: allH[i][j].y};
-          // approximate corners by i/j
-        }
-      }
-      // Instead: simple grid: fill alternating rectangles
+      // fill the grid cells with colors
       const cellW = W/lineCount;
       const cellH = H/lineCount;
       for (let i=0;i<lineCount;i++){
