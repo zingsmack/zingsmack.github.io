@@ -5,122 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>3D Photography Showcase</title>
   <style>
-    html, body { margin: 0; padding: 0; overflow-x: hidden; }
-    #renderCanvas { width: 100vw; height: 100vh; display: block; position: fixed; top: 0; left: 0; }
-    .spacer { height: 1000vh; }
+    html, body { margin: 0; padding: 0; }
+    canvas { display: block; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
+    .spacer { height: 1000vh; /* Scroll length */ }
   </style>
 </head>
 <body>
   <canvas id="renderCanvas"></canvas>
   <div class="spacer"></div>
 
-  <!-- BabylonJS & GSAP Libraries -->
+  <!-- Libraries -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
 
-  <script>
-    // Basic Babylon.js setup
-    const canvas = document.getElementById('renderCanvas');
-    const engine = new BABYLON.Engine(canvas, true);
-    const scene = new BABYLON.Scene(engine);
-    scene.clearColor = new BABYLON.Color4(0.03, 0.01, 0.08, 1);
+<script>
+// Initialize Babylon
+const canvas = document.getElementById('renderCanvas');
+const engine = new BABYLON.Engine(canvas, true);
+const scene = new BABYLON.Scene(engine);
+scene.clearColor = new BABYLON.Color4(0.03, 0.01, 0.08, 1);
 
-    // Camera
-    const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 0, 0), scene);
-    camera.attachControl(canvas, true);
+// Camera
+const camera = new BABYLON.FreeCamera('cam', new BABYLON.Vector3(0,0,0), scene);
+camera.attachControl(canvas,true);
 
-    // Light
-    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
-    light.intensity = 0.8;
+// Light
+new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0,1,0), scene);
 
-    // Tube geometry (tunnel)
-    const frames = [];
-    const frameCount = 10;
-    const pathLength = 300;
-    const tubePath = [];
-    for (let i = 0; i <= pathLength; i++) {
-      const t = i / pathLength;
-      tubePath.push(
-        new BABYLON.Vector3(
-          Math.sin(t * Math.PI * 2) * 8,
-          Math.cos(t * Math.PI * 2) * 4,
-          t * 150
-        )
-      );
-    }
-    const tube = BABYLON.MeshBuilder.CreateTube('tube', { path: tubePath, radius: 6, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
-    const tubeMat = new BABYLON.StandardMaterial('tubeMat', scene);
-    tubeMat.alpha = 0.1;
-    tube.material = tubeMat;
+// Define tunnel path using parametric Z-based calculation
+const maxZ = 150;
+function getPoint(t) {
+  // t from 0 to 1
+  return new BABYLON.Vector3(
+    Math.sin(2 * Math.PI * t) * 8,
+    Math.cos(2 * Math.PI * t) * 4,
+    t * maxZ
+  );
+}
+// Draw semi-transparent tube
+const steps = 200;
+const path = [];
+for(let i=0;i<=steps;i++){ path.push(getPoint(i/steps)); }
+const tube = BABYLON.MeshBuilder.CreateTube('t', {path, radius:6, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+tube.material = new BABYLON.StandardMaterial('m',scene);
+tube.material.alpha = 0.1;
 
-    // Create portrait frames
-    for (let i = 0; i < frameCount; i++) {
-      const node = new BABYLON.TransformNode('frame' + i, scene);
-      // border
-      const border = BABYLON.MeshBuilder.CreateBox('border' + i, { width: 2, height: 3, depth: 0.1 }, scene);
-      border.parent = node;
-      border.renderOutline = true;
-      border.outlineColor = BABYLON.Color3.White();
-      border.outlinesWidth = 0.05;
-      // placeholder plane
-      const plane = BABYLON.MeshBuilder.CreatePlane('plane' + i, { width: 1.8, height: 2.8 }, scene);
-      plane.parent = node;
-      plane.position.z = 0.06;
+// Create frames
+const frames = [];
+const count = 10;
+for(let i=0;i<count;i++){
+  const t = (i+1)/(count+1);
+  const pos = getPoint(t);
+  const node = new BABYLON.TransformNode('f'+i,scene);
+  node.position = pos;
+  // border
+  const b = BABYLON.MeshBuilder.CreateBox('b'+i,{width:2,height:3,depth:0.1},scene);
+  b.parent = node;
+  b.renderOutline = true; b.outlineColor.set(1,1,1); b.outlinesWidth=0.05;
+  // plane
+  const p = BABYLON.MeshBuilder.CreatePlane('p'+i,{width:1.8,height:2.8},scene);
+  p.parent = node; p.position.z=0.06;
+  const dt = new BABYLON.DynamicTexture('dt'+i,{width:512,height:768},scene);
+  dt.drawText('Your Portrait',50,400,'bold 48px Arial','#FFF','transparent');
+  const mat = new BABYLON.StandardMaterial('mat'+i,scene);
+  mat.diffuseTexture = dt; mat.emissiveColor.set(1,1,1);
+  p.material = mat;
+  frames.push(node);
+}
 
-      const dynamicTexture = new BABYLON.DynamicTexture('dt' + i, { width: 512, height: 768 }, scene);
-      dynamicTexture.getContext().fillStyle = 'transparent';
-      dynamicTexture.drawText('Your Portrait', 50, 380, 'bold 48px Arial', '#fff', 'transparent');
-      const mat = new BABYLON.StandardMaterial('mat' + i, scene);
-      mat.diffuseTexture = dynamicTexture;
-      mat.emissiveColor = new BABYLON.Color3(1, 1, 1);
-      plane.material = mat;
+// GSAP scroll animation
+gsap.registerPlugin(ScrollTrigger);
+const proxy = {t:0};
+gsap.to(proxy, {
+  t:1,
+  ease:'none',
+  scrollTrigger: {
+    trigger: '.spacer', start:'top top', end:'bottom bottom', scrub:true,
+  },
+  onUpdate() {
+    const t = proxy.t;
+    // move camera
+    const pos = getPoint(t);
+    camera.position.copyFrom(pos);
+    // look ahead
+    const ahead = getPoint(Math.min(t+1/steps,1));
+    camera.setTarget(ahead);
+    // rotate frames
+    frames.forEach((n,i)=> n.rotation.y = proxy.t * Math.PI * 2 * ((i%2)?-1:1));
+  }
+});
 
-      // position along tunnel
-      const idx = Math.floor((i + 1) * (pathLength / (frameCount + 1)));
-      node.position = tubePath[idx].clone();
-      frames.push(node);
-    }
-
-        // Scroll-triggered camera movement along the tunnel path
-    gsap.registerPlugin(ScrollTrigger);
-    gsap.to({}, {
-      scrollTrigger: {
-        trigger: '.spacer',
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true,
-        onUpdate: self => {
-          const prog = self.progress;
-          // compute index along path
-          const idx = Math.floor(prog * pathLength);
-          // set camera position and target along path
-          camera.position.copyFrom(tubePath[idx]);
-          const nextIdx = Math.min(idx + 1, pathLength);
-          camera.setTarget(tubePath[nextIdx]);
-          // rotate frames as you pass them
-          frames.forEach((node, i) => {
-            node.rotation.y = prog * Math.PI * 2 * ((i % 2) ? -1 : 1);
-          });
-        }
-      }
-    });
-    frames.forEach((node, i) => {
-      gsap.to(node.rotation, {
-        y: Math.PI * 2,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.spacer',
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: true
-        }
-      });
-    });
-
-    // render loop
-    engine.runRenderLoop(() => scene.render());
-    window.addEventListener('resize', () => engine.resize());
-  </script>
+// Render loop
+engine.runRenderLoop(()=>scene.render());
+window.addEventListener('resize',()=>engine.resize());
+</script>
 </body>
 </html>
