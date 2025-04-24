@@ -3,102 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Photography Showcase</title>
+  <title>3D Picture Frame Gallery</title>
   <style>
-    html, body { margin: 0; padding: 0; }
-    canvas { display: block; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
-    .spacer { height: 1000vh; /* Scroll length */ }
+    body { margin: 0; height: 500vh; overflow-x: hidden; }
+    canvas { display: block; position: fixed; top: 0; left: 0; }
   </style>
 </head>
 <body>
-  <canvas id="renderCanvas"></canvas>
-  <div class="spacer"></div>
+  <canvas id="canvas"></canvas>
 
-  <!-- Libraries -->
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.152.0/build/three.module.js';
 
-<script>
-// Initialize Babylon
-const canvas = document.getElementById('renderCanvas');
-const engine = new BABYLON.Engine(canvas, true);
-const scene = new BABYLON.Scene(engine);
-scene.clearColor = new BABYLON.Color4(0.03, 0.01, 0.08, 1);
+    // --- Scene & Renderer Setup ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xdddddd); // initial environment
 
-// Camera
-const camera = new BABYLON.FreeCamera('cam', new BABYLON.Vector3(0,0,0), scene);
-camera.attachControl(canvas,true);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(0, 0, 5);
 
-// Light
-new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0,1,0), scene);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-// Define tunnel path using parametric Z-based calculation
-const maxZ = 150;
-function getPoint(t) {
-  // t from 0 to 1
-  return new BABYLON.Vector3(
-    Math.sin(2 * Math.PI * t) * 8,
-    Math.cos(2 * Math.PI * t) * 4,
-    t * maxZ
-  );
-}
-// Draw semi-transparent tube
-const steps = 200;
-const path = [];
-for(let i=0;i<=steps;i++){ path.push(getPoint(i/steps)); }
-const tube = BABYLON.MeshBuilder.CreateTube('t', {path, radius:6, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
-tube.material = new BABYLON.StandardMaterial('m',scene);
-tube.material.alpha = 0.1;
+    // --- Frames Configuration ---
+    const frameCount = 5;
+    const spacing = 6;
+    const frames = [];
+    
+    for (let i = 0; i < frameCount; i++) {
+      // Create frame plane
+      const geometry = new THREE.PlaneGeometry(3, 4);
+      const texture = new THREE.TextureLoader().load('images/one.jpg');
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const mesh = new THREE.Mesh(geometry, material);
 
-// Create frames
-const frames = [];
-const count = 10;
-for(let i=0;i<count;i++){
-  const t = (i+1)/(count+1);
-  const pos = getPoint(t);
-  const node = new BABYLON.TransformNode('f'+i,scene);
-  node.position = pos;
-  // border
-  const b = BABYLON.MeshBuilder.CreateBox('b'+i,{width:2,height:3,depth:0.1},scene);
-  b.parent = node;
-  b.renderOutline = true; b.outlineColor.set(1,1,1); b.outlinesWidth=0.05;
-  // plane
-  const p = BABYLON.MeshBuilder.CreatePlane('p'+i,{width:1.8,height:2.8},scene);
-  p.parent = node; p.position.z=0.06;
-  const dt = new BABYLON.DynamicTexture('dt'+i,{width:512,height:768},scene);
-  dt.drawText('Your Portrait',50,400,'bold 48px Arial','#FFF','transparent');
-  const mat = new BABYLON.StandardMaterial('mat'+i,scene);
-  mat.diffuseTexture = dt; mat.emissiveColor.set(1,1,1);
-  // frames now always face the camera via billboardMode; no manual rotation needed;
-  frames.push(node);
-}
+      // Position frames in a line along Z, spread on X
+      mesh.position.set((i - (frameCount - 1) / 2) * spacing, 0, -i * (spacing + 2));
+      
+      // PLACEHOLDER for portrait image #" + (i+1) + "
+      // TODO: Replace 'images/one.jpg' with your portrait image #" + (i+1) + "
+      frames.push(mesh);
+      scene.add(mesh);
+    }
 
-// GSAP scroll animation
-gsap.registerPlugin(ScrollTrigger);
-const proxy = {t:0};
-gsap.to(proxy, {
-  t:1,
-  ease:'none',
-  scrollTrigger: {
-    trigger: '.spacer', start:'top top', end:'bottom bottom', scrub:true,
-  },
-  onUpdate() {
-    const t = proxy.t;
-    // move camera
-    const pos = getPoint(t);
-    camera.position.copyFrom(pos);
-    // look ahead
-    const ahead = getPoint(Math.min(t+1/steps,1));
-    camera.setTarget(ahead);
-    // rotate frames
-    frames.forEach((n,i)=> n.rotation.y = proxy.t * Math.PI * 2 * ((i%2)?-1:1));
-  }
-});
+    // --- Scroll-based Camera Movement & Environment Animation ---
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const t = scrollY / maxScroll;
 
-// Render loop
-engine.runRenderLoop(()=>scene.render());
-window.addEventListener('resize',()=>engine.resize());
-</script>
+      // Move camera through the frames
+      const totalDepth = (frameCount - 1) * (spacing + 2);
+      camera.position.z = 5 + t * totalDepth;
+
+      // Animate background color as environment change (simple example)
+      // TODO: Replace with dynamic environment maps or skyboxes per section
+      const startColor = new THREE.Color(0xdddddd);
+      const endColor   = new THREE.Color(0x333366);
+      scene.background = startColor.lerp(endColor, t);
+    });
+
+    // --- Responsive Resize ---
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- Render Loop ---
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
 </body>
 </html>
