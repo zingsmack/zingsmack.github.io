@@ -5,26 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Under Renovations</title>
   <style>
-    html, body { margin: 0; height: 100%; overflow: hidden; }
-    canvas { display: block; }
+    html,body { margin:0; height:100%; overflow:hidden; background:#111; }
+    canvas { display:block; }
+
+    /* your existing overlay */
     .overlay {
       position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 2rem 3rem;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      padding:2rem 3rem;
       background: rgba(255,255,255,0.2);
       backdrop-filter: blur(10px);
-      border-radius: 12px;
+      border-radius:12px;
       font-family: 'Segoe UI', sans-serif;
-      font-size: 2rem;
-      color: #fff;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+      font-size:3rem;
+      color:#fff;
+      text-shadow:0 2px 6px rgba(0,0,0,0.7);
+    }
+
+    /* new warp effect */
+    .warp {
+      /* 1) gradient background we'll animate */
+      background: linear-gradient(
+        60deg,
+        #ff0057,
+        #fffd87,
+        #37ff5f,
+        #17caff,
+        #c917ff
+      );
+      background-size: 300% 300%;
+      
+      /* 2) clip the gradient to the text */
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      
+      /* 3) stack text-shadows for extra depth */
+      text-shadow:
+        0 0 2px rgba(0,0,0,0.5),
+        0 0 8px rgba(0,0,0,0.3);
+
+      /* 4) composite animations */
+      animation:
+        hueShift 6s infinite linear,
+        moveGradient 8s infinite ease-in-out,
+        distort 5s infinite ease-in-out;
+    }
+
+    /* animate the gradient’s position */
+    @keyframes moveGradient {
+      0%   { background-position:   0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position:   0% 50%; }
+    }
+
+    /* shift hue for extra color cycling */
+    @keyframes hueShift {
+      from   { filter: hue-rotate(0deg); }
+      to     { filter: hue-rotate(360deg); }
+    }
+
+    /* warp/distort in 3D & skew */
+    @keyframes distort {
+      0% {
+        transform: perspective(400px) rotateX(0deg)   rotateY(0deg)   skew(0deg,0deg);
+      }
+      25% {
+        transform: perspective(500px) rotateX(5deg)   rotateY(15deg)  skew(5deg,-5deg);
+      }
+      50% {
+        transform: perspective(450px) rotateX(-5deg)  rotateY(-10deg) skew(-5deg,5deg);
+      }
+      75% {
+        transform: perspective(550px) rotateX(10deg)  rotateY(5deg)   skew(5deg,5deg);
+      }
+      100% {
+        transform: perspective(400px) rotateX(0deg)   rotateY(0deg)   skew(0deg,0deg);
+      }
     }
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
-  <div class="overlay">LEONLIII is currently renovating this area</div>
+  <div class="overlay warp">LEONLIII is currently renovating this area</div>
 
   <script>
     // Utility to linearly interpolate
