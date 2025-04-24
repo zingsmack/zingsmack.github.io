@@ -7,7 +7,7 @@
   <style>
     html, body { margin: 0; padding: 0; overflow-x: hidden; }
     #renderCanvas { width: 100vw; height: 100vh; display: block; position: fixed; top: 0; left: 0; }
-    .spacer { height: 500vh; /* make scroll length: adjust to taste */ }
+    .spacer { height: 1000vh; /* doubled scroll length */ }
   </style>
 </head>
 <body>
@@ -24,118 +24,110 @@
     const canvas = document.getElementById('renderCanvas');
     const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
     const scene = new BABYLON.Scene(engine);
-    scene.clearColor = new BABYLON.Color4(0.05, 0.02, 0.1, 1); // deep purple background
+    scene.clearColor = new BABYLON.Color4(0.03, 0.01, 0.08, 1); // deeper, trippy background
 
     // Camera
-    const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, -10), scene);
-    camera.setTarget(BABYLON.Vector3.Zero());
+    const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), scene);
+    camera.setTarget(new BABYLON.Vector3(0, 0, 1));
     camera.attachControl(canvas, true);
 
     // Lighting
     const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), scene);
-    hemiLight.intensity = 0.8;
+    hemiLight.intensity = 0.7;
 
-    // Optional: Add subtle glow or post-process for cartoon effect
-    const outlineRenderer = new BABYLON.OutlineRenderer(scene);
-
-    // Create Floating Frames
+    // Frame Setup
     const frames = [];
     const frameCount = 10;
     for (let i = 0; i < frameCount; i++) {
-      const frameGroup = new BABYLON.TransformNode('frameGroup' + i, scene);
-
-      // Outer border box
+      const group = new BABYLON.TransformNode('frameGroup' + i, scene);
       const border = BABYLON.MeshBuilder.CreateBox('border' + i, { width: 3, height: 2, depth: 0.1 }, scene);
-      border.parent = frameGroup;
-      border.outlinesWidth = 0.05;
+      border.parent = group;
       border.renderOutline = true;
       border.outlineColor = BABYLON.Color3.White();
-      const frameMat = new BABYLON.StandardMaterial('frameMat' + i, scene);
-      frameMat.diffuseColor = new BABYLON.Color3(
-        0.8 + Math.random() * 0.2,
-        0.3 + Math.random() * 0.4,
-        0.6 + Math.random() * 0.3
-      ); // pastel-ish colors
-      frameMat.specularColor = BABYLON.Color3.Black();
-      border.material = frameMat;
-
-      // Inner plane for text or image
-      const innerPlane = BABYLON.MeshBuilder.CreatePlane('plane' + i, { width: 2.5, height: 1.5 }, scene);
-      innerPlane.parent = frameGroup;
-      innerPlane.position.z = 0.06;
-      
-      // Dynamic texture for placeholder text
+      border.outlinesWidth = 0.05;
+      const mat = new BABYLON.StandardMaterial('frameMat' + i, scene);
+      mat.diffuseColor = new BABYLON.Color3(0.7 + Math.random() * 0.3, 0.2 + Math.random() * 0.5, 0.5 + Math.random() * 0.4);
+      border.material = mat;
+      const plane = BABYLON.MeshBuilder.CreatePlane('plane' + i, { width: 2.5, height: 1.5 }, scene);
+      plane.parent = group;
+      plane.position.z = 0.06;
       const dt = new BABYLON.DynamicTexture('dt' + i, { width: 512, height: 256 }, scene, false);
-      dt.hasAlpha = true;
-      dt.drawText(
-        'Placeholder Text',
-        null, 140,
-        "bold 36px " + 'monospace',
-        "#FFFFFF",
-        "transparent",
-        true
-      );
+      dt.drawText('Placeholder Text', null, 140, 'bold 36px monospace', '#FFFFFF', 'transparent', true);
       const dtMat = new BABYLON.StandardMaterial('dtMat' + i, scene);
       dtMat.diffuseTexture = dt;
       dtMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
-      innerPlane.material = dtMat;
-
-      // Positioning in 3D space
-      frameGroup.position = new BABYLON.Vector3(
-        (Math.random() - 0.5) * 20,
-        (Math.random() - 0.5) * 10,
-        i * 15 + 20
-      );
-
-      frames.push(frameGroup);
+      plane.material = dtMat;
+      frames.push(group);
     }
 
-    // Scroll-triggered Animations using GSAP + ScrollTrigger
-    gsap.registerPlugin(ScrollTrigger);
+    // Create winding tube path
+    const tubePath = [];
+    const totalLength = frameCount * 15 * 2 + 40; // doubled journey + padding
+    const samples = 300;
+    for (let i = 0; i <= samples; i++) {
+      const t = i / samples;
+      const z = t * totalLength;
+      const x = Math.sin(t * Math.PI * 4) * 8;
+      const y = Math.cos(t * Math.PI * 3) * 5;
+      tubePath.push(new BABYLON.Vector3(x, y, z));
+    }
+    const tube = BABYLON.MeshBuilder.CreateTube('tube', { path: tubePath, radius: 6, tessellation: 64, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+    const tubeMat = new BABYLON.StandardMaterial('tubeMat', scene);
+    tubeMat.emissiveColor = new BABYLON.Color3(0.2, 0.1, 0.5);
+    tubeMat.alpha = 0.15;
+    tube.material = tubeMat;
 
-    // Move camera along Z as user scrolls
-    gsap.to(camera.position, {
-      z: frameCount * 15 + 10,
-      ease: 'none',
+    // Add random trippy objects
+    const shapes = ['box', 'sphere', 'torus', 'cylinder'];
+    for (let i = 0; i < 60; i++) {
+      const type = shapes[Math.floor(Math.random() * shapes.length)];
+      let mesh;
+      switch (type) {
+        case 'box': mesh = BABYLON.MeshBuilder.CreateBox('obj' + i, { size: 2 }, scene); break;
+        case 'sphere': mesh = BABYLON.MeshBuilder.CreateSphere('obj' + i, { diameter: 2.5 }, scene); break;
+        case 'torus': mesh = BABYLON.MeshBuilder.CreateTorus('obj' + i, { diameter: 2, thickness: 0.5 }, scene); break;
+        case 'cylinder': mesh = BABYLON.MeshBuilder.CreateCylinder('obj' + i, { diameter: 1.5, height: 3 }, scene); break;
+      }
+      const px = (Math.random() - 0.5) * 16;
+      const py = (Math.random() - 0.5) * 10;
+      const pz = Math.random() * totalLength;
+      mesh.position = new BABYLON.Vector3(px, py, pz);
+      mesh.rotation = new BABYLON.Vector3(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      const mmat = new BABYLON.StandardMaterial('omat' + i, scene);
+      mmat.emissiveColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+      mesh.material = mmat;
+    }
+
+    // ScrollTrigger setup
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.to({}, {
       scrollTrigger: {
         trigger: '.spacer',
         start: 'top top',
         end: 'bottom bottom',
-        scrub: true
+        scrub: true,
+        onUpdate: self => {
+          const prog = self.progress;
+          const idx = Math.floor(prog * samples);
+          camera.position.copyFrom(tubePath[idx]);
+          const next = tubePath[Math.min(idx + 1, samples)];
+          camera.setTarget(next);
+          // rotate frames a bit as we pass
+          frames.forEach((fg, i) => fg.rotation.y = prog * Math.PI * 2 * ((i % 2) ? -1 : 1));
+        }
       }
     });
 
-    // Rotate each frame group gently
-    frames.forEach((fg, idx) => {
-      gsap.to(fg.rotation, {
-        y: Math.PI * 2,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.spacer',
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: true
-        }
-      });
-    });
-
     // Render Loop
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
-
-    // Resize
-    window.addEventListener('resize', () => {
-      engine.resize();
-    });
+    engine.runRenderLoop(() => scene.render());
+    window.addEventListener('resize', () => engine.resize());
 
     /*
-      HOW TO CUSTOMIZE:
-      - To replace placeholder text: modify dt.drawText() with your own strings.
-      - To use images instead of text: create a BABYLON.Texture('path/to/your.jpg', scene) and assign to innerPlane.material.diffuseTexture.
-      - Adjust frameCount, spacing, colors, and positions as desired.
+      CUSTOMIZATION:
+      - Replace placeholder text via dt.drawText()
+      - Load images: use new BABYLON.Texture('path.jpg', scene) and assign to plane.material.diffuseTexture
+      - Tweak colors, radii, shapes count as desired
     */
   </script>
 </body>
 </html>
-
