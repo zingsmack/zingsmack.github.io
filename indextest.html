@@ -74,10 +74,20 @@
     uniform vec3 colorB;
     uniform vec3 colorC;
     varying float vUvY;
+    varying vec2 vUv;
+    // Add subtle noise-based saturation shift
+    float rand(vec2 co) { return fract(sin(dot(co.xy, vec2(12.9898,78.233))) * 43758.5453); }
     void main() {
+      // Base gradient
       vec3 col = (vUvY < 0.5)
         ? mix(colorA, colorB, vUvY * 2.0)
         : mix(colorB, colorC, (vUvY - 0.5) * 2.0);
+      // Apply radial glow from bloom center
+      float glow = 1.0 - length((vUv - 0.5) * 2.0);
+      col += glow * 0.2;
+      // Add per-pixel noise modulation
+      float n = rand(vUv * uTime);
+      col = mix(col, col * (0.8 + 0.2 * n), 0.5);
       gl_FragColor = vec4(col, 1.0);
     }
   `;
@@ -133,7 +143,9 @@
     composer.addPass(new RenderPass(scene, camera));
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.8, 0.4, 0.85
+      1.2, // increased strength
+      1.5, // increased radius
+      0.6  // lowered threshold for wider bloom
     );
     composer.addPass(bloomPass);
 
