@@ -108,3 +108,27 @@ body {
 }
 .prev { left: 1rem; }
 .next { right: 1rem; }
+
+/* Home button styling */
+.home-button-new {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 999;
+  width: 32px;
+  height: 32px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-button-new:hover {
+  opacity: 1;
+}
+.home-button-new svg {
+  width: 100%;
+  height: 100%;
+  fill: #000;  /* Update color if desired */
+}
+
