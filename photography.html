@@ -1,17 +1,26 @@
+<!-- File: photography.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Immersive Portrait Corridor</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portrait Gallery Mockup</title>
+  <link rel="stylesheet" href="css/mockup.css">
 </head>
 <body>
-  <canvas id="webgl-canvas"></canvas>
+  <!-- Ambient blob background -->
+  <div class="blob-container">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+  </div>
 
-  <!-- menu overlay… -->
-
-  <!-- only load three as a module -->
-  <script type="module" src="js/gallery.js"></script>
+  <!-- Image viewer -->
+  <figure class="viewer">
+    <button class="nav prev" aria-label="Previous image">&#10094;</button>
+    <img src="images/one.jpg" alt="Portrait 1">
+    <button class="nav next" aria-label="Next image">&#10095;</button>
+    <figcaption>Title or caption for Portrait 1</figcaption>
+  </figure>
 </body>
 </html>
