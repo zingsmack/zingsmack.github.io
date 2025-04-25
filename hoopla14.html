@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Random Grid – Quadratic Arches</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#fff; }
+    canvas     { display:block; cursor:crosshair; }
+    #tooltip   { position:fixed; padding:4px 6px; font-family:monospace; font-size:12px;
+                 background:rgba(0,0,0,.85); color:#fff; border-radius:4px; pointer-events:none;
+                 transform:translate(-50%,-150%); opacity:0; transition:opacity .12s; z-index:1000; }
+  </style>
+</head>
+<body>
+<canvas id="gridCanvas"></canvas>
+<div id="tooltip"></div>
+<script>
+// ===== Helpers =====
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rf=(a,b)=>Math.random()*(b-a)+a;
+const pick=a=>a[ri(0,a.length-1)];
+
+// ===== Globals =====
+const canvas=document.getElementById('gridCanvas');
+const ctx=canvas.getContext('2d');
+const tooltip=document.getElementById('tooltip');
+
+const PALETTE=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+let verticalLines=[],horizontalLines=[],innerLines=[];
+let cellColors=[],intersections=[],activeLine=null;
+
+// tuneables
+const HIT_RADIUS=10;
+const TRANS_AMP=80;
+const TRANS_SPEED=0.6;
+const CURVE_AMP=45;
+const ARCH_FACTOR=1.6; // how much deeper than linear mid‑point
+const EXTRA_SAMPLES=8;
+let time=0;
+
+// ===== Canvas fit =====
+function fit(){const{innerWidth:w,innerHeight:h}=window;const d=window.devicePixelRatio||1;canvas.width=w*d;canvas.height=h*d;canvas.style.width=`${w}px`;canvas.style.height=`${h}px`;ctx.setTransform(d,0,0,d,0,0);} 
+
+// ===== grid =====
+function distrib(n,a,b){const g=(b-a)/(n+1);return Array.from({length:n},(_,i)=>rf(a+i*g,a+(i+1)*g)).sort((x,y)=>x-y);} 
+const vLine=(x,id,b=false)=>({id,orient:'v',x,orig:x,thick:b?4:ri(2,10),dir:1,bound:b,idx:0});
+const hLine=(y,id,b=false)=>({id,orient:'h',y,orig:y,thick:b?4:ri(2,10),dir:1,bound:b,idx:0});
+function idx(arr,key){arr.sort((a,b)=>a[key]-b[key]).forEach((l,i)=>l.idx=i);} 
+function build(){
+  const{width:w,height:h}=canvas.getBoundingClientRect();
+  const vp=distrib(ri(3,9),0,w); const hp=distrib(ri(3,9),0,h);
+  verticalLines=[vLine(0,'VBL',true),...vp.map((x,i)=>vLine(x,`VER${i}`)),vLine(w,'VBR',true)];
+  horizontalLines=[hLine(0,'HBT',true),...hp.map((y,i)=>hLine(y,`HOR${i}`)),hLine(h,'HBB',true)];
+  idx(verticalLines,'x'); idx(horizontalLines,'y');
+  innerLines=[...verticalLines,...horizontalLines].filter(l=>!l.bound);
+  const cols=verticalLines.length-1,rows=horizontalLines.length-1;
+  cellColors=Array.from({length:cols},()=>Array.from({length:rows},()=>pick(PALETTE)));
+  cacheIntersections();
+}
+
+// ===== anchors =====
+function setupAnchors(){
+  if(!activeLine)return;
+  const n=activeLine.orient==='v'?horizontalLines.length:verticalLines.length;
+  activeLine.anchors=Array.from({length:n},()=>({phase:rf(0,Math.PI*2),speed:rf(0.25,0.6),strength:rf(0.3,1)*(Math.random()<0.5?-1:1)}));
+}
+function anchorOffset(i){const a=activeLine.anchors[i];return Math.sin(time*a.speed+a.phase)*CURVE_AMP*a.strength;}
+
+// ===== quadratic helpers =====
+function quad(p0,c,p1,t){return (1-t)*(1-t)*p0+2*(1-t)*t*c+t*t*p1;}
+
+function curveX(y){ // evaluate quadratic for segment
+  const seg=horizontalLines.findIndex((h,i)=>y>=h.y&&y<=horizontalLines[i+1]?.y);
+  if(seg<0)return activeLine.x;
+  const y0=horizontalLines[seg].y,y1=horizontalLines[seg+1].y;
+  const t=(y-y0)/(y1-y0);
+  const off0=anchorOffset(seg),off1=anchorOffset(seg+1);
+  const x0=activeLine.x+off0,x1=activeLine.x+off1;
+  const controlX=activeLine.x+((off0+off1)/2)*ARCH_FACTOR;
+  return quad(x0,controlX,x1,t);
+}
+function curveY(x){
+  const seg=verticalLines.findIndex((v,i)=>x>=v.x&&x<=verticalLines[i+1]?.x);
+  if(seg<0)return activeLine.y;
+  const x0=verticalLines[seg].x,x1=verticalLines[seg+1].x;
+  const t=(x-x0)/(x1-x0);
+  const off0=anchorOffset(seg),off1=anchorOffset(seg+1);
+  const y0=activeLine.y+off0,y1=activeLine.y+off1;
+  const controlY=activeLine.y+((off0+off1)/2)*ARCH_FACTOR;
+  return quad(y0,controlY,y1,t);
+}
+
+// ===== intersections =====
+function cacheIntersections(){intersections=[];horizontalLines.forEach(h=>{verticalLines.forEach(v=>{let x=v.x,y=h.y;if(activeLine){if(activeLine.orient==='v'&&v.id===activeLine.id)x=curveX(y);if(activeLine.orient==='h'&&h.id===activeLine.id)y=curveY(x);}intersections.push({x,y});});});}
+
+// ===== sampling =====
+function sampleCurveV(y0,y1){const pts=[];for(let k=0;k<=EXTRA_SAMPLES+1;k++){const y=y0+(y1-y0)*k/(EXTRA_SAMPLES+1);pts.push([curveX(y),y]);}return pts;}
+function sampleCurveH(x0,x1){const pts=[];for(let k=0;k<=EXTRA_SAMPLES+1;k++){const x=x0+(x1-x0)*k/(EXTRA_SAMPLES+1);pts.push([x,curveY(x)]);}return pts;}
+
+// ===== draw active path =====
+function drawActive(){const{height:h,width:w}=canvas.getBoundingClientRect();ctx.lineWidth=activeLine.thick;ctx.strokeStyle='#000';ctx.beginPath();if(activeLine.orient==='v'){let y0=0;ctx.moveTo(curveX(y0),y0);for(let seg=0;seg<horizontalLines.length-1;seg++){const y1=horizontalLines[seg+1].y;const xm=activeLine.x+((anchorOffset(seg)+anchorOffset(seg+1))/2)*ARCH_FACTOR;const ym=(horizontalLines[seg].y+y1)/2;ctx.quadraticCurveTo(xm,ym,curveX(y1),y1);}ctx.lineTo(curveX(h),h);}else{let x0=0;ctx.moveTo(x0,curveY(x0));for(let seg=0;seg<verticalLines.length-1;seg++){const x1=verticalLines[seg+1].x;const ym=activeLine.y+((anchorOffset(seg)+anchorOffset(seg+1))/2)*ARCH_FACTOR;const xm=(verticalLines[seg].x+x1)/2;ctx.quadraticCurveTo(xm,ym,x1,curveY(x1));}ctx.lineTo(w,curveY(w));}ctx.stroke();}
+
+// ===== main draw =====
+function drawScene(){const{width:w,height:h}=canvas.getBoundingClientRect();ctx.clearRect(0,0,w,h);const v=verticalLines,hl=horizontalLines;let L,R,A,B;if(activeLine.orient==='v'){L=activeLine.idx-1;R=activeLine.idx;}else{A=activeLine.idx-1;B=activeLine.idx;}for(let i=0;i<v.length-1;i++){for(let j=0;j<hl.length-1;j++){ctx.fillStyle=cellColors[i][j];if(activeLine.orient==='v'&&(i===L||i===R)){const y0=hl[j].y,y1=hl[j+1].y,fx=i===L?v[i].x:v[i+1].x;const curve=sampleCurveV(y0,y1);ctx.beginPath();if(i===L){ctx.moveTo(fx,y0);curve.forEach(([x,y])=>ctx.lineTo(x,y));ctx.lineTo(fx,y1);}else{ctx.moveTo(curve[0][0],curve[0][1]);ctx.lineTo(fx,y0);ctx.lineTo(fx,y1);for(let p=curve.length-1;p>=0;p--)ctx.lineTo(curve[p][0],curve[p][1]);}ctx.closePath();ctx.fill();}else if(activeLine.orient==='h'&&(j===A||j===B)){const x0=v[i].x,x1=v[i+1].x,fy=j===A?hl[j].y:hl[j+1].y;const curve=sampleCurveH(x0,x1);ctx.beginPath();if(j===A){ctx.moveTo(x0,fy);curve.forEach(([x,y])=>ctx.lineTo(x,y));ctx.lineTo(x1,fy);}else{ctx.moveTo(curve[0][0],curve[0][1]);ctx.lineTo(x0,fy);ctx.lineTo(x1,fy);for(let p=curve.length-1;p>=0;p--)ctx.lineTo(curve[p][0],curve[p][1]);}ctx.closePath();ctx.fill();}else{ctx.fillRect(v[i].x,hl[j].y,v[i+1].x-v[i].x,hl[j+1].y-hl[j].y);}}}v.forEach(l=>{if(l.id!==activeLine.id){ctx.lineWidth=l.thick;ctx.strokeStyle='#000';ctx.beginPath();ctx.moveTo(l.x,0);ctx.lineTo(l.x,h);ctx.stroke();}});hl.forEach(l=>{if(l.id!==activeLine.id){ctx.lineWidth=l.thick;ctx.strokeStyle='#000';ctx.beginPath();ctx.moveTo(0,l.y);ctx.lineTo(w,l.y);ctx.stroke();}});drawActive();}
+
+// ===== motion & loop =====
+function drift(){const{width:w,height:h}=canvas.getBoundingClientRect();if(activeLine.orient==='v'){activeLine.x+=TRANS_SPEED*activeLine.dir;const d=activeLine.x-activeLine.orig;if(Math.abs(d)>=TRANS_AMP||activeLine.x<=0||activeLine.x>=w)activeLine.dir*=-1;}else{activeLine.y+=TRANS_SPEED*activeLine.dir;const d=activeLine.y-activeLine.orig;if(Math.abs(d)>=TRANS_AMP||activeLine.y<=0||activeLine.y>=h)activeLine.dir*=-1;}}
+function loop(){time+=0.02;drift();drawScene();cacheIntersections();requestAnimationFrame(loop);} 
+
+// ===== init =====
+function chooseActive(){activeLine=pick(innerLines);setupAnchors();}
+function init(){fit();build();chooseActive();loop();}
+
+// tooltip events
+canvas.addEventListener('mousemove',e=>{const{clientX:x,clientY:y}=e;const hit=intersections.find(pt=>Math.hypot(pt.x-x,pt.y-y)<=HIT_RADIUS);if(hit){tooltip.textContent=`${Math.round(hit.x)}, ${Math.round(hit.y)}`;tooltip.style.left=`${x}px`;tooltip.style.top=`${y}px`;tooltip.style.opacity=1;}else tooltip.style.opacity=0;});canvas.addEventListener('mouseleave',()=>tooltip.style.opacity=0);
+window.addEventListener('resize',init);
+init();
+</script>
+</body>
+</html>
