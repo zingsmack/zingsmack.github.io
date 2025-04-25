@@ -77,7 +77,7 @@ body {
 
   display: block;
   margin: 0 auto;
-  transition: opacity 0.4s ease;
+  transition: opacity 3s ease;
   opacity: 1;
 }
 
