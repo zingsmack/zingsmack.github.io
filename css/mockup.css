@@ -67,7 +67,7 @@ body {
   }
 }
 
-/* Viewer styling */
+/* Viewer container */
 .viewer {
   position: relative;
   z-index: 2;
@@ -77,14 +77,29 @@ body {
   top: 50%;
   transform: translateY(-50%);
   text-align: center;
+
+  /* ensure the entire viewer never exceeds viewport height */
+  max-height: 90vh;
+  overflow: hidden;
 }
+
+/* Portrait image */
 .viewer img {
-  width: 100%;
+  /* preserve native aspect ratio */
+  width: auto;
   height: auto;
+
+  /* cap to viewport dimensions */
+  max-width: 100%;
+  max-height: 70vh;
+
   display: block;
+  margin: 0 auto;
   border-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+
+/* Caption */
 .viewer figcaption {
   margin-top: 1rem;
   color: #555;
@@ -96,7 +111,7 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   border: none;
   font-size: 2rem;
   padding: 0.5rem;
@@ -105,7 +120,7 @@ body {
   transition: background 0.2s;
 }
 .nav:hover {
-  background: rgba(255,255,255,1);
+  background: rgba(255, 255, 255, 1);
 }
 .prev {
   left: -3rem;
