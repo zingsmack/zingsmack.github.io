@@ -1,5 +1,15 @@
 // File: js/gallery.js
 
+// At the top of js/gallery.js
+document.addEventListener('DOMContentLoaded', () => {
+  // ... all your existing code here, indented one level ...
+
+
+
+
+
+
+
 // 1) Define your image reel
 const reel = [
   { src: 'images/one.jpg',   caption: 'Portrait 1: [Your captiones here]' },
@@ -52,3 +62,6 @@ imgEl.addEventListener('touchend', e => {
 
 // 7) Initial render
 render();
+
+                          });
+
