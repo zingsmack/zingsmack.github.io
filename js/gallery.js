@@ -1,12 +1,11 @@
 // File: js/gallery.js
 
-import * as THREE        from './libs/three.module.js';
-// Removed DeviceOrientationControls import since it's deprecated
-import gsap             from './libs/gsap.min.js';
-import './plugins/ScrollTrigger.min.js';
-const ScrollTrigger = gsap.ScrollTrigger;
+import * as THREE from './libs/three.module.js';
 
-gsap.registerPlugin(ScrollTrigger);
+// GSAP & ScrollTrigger are loaded via global <script> tags in photography.html
+const gsap = window.gsap;
+const ScrollTrigger = window.ScrollTrigger || (gsap && gsap.ScrollTrigger);
+if (ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
 // 1. Scene + fog
 const scene = new THREE.Scene();
