@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Organic Bloom Animation</title>
+  <style>canvas { display: block; margin: 0 auto; background: #000; }</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script>
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
+  resize();
+  window.onresize = resize;
 
+  function resize(){
+    canvas.width  = innerWidth;
+    canvas.height = innerHeight;
+  }
+
+  //–– Utilities ––//
+
+  // Simple Perlin-style noise for organic wobble
+  function noise(t){ return (Math.sin(t*2.3)*0.5 + 0.5); }
+
+  // Linearly interpolate two values
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  // Generate a radial gradient for a petal
+  function makePetalGradient(x,y,r, c1, c2) {
+    const g = ctx.createRadialGradient(x, y, r*0.1, x, y, r);
+    g.addColorStop(0, c1);
+    g.addColorStop(1, c2);
+    return g;
+  }
+
+  //–– Define a “Flower” class ––//
+  class Flower {
+    constructor(x,y, maxRadius, palette){
+      this.x = x;
+      this.y = y;
+      this.maxR = maxRadius;
+      this.palette = palette;   // e.g. [{t:0, c:'#f6c'},{t:1,c:'#6cf'}]
+      this.birth = performance.now();
+      this.duration = 3000 + Math.random()*2000; // ms to full bloom
+      this.petalCount = 5 + Math.floor(Math.random()*3);
+    }
+
+    draw(now){
+      let t = (now - this.birth) / this.duration;
+      if(t>1) t=1;
+      // growth scale 0→1
+      const scale = t;
+      // choose 2 colors from palette and lerp them by t
+      const c1 = this.lerpColor(this.palette[0].c, this.palette[1].c, t);
+      const c2 = this.lerpColor(this.palette[1].c, this.palette[2].c||this.palette[0].c, t);
+      // draw each petal
+      for(let i=0; i<this.petalCount; i++){
+        const angle = (Math.PI*2/i)*i + noise(now*0.001+i)*0.2;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(angle);
+        ctx.scale(scale, scale);
+        // petal shape via Bézier
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.bezierCurveTo(this.maxR*0.2, -this.maxR*0.1,
+                          this.maxR*0.8, -this.maxR*0.8,
+                          0, -this.maxR);
+        ctx.bezierCurveTo(-this.maxR*0.8, -this.maxR*0.8,
+                         -this.maxR*0.2, -this.maxR*0.1,
+                          0, 0);
+        // fill with radial gradient
+        ctx.fillStyle = makePetalGradient(0, -this.maxR/2, this.maxR, c1, c2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // simple hex‐to‐rgb and back interp for color mixing
+    lerpColor(a,b,t){
+      const ah = parseInt(a.slice(1),16),
+            ar = ah>>16, ag=(ah>>8)&0xff, ab=ah&0xff,
+            bh = parseInt(b.slice(1),16),
+            br = bh>>16, bg=(bh>>8)&0xff, bb=bh&0xff;
+      const rr = Math.round(lerp(ar, br, t)),
+            gg = Math.round(lerp(ag, bg, t)),
+            bb2= Math.round(lerp(ab, bb, t));
+      return `rgb(${rr},${gg},${bb2})`;
+    }
+  }
+
+  //–– Setup a few flowers ––//
+  const blooms = [];
+  for(let i=0;i<6;i++){
+    blooms.push(new Flower(
+      Math.random()*canvas.width,
+      Math.random()*canvas.height,
+      40 + Math.random()*80,
+      ['#fec','#6cf','#fc0']     // pastel → teal → gold
+    ));
+  }
+
+  //–– Animation loop ––//
+  function render(now=0){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    blooms.forEach(f=>f.draw(now));
+    requestAnimationFrame(render);
+  }
+  render();
+  </script>
+</body>
+</html>
