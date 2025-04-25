@@ -47,11 +47,8 @@
   import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
   import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-  import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
-  import { LuminosityHighPassShader } from 'three/examples/jsm/shaders/LuminosityHighPassShader.js';
-  // Prepend common chunk so luminance() is defined for high-pass shader
-  LuminosityHighPassShader.fragmentShader = `#include <common>
-` + LuminosityHighPassShader.fragmentShader;
+  
+  
 
   let scene, camera, renderer, clock, composer;
   const bloomGroup = new THREE.Group();
@@ -95,14 +92,7 @@
     );
     composer.addPass(bloomPass);
 
-    // Outline pass for black edge
-    const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
-    outlinePass.edgeStrength = 3.0;
-    outlinePass.edgeGlow = 0.5;
-    outlinePass.edgeThickness = 1.0;
-    outlinePass.visibleEdgeColor.set('#000000');
-    outlinePass.hiddenEdgeColor.set('#000000');
-    composer.addPass(outlinePass);
+    
 
     // HDR environment
     const pmremGen = new THREE.PMREMGenerator(renderer);
@@ -127,6 +117,13 @@
       const bloom = createBloom(20 + Math.random()*30, 5 + Math.floor(Math.random()*5), palettes[i % palettes.length]);
       bloom.position.set((Math.random()-0.5)*150, (Math.random()-0.5)*100, (Math.random()-0.5)*50);
       bloomGroup.add(bloom);
+      // Add backface outline
+      const bloomOutline = bloom.clone();
+      bloomOutline.traverse(obj => {
+        if (obj.isMesh) obj.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+      });
+      bloomOutline.scale.multiplyScalar(1.05);
+      scene.add(bloomOutline);
       outlinePass.selectedObjects.push(bloom);
     }
 
@@ -137,6 +134,11 @@
       b.position.set((Math.random()-0.5)*150, (Math.random()-0.5)*100, (Math.random()-0.5)*50);
       b.userData.vel = new THREE.Vector3(0,0.1+Math.random()*0.2,0);
       bubbleGroup.add(b);
+      // Outline bubble
+      const bOutline = b.clone();
+      bOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+      bOutline.scale.multiplyScalar(1.05);
+      scene.add(bOutline);
       outlinePass.selectedObjects.push(b);
     }
 
@@ -148,6 +150,11 @@
       );
       stem.position.set((Math.random()-0.5)*150, (Math.random()-0.5)*100, (Math.random()-0.5)*50);
       mushroomGroup.add(stem);
+      // Outline stem
+      const stemOutline = stem.clone();
+      stemOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+      stemOutline.scale.multiplyScalar(1.05);
+      scene.add(stemOutline);
       outlinePass.selectedObjects.push(stem);
 
       const cap = new THREE.Mesh(
@@ -157,6 +164,11 @@
       cap.position.copy(stem.position).add(new THREE.Vector3(0,h/2,0));
       cap.rotation.x = Math.PI;
       mushroomGroup.add(cap);
+      // Outline cap
+      const capOutline = cap.clone();
+      capOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+      capOutline.scale.multiplyScalar(1.05);
+      scene.add(capOutline);
       outlinePass.selectedObjects.push(cap);
     }
 
@@ -168,6 +180,11 @@
       );
       bud.position.set((Math.random()-0.5)*150, (Math.random()-0.5)*100, (Math.random()-0.5)*50);
       budGroup.add(bud);
+      // Outline bud
+      const budOutline = bud.clone();
+      budOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+      budOutline.scale.multiplyScalar(1.05);
+      scene.add(budOutline);
       outlinePass.selectedObjects.push(bud);
     }
   }
