@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Responsive Random Grid Animation + Hover Co‑ordinates</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    canvas {
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* floating tooltip for intersection co‑ordinates */
+    #tooltip {
+      position: fixed;
+      padding: 4px 6px;
+      font-family: monospace;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      border-radius: 4px;
+      pointer-events: none;
+      transform: translate(-50%, -150%); /* center horizontally, above cursor */
+      opacity: 0;
+      transition: opacity 0.12s;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gridCanvas"></canvas>
+  <div id="tooltip"></div>
+
+  <script>
+    // ------------------------------ Helpers ------------------------------
+    const randInt   = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randFloat = (min, max) => Math.random() * (max - min) + min;
+
+    // ------------------------------ Setup -------------------------------
+    const canvas  = document.getElementById('gridCanvas');
+    const tooltip = document.getElementById('tooltip');
+    const ctx     = canvas.getContext('2d');
+
+    // hi‑dpi scaling – keep internal drawing sharp
+    function resizeCanvas() {
+      const { innerWidth: w, innerHeight: h } = window;
+      const ratio = window.devicePixelRatio || 1;
+
+      canvas.width  = w * ratio;
+      canvas.height = h * ratio;
+      canvas.style.width  = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0); // reset transform each resize
+    }
+
+    // Generate unique semi‑random positions across an axis
+    function generateUniquePositions(count, min, max) {
+      const segment = (max - min) / (count + 1);
+      return Array.from({ length: count }, (_, i) =>
+        randFloat(min + i * segment, min + (i + 1) * segment)
+      ).sort((a, b) => a - b);
+    }
+
+    // ------------------------------ Grid -------------------------------
+    let intersections = [];
+
+    function generateAndAnimate() {
+      const { width: wCss, height: hCss } = canvas.getBoundingClientRect();
+      const V_COUNT = randInt(3, 9);
+      const H_COUNT = randInt(3, 9);
+
+      const verticalX   = generateUniquePositions(V_COUNT, 0, wCss);
+      const horizontalY = generateUniquePositions(H_COUNT, 0, hCss);
+
+      const verticalLines   = verticalX.map(x => ({ x, thickness: randInt(2, 10) }));
+      const horizontalLines = horizontalY.map(y => ({ y, thickness: randInt(2, 10) }));
+
+      intersections = [];
+      verticalLines.forEach(v => {
+        horizontalLines.forEach(h => intersections.push({ x: v.x, y: h.y }));
+      });
+      window.intersections = intersections; // expose for dev‑tools
+
+      // Animation
+      let progress = 0;
+      const FRAMES = 60;
+
+      (function drawFrame() {
+        ctx.clearRect(0, 0, wCss, hCss);
+
+        verticalLines.forEach(({ x, thickness }) => {
+          ctx.lineWidth = thickness;
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, hCss * progress);
+          ctx.stroke();
+        });
+
+        horizontalLines.forEach(({ y, thickness }) => {
+          ctx.lineWidth = thickness;
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(wCss * progress, y);
+          ctx.stroke();
+        });
+
+        if (progress < 1) {
+          progress += 1 / FRAMES;
+          requestAnimationFrame(drawFrame);
+        }
+      })();
+    }
+
+    // ------------------------------ Hover logic ------------------------
+    const HIT_RADIUS = 10; // pixels
+
+    function handleMove(e) {
+      const x = e.clientX;
+      const y = e.clientY;
+
+      // find the first intersection within radius
+      const target = intersections.find(pt =>
+        Math.hypot(pt.x - x, pt.y - y) <= HIT_RADIUS
+      );
+
+      if (target) {
+        tooltip.textContent = `${Math.round(target.x)}, ${Math.round(target.y)}`;
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top  = `${y}px`;
+        tooltip.style.opacity = 1;
+      } else {
+        tooltip.style.opacity = 0;
+      }
+    }
+
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseleave', () => (tooltip.style.opacity = 0));
+
+    // ------------------------------ Bootstrap --------------------------
+    function init() {
+      resizeCanvas();
+      generateAndAnimate();
+    }
+
+    window.addEventListener('resize', () => init());
+    init();
+  </script>
+</body>
+</html>
