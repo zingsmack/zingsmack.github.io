@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { src: 'images/one.jpg',   caption: 'Portrait 1: [Your caption here]' },
     { src: 'images/two.jpg',   caption: 'Portrait 2: [Your caption here]' },
     { src: 'images/three.jpg', caption: 'Portrait 3: [Your caption here]' },
+    { src: 'images/four.jpg', caption: 'Portrait 4: [Your caption here]' },
   ];
 
   let current = 0;
