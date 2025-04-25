@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Random Grid – Every Line Animated</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#fff; }
+    canvas     { display:block; cursor:crosshair; }
+    #tooltip   { position:fixed; padding:4px 6px; font-family:monospace; font-size:12px;
+                 background:rgba(0,0,0,.85); color:#fff; border-radius:4px; pointer-events:none;
+                 transform:translate(-50%,-150%); opacity:0; transition:opacity .12s; z-index:1000; }
+  </style>
+</head>
+<body>
+<canvas id="gridCanvas"></canvas>
+<div id="tooltip"></div>
+<script>
+// ───────────────────────── Helpers ─────────────────────────
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rf=(a,b)=>Math.random()*(b-a)+a;
+const pick=a=>a[ri(0,a.length-1)];
+
+// ───────────────────────── Globals ─────────────────────────
+const canvas=document.getElementById('gridCanvas');
+const ctx=canvas.getContext('2d');
+const tooltip=document.getElementById('tooltip');
+const PALETTE=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+let vertical=[], horizontal=[], intersections=[], cellColors=[];
+
+// tunables
+const CURVE_AMP = 45;
+const ARCH_FACTOR = 1.6;
+const EXTRA = 20;          // samples per edge section
+const TRANS_AMP = 80;     // ± drift
+const TRANS_SPEED = 0.6;  // px / frame
+let clock=0;
+
+// ───────────── Canvas fit ─────────────
+function fit(){const{innerWidth:w,innerHeight:h}=window;const d=window.devicePixelRatio||1;canvas.width=w*d;canvas.height=h*d;canvas.style.width=`${w}px`;canvas.style.height=`${h}px`;ctx.setTransform(d,0,0,d,0,0);} 
+
+// ───────────── Grid build ─────────────
+function distrib(n,a,b){const gap=(b-a)/(n+1);return Array.from({length:n},(_,i)=>rf(a+i*gap,a+(i+1)*gap)).sort((x,y)=>x-y);} 
+function makeLine(isV,pos,id,bound=false){return{ id,orient:isV?'v':'h',pos,orig:pos,thick:bound?4:ri(2,10),dir:1,bound,idx:0,anchors:[] };}
+function sortIdx(arr){arr.sort((a,b)=>a.pos-b.pos).forEach((l,i)=>l.idx=i);} 
+
+function build(){
+  const{width:w,height:h}=canvas.getBoundingClientRect();
+  const vPos=distrib(ri(3,9),0,w), hPos=distrib(ri(3,9),0,h);
+  vertical=[makeLine(true,0,'V0',true),...vPos.map((x,i)=>makeLine(true,x,`V${i}`)),makeLine(true,w,'Vmax',true)];
+  horizontal=[makeLine(false,0,'H0',true),...hPos.map((y,i)=>makeLine(false,y,`H${i}`)),makeLine(false,h,'Hmax',true)];
+  sortIdx(vertical); sortIdx(horizontal);
+  // anchors per line
+  vertical.forEach(v=>{const n=horizontal.length;v.anchors=Array.from({length:n},()=>({phase:rf(0,Math.PI*2),speed:rf(0.25,0.6),strength:rf(0.3,1)*(Math.random()<0.5?-1:1)}));});
+  horizontal.forEach(h=>{const n=vertical.length;h.anchors=Array.from({length:n},()=>({phase:rf(0,Math.PI*2),speed:rf(0.25,0.6),strength:rf(0.3,1)*(Math.random()<0.5?-1:1)}));});
+  // cell colours
+  const cols=vertical.length-1, rows=horizontal.length-1;
+  cellColors=Array.from({length:cols},()=>Array.from({length:rows},()=>pick(PALETTE)));
+}
+
+// ───────────── Curves / offsets ─────────────
+function offset(line,anchorIdx){const a=line.anchors[anchorIdx];return Math.sin(clock*a.speed+a.phase)*CURVE_AMP*a.strength;}
+
+function curveX(lineIdx,y){const v=vertical[lineIdx];if(v.bound) return v.pos;const seg=horizontal.findIndex((h,i)=>y>=h.pos && y<=horizontal[i+1]?.pos);if(seg<0)return v.pos;const y0=horizontal[seg].pos,y1=horizontal[seg+1].pos,t=(y-y0)/(y1-y0);const off0=offset(v,seg),off1=offset(v,seg+1);const x0=v.pos+off0,x1=v.pos+off1;const cx=v.pos+((off0+off1)/2)*ARCH_FACTOR;return (1-t)*(1-t)*x0+2*(1-t)*t*cx+t*t*x1;}
+function curveY(lineIdx,x){const h=horizontal[lineIdx];if(h.bound) return h.pos;const seg=vertical.findIndex((v,i)=>x>=v.pos && x<=vertical[i+1]?.pos);if(seg<0)return h.pos;const x0=vertical[seg].pos,x1=vertical[seg+1].pos,t=(x-x0)/(x1-x0);const off0=offset(h,seg),off1=offset(h,seg+1);const y0=h.pos+off0,y1=h.pos+off1;const cy=h.pos+((off0+off1)/2)*ARCH_FACTOR;return (1-t)*(1-t)*y0+2*(1-t)*t*cy+t*t*y1;}
+
+// ───────────── Cell polygon sampling ─────────────
+function sampleVertEdge(i,y0,y1){const pts=[];for(let k=0;k<=EXTRA+1;k++){const yy=y0+(y1-y0)*k/(EXTRA+1);pts.push([curveX(i,yy),yy]);}return pts;}
+function sampleHorzEdge(j,x0,x1){const pts=[];for(let k=0;k<=EXTRA+1;k++){const xx=x0+(x1-x0)*k/(EXTRA+1);pts.push([xx,curveY(j,xx)]);}return pts;}
+
+// ───────────── Drawing ─────────────
+function draw(){const{width:w,height:h}=canvas.getBoundingClientRect();ctx.clearRect(0,0,w,h);
+  // draw coloured cells
+  for(let i=0;i<vertical.length-1;i++){
+    for(let j=0;j<horizontal.length-1;j++){
+      ctx.fillStyle=cellColors[i][j];
+      const y0=horizontal[j].pos,y1=horizontal[j+1].pos;
+      const xLeftTop = curveX(i, y0), xLeftBottom = curveX(i, y1);
+      const xRightTop = curveX(i+1, y0), xRightBottom = curveX(i+1, y1);
+      const leftEdge = sampleVertEdge(i,y0,y1);
+      const rightEdge = sampleVertEdge(i+1,y1,y0); // reverse bottom‑up
+      const bottomEdge = sampleHorzEdge(j+1,xRightBottom,xLeftBottom); // right→left
+      const topEdge = sampleHorzEdge(j,xLeftTop,xRightTop); // left→right
+      ctx.beginPath();
+      ctx.moveTo(leftEdge[0][0],leftEdge[0][1]);
+      leftEdge.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));
+      topEdge.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));
+      rightEdge.forEach(p=>ctx.lineTo(p[0],p[1]));
+      bottomEdge.forEach(p=>ctx.lineTo(p[0],p[1]));
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+  // draw all curves / lines
+  ctx.strokeStyle='#000';
+  vertical.forEach((v,i)=>{
+    ctx.lineWidth=v.thick;
+    ctx.beginPath();
+    ctx.moveTo(curveX(i,0),0);
+    for(let y=0;y<=h;y+=4) ctx.lineTo(curveX(i,y),y);
+    ctx.stroke();
+  });
+  horizontal.forEach((l,j)=>{
+    ctx.lineWidth=l.thick;
+    ctx.beginPath();
+    ctx.moveTo(0,curveY(j,0));
+    for(let x=0;x<=w;x+=4) ctx.lineTo(x,curveY(j,x));
+    ctx.stroke();
+  });
+}
+
+// ───────────── Motion ─────────────
+function drift(){const{width:w,height:h}=canvas.getBoundingClientRect();
+  vertical.forEach(v=>{if(v.bound) return; v.pos+=TRANS_SPEED*v.dir; const d=v.pos-v.orig; if(Math.abs(d)>=TRANS_AMP||v.pos<=0||v.pos>=w) v.dir*=-1;});
+  horizontal.forEach(l=>{if(l.bound) return; l.pos+=TRANS_SPEED*l.dir; const d=l.pos-l.orig; if(Math.abs(d)>=TRANS_AMP||l.pos<=0||l.pos>=h) l.dir*=-1;});
+}
+
+function loop(){clock+=0.015; drift(); draw(); requestAnimationFrame(loop);} 
+
+// ───────────── Init ─────────────
+function init(){fit(); build(); loop();}
+window.addEventListener('resize',init); init();
+</script>
+</body>
+</html>
