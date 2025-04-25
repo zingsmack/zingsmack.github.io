@@ -71,17 +71,20 @@
   `;
 
   function createShaderMaterial(colors) {
-    return new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      uniforms: {
-        uTime: { value: 0 },
-        colorA: { value: colors[0] },
-        colorB: { value: colors[1] },
-        colorC: { value: colors[2] }
-      },
-      side: THREE.DoubleSide
+    // Cartoon PBR using MeshToonMaterial with flat shading
+    const textureLoader = new THREE.TextureLoader();
+    const gradientMap = textureLoader.load('/js/libs/textures/gradients/toon1.jpg');
+    gradientMap.minFilter = THREE.NearestFilter;
+    gradientMap.magFilter = THREE.NearestFilter;
+    gradientMap.generateMipmaps = false;
+    return new THREE.MeshToonMaterial({
+      color: colors[1],
+      gradientMap: gradientMap,
+      flatShading: true,
+      skinning: false,
+      morphTargets: false
     });
+  }
   }
 
   let scene, camera, renderer, clock, composer;
@@ -145,15 +148,25 @@
     // Generate elements
     for (let i = 0; i < 6; i++) {
       const bloom = createBloom(20 + Math.random() * 30, 6 + Math.floor(Math.random() * 4), palettes[i % palettes.length]);
-      bloom.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
+      // Increased spread
+      bloom.position.set(
+        (Math.random() - 0.5) * 150,
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 50
+      );
       bloomGroup.add(bloom);
+    }
     }
 
     const bubbleGeo = new THREE.SphereGeometry(1.5, 16, 12);
     const bubbleMat = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0.5, emissive: 0xffffff, emissiveIntensity: 0.6 });
     for (let i = 0; i < 50; i++) {
       const bubble = new THREE.Mesh(bubbleGeo, bubbleMat);
-      bubble.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
+      bubble.position.set(
+        (Math.random() - 0.5) * 150,
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 50
+      );
       bubble.userData.vel = new THREE.Vector3(0, 0.1 + Math.random() * 0.2, 0);
       bubbleGroup.add(bubble);
     }
