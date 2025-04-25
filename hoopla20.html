@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Random Grid – Fully Independent Lines</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#fff; }
+    canvas     { display:block; cursor:crosshair; }
+  </style>
+</head>
+<body>
+<canvas id="gridCanvas"></canvas>
+<script>
+// -------- Utils --------
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rf=(a,b)=>Math.random()*(b-a)+a;
+const pick=a=>a[ri(0,a.length-1)];
+
+// -------- Globals --------
+const canvas=document.getElementById('gridCanvas');
+const ctx=canvas.getContext('2d');
+const PALETTE=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+let vertical=[], horizontal=[], cellColors=[];
+let time=0;
+
+// tuneables
+const CURVE_AMP=45;
+const ARCH=1.6;            // Bézier control multiplier
+const EXTRA=48;            // samples per edge
+const STEP=1;              // draw step px
+const RANGE=150;           // drift range px
+
+// -------- Canvas fit --------
+function fit(){const{innerWidth:w,innerHeight:h}=window;const d=window.devicePixelRatio||1;canvas.width=w*d;canvas.height=h*d;canvas.style.width=`${w}px`;canvas.style.height=`${h}px`;ctx.setTransform(d,0,0,d,0,0);} 
+
+// -------- Grid --------
+function distrib(n,a,b){const gap=(b-a)/(n+1);return Array.from({length:n},(_,i)=>rf(a+i*gap,a+(i+1)*gap)).sort((x,y)=>x-y);} 
+function makeLine(isV,pos,bound=false){return{
+  orient:isV?'v':'h',
+  pos, orig:pos, bound,
+  dir:Math.random()<0.5?1:-1,             // independent start direction
+  speed:rf(0.3,1.2),                      // independent drift speed
+  thick: bound?4:ri(2,10),
+  anchors:[]
+};}
+function build(){
+  const{width:w,height:h}=canvas.getBoundingClientRect();
+  vertical   =[makeLine(true,0,true),...distrib(ri(3,9),0,w).map(x=>makeLine(true,x)),makeLine(true,w,true)];
+  horizontal =[makeLine(false,0,true),...distrib(ri(3,9),0,h).map(y=>makeLine(false,y)),makeLine(false,h,true)];
+  vertical.forEach((v,i)=>{
+    v.idx=i;
+    v.anchors=Array.from({length:horizontal.length},()=>({phase:rf(0,Math.PI*2),speed:rf(0.15,0.5),str:rf(0.3,1)*(Math.random()<0.5?-1:1)}));
+  });
+  horizontal.forEach((h,i)=>{
+    h.idx=i;
+    h.anchors=Array.from({length:vertical.length},()=>({phase:rf(0,Math.PI*2),speed:rf(0.15,0.5),str:rf(0.3,1)*(Math.random()<0.5?-1:1)}));
+  });
+  cellColors=Array.from({length:vertical.length-1},()=>Array.from({length:horizontal.length-1},()=>pick(PALETTE)));
+}
+
+// -------- Geometry helpers --------
+function anchorOffset(line,i){const a=line.anchors[i];return Math.sin(time*a.speed+a.phase)*a.str*CURVE_AMP;}
+const quad=(p0,c,p1,t)=> (1-t)*(1-t)*p0+2*(1-t)*t*c+t*t*p1;
+function xAt(vIdx,y){const v=vertical[vIdx];if(v.bound) return v.pos; const seg=horizontal.findIndex((h,i)=>y>=h.pos&&y<=horizontal[i+1]?.pos); if(seg<0) return v.pos;
+  const y0=horizontal[seg].pos, y1=horizontal[seg+1].pos, t=(y-y0)/(y1-y0);
+  const o0=anchorOffset(v,seg), o1=anchorOffset(v,seg+1);
+  const x0=v.pos+o0, x1=v.pos+o1, cx=v.pos+((o0+o1)/2)*ARCH;
+  return quad(x0,cx,x1,t);
+}
+function yAt(hIdx,x){const h=horizontal[hIdx];if(h.bound) return h.pos; const seg=vertical.findIndex((v,i)=>x>=v.pos&&x<=vertical[i+1]?.pos); if(seg<0) return h.pos;
+  const x0=vertical[seg].pos, x1=vertical[seg+1].pos, t=(x-x0)/(x1-x0);
+  const o0=anchorOffset(h,seg), o1=anchorOffset(h,seg+1);
+  const y0=h.pos+o0, y1=h.pos+o1, cy=h.pos+((o0+o1)/2)*ARCH;
+  return quad(y0,cy,y1,t);
+}
+function sampleVert(i,y0,y1){const pts=[];for(let k=0;k<=EXTRA;k++){const y=y0+(y1-y0)*k/EXTRA;pts.push([xAt(i,y),y]);}return pts;}
+function sampleHorz(j,x0,x1){const pts=[];for(let k=0;k<=EXTRA;k++){const x=x0+(x1-x0)*k/EXTRA;pts.push([x,yAt(j,x)]);}return pts;}
+
+// -------- Draw --------
+function draw(){const{width:w,height:h}=canvas.getBoundingClientRect();ctx.clearRect(0,0,w,h);
+  // cells
+  for(let i=0;i<vertical.length-1;i++){
+    for(let j=0;j<horizontal.length-1;j++){
+      const yTop=horizontal[j].pos, yBot=horizontal[j+1].pos;
+      // Sample edges consistently
+      const left  = sampleVert(i,   yTop, yBot);            // down
+      const right = sampleVert(i+1, yBot, yTop);            // up
+      const bottom = sampleHorz(j+1, xAt(i,  yBot), xAt(i+1,yBot)); // left→right
+      const top    = sampleHorz(j,   xAt(i+1,yTop), xAt(i,  yTop)); // right→left
+
+      const poly=[...left,
+                  ...bottom.slice(1),
+                  ...right.slice(1),
+                  ...top.slice(1)];
+      ctx.beginPath(); ctx.moveTo(poly[0][0],poly[0][1]); poly.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath();
+      ctx.fillStyle=cellColors[i][j]; ctx.fill();
+    }
+  }
+  // draw lines atop cells to mask sub‑pixel seams
+  ctx.strokeStyle='#000';
+  vertical.forEach((v,i)=>{ctx.lineWidth=v.thick;ctx.beginPath();ctx.moveTo(xAt(i,0),0);for(let y=0;y<=h;y+=STEP)ctx.lineTo(xAt(i,y),y);ctx.stroke();});
+  horizontal.forEach((h,j)=>{ctx.lineWidth=h.thick;ctx.beginPath();ctx.moveTo(0,yAt(j,0));for(let x=0;x<=w;x+=STEP)ctx.lineTo(x,yAt(j,x));ctx.stroke();});
+}
+  ctx.strokeStyle='#000';
+  vertical.forEach((v,i)=>{ctx.lineWidth=v.thick;ctx.beginPath();ctx.moveTo(xAt(i,0),0);for(let y=0;y<=h;y+=STEP)ctx.lineTo(xAt(i,y),y);ctx.stroke();});
+  horizontal.forEach((h,j)=>{ctx.lineWidth=h.thick;ctx.beginPath();ctx.moveTo(0,yAt(j,0));for(let x=0;x<=w;x+=STEP)ctx.lineTo(x,yAt(j,x));ctx.stroke();});
+}
+
+// -------- Motion & Loop --------
+function drift(){const{width:w,height:h}=canvas.getBoundingClientRect();
+  vertical.forEach(v=>{if(v.bound) return; v.pos+=v.speed*v.dir; const d=v.pos-v.orig; if(Math.abs(d)>=RANGE||v.pos<=0||v.pos>=w) v.dir*=-1;});
+  horizontal.forEach(l=>{if(l.bound) return; l.pos+=l.speed*l.dir; const d=l.pos-l.orig; if(Math.abs(d)>=RANGE||l.pos<=0||l.pos>=h) l.dir*=-1;});
+}
+function loop(){time+=0.008; drift(); draw(); requestAnimationFrame(loop);} 
+
+// -------- Init --------
+function init(){fit(); build(); loop();}
+window.addEventListener('resize',init);
+init();
+</script>
+</body>
+</html>
