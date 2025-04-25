@@ -31,70 +31,57 @@ window.onload = () => {
   const prevBtn   = document.querySelector('.viewer .prev');
   const nextBtn   = document.querySelector('.viewer .next');
 
-  // 3) Set up the fade transition in JS (remove any CSS transition)
-  imgEl.style.transition = 'opacity 1s ease';  // adjust duration as needed
+  // 3) Configure a single 3s opacity transition
+  imgEl.style.transition = 'opacity 3s ease';
 
-  // 4) Helper: load & fade in an image immediately
+  // 4) Helper to load & fade in
+  function fadeIn() {
+    imgEl.onload = () => {
+      // after image loads, fade in
+      requestAnimationFrame(() => { 
+        imgEl.style.opacity = '1'; 
+      });
+    };
+  }
+
+  // 5) Show the very first image
   function showInitial() {
     const { src, caption } = reel[current];
+    imgEl.style.opacity = '0';
     imgEl.src = src;
-    imgEl.alt = caption;
     captionEl.textContent = caption;
-    // wait one frame so the browser registers opacity:0 → opacity:1
-    requestAnimationFrame(() => {
-      imgEl.style.opacity = '1';
-    });
+    fadeIn();
   }
 
-  // 5) Core render sequence for navigation
-  function render() {
+  // 6) Swap logic for nav
+  function showNext(delta) {
+    current = (current + delta + reel.length) % reel.length;
     const { src, caption } = reel[current];
-    // fade out current
+
+    // 6a) Fade out
     imgEl.style.opacity = '0';
 
-    // after fade-out, swap and fade in
-    imgEl.addEventListener('transitionend', function onFade(e) {
+    // 6b) Once fade-out ends, swap src & caption, then fade in
+    imgEl.ontransitionend = (e) => {
       if (e.propertyName !== 'opacity') return;
-      imgEl.removeEventListener('transitionend', onFade);
+      imgEl.ontransitionend = null;  // clear handler
 
       imgEl.src = src;
-      imgEl.alt = caption;
       captionEl.textContent = caption;
-
-      // once new image is loaded, fade in
-      imgEl.onload = () => {
-        imgEl.style.opacity = '1';
-      };
-    });
+      fadeIn();
+    };
   }
 
-  // 6) Navigation handlers
-  prevBtn.addEventListener('click', () => {
-    current = (current - 1 + reel.length) % reel.length;
-    render();
-  });
-  nextBtn.addEventListener('click', () => {
-    current = (current + 1) % reel.length;
-    render();
-  });
+  // 7) Wire up buttons
+  prevBtn.onclick = () => showNext(-1);
+  nextBtn.onclick = () => showNext(+1);
 
-  // 7) Keyboard navigation
-  window.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft')  prevBtn.click();
-    if (e.key === 'ArrowRight') nextBtn.click();
-  });
+  // 8) Keyboard nav
+  window.onkeydown = (e) => {
+    if (e.key === 'ArrowLeft')  showNext(-1);
+    if (e.key === 'ArrowRight') showNext(+1);
+  };
 
-  // 8) Touch-swipe support
-  let startX = null;
-  imgEl.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
-  imgEl.addEventListener('touchend',   e => {
-    if (startX === null) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (dx > 50)      prevBtn.click();
-    else if (dx < -50) nextBtn.click();
-    startX = null;
-  });
-
-  // 9) Kick off initial display
+  // 9) Kick it off
   showInitial();
 };
