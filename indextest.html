@@ -3,33 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Three.js Organic Bloom Animation</title>
-  <!-- Import map to resolve bare specifiers -->
+  <!-- Import map for local modules -->
   <script type="importmap">
-{
-  "imports": {
-    "three": "/js/libs/three.module.js",
-    "three/examples/jsm/": "/js/libs/examples/jsm/"
+  {
+    "imports": {
+      "three": "/js/libs/three.module.js",
+      "three/examples/jsm/": "/js/libs/examples/jsm/"
+    }
   }
-}
-</script>
-  <!--
-    Required example modules under js/libs/examples/jsm:
-
-    postprocessing:
-      - Pass.js
-      - RenderPass.js
-      - ShaderPass.js
-      - MaskPass.js
-      - EffectComposer.js
-      - UnrealBloomPass.js
-
-    loaders:
-      - RGBELoader.js
-
-    shaders (if used via ShaderPass):
-      - CopyShader.js
-      - LuminosityHighPassShader.js
-  -->
+  </script>
   <style>
     body { margin: 0; overflow: hidden; background: #000; }
     canvas { display: block; }
@@ -42,21 +24,20 @@
   import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
   import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-  import { LuminosityHighPassShader } from 'three/examples/jsm/shaders/LuminosityHighPassShader.js';
 
-  // Shader code must be declared before its usage
+  // Shader sources
   const vertexShader = `
     uniform float uTime;
     varying vec2 vUv;
     varying float vUvY;
-    float random(vec2 st) { return fract(sin(dot(st, vec2(12.9898,78.233))) * 43758.5453123); }
+    float random(vec2 st) { return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453123); }
     float noise(vec2 st) {
       vec2 i = floor(st);
       vec2 f = fract(st);
       vec2 u = f * f * (3.0 - 2.0 * f);
       return mix(
-        mix(random(i), random(i + vec2(1.0,0.0)), u.x),
-        mix(random(i + vec2(0.0,1.0)), random(i + vec2(1.0)), u.x),
+        mix(random(i), random(i + vec2(1.0, 0.0)), u.x),
+        mix(random(i + vec2(0.0, 1.0)), random(i + vec2(1.0)), u.x),
         u.y
       );
     }
@@ -70,38 +51,34 @@
   `;
 
   const fragmentShader = `
+    uniform float uTime;
     uniform vec3 colorA;
     uniform vec3 colorB;
     uniform vec3 colorC;
-    varying float vUvY;
     varying vec2 vUv;
-    // Add subtle noise-based saturation shift
-    float rand(vec2 co) { return fract(sin(dot(co.xy, vec2(12.9898,78.233))) * 43758.5453); }
+    varying float vUvY;
+    float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
     void main() {
-      // Base gradient
       vec3 col = (vUvY < 0.5)
         ? mix(colorA, colorB, vUvY * 2.0)
         : mix(colorB, colorC, (vUvY - 0.5) * 2.0);
-      // Apply radial glow from bloom center
       float glow = 1.0 - length((vUv - 0.5) * 2.0);
       col += glow * 0.2;
-      // Add per-pixel noise modulation
       float n = rand(vUv * uTime);
       col = mix(col, col * (0.8 + 0.2 * n), 0.5);
       gl_FragColor = vec4(col, 1.0);
     }
   `;
 
-  // Shared shader material factory
-  function createShaderMaterial(pal) {
+  function createShaderMaterial(colors) {
     return new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: {
         uTime: { value: 0 },
-        colorA: { value: pal[0] },
-        colorB: { value: pal[1] },
-        colorC: { value: pal[2] }
+        colorA: { value: colors[0] },
+        colorB: { value: colors[1] },
+        colorC: { value: colors[2] }
       },
       side: THREE.DoubleSide
     });
@@ -128,29 +105,27 @@
     camera.position.set(0, 0, 100);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     window.addEventListener('resize', onWindowResize);
 
     clock = new THREE.Clock();
 
-    // Fix missing luminance in high-pass shader
-  LuminosityHighPassShader.fragmentShader = `#include <common>
-` + LuminosityHighPassShader.fragmentShader;
-
-    // Post-processing
     composer = new EffectComposer(renderer);
+    composer.setPixelRatio(renderer.getPixelRatio());
+    composer.setSize(window.innerWidth, window.innerHeight);
     composer.addPass(new RenderPass(scene, camera));
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.2, // increased strength
-      1.5, // increased radius
-      0.6  // lowered threshold for wider bloom
+      1.2, 1.5, 0.6
     );
     composer.addPass(bloomPass);
 
-    // Environment HDR
     const pmremGen = new THREE.PMREMGenerator(renderer);
+    pmremGen.compileEquirectangularShader();
     new RGBELoader()
       .setDataType(THREE.FloatType)
       .load('/js/env/env.hdr', hdr => {
@@ -167,71 +142,80 @@
     dirLight.position.set(1, 1, 1);
     scene.add(dirLight);
 
-    // Create blooms, bubbles, mushrooms, buds
+    // Generate elements
     for (let i = 0; i < 6; i++) {
       const bloom = createBloom(20 + Math.random() * 30, 6 + Math.floor(Math.random() * 4), palettes[i % palettes.length]);
       bloom.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
       bloomGroup.add(bloom);
     }
+
     const bubbleGeo = new THREE.SphereGeometry(1.5, 16, 12);
+    const bubbleMat = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0.5, emissive: 0xffffff, emissiveIntensity: 0.6 });
     for (let i = 0; i < 50; i++) {
-      const bubble = new THREE.Mesh(bubbleGeo, new THREE.MeshStandardMaterial({ transparent:true, opacity:0.5, emissive:0xffffff, emissiveIntensity:0.6 }));
-      bubble.position.set((Math.random()-0.5)*80, (Math.random()-0.5)*60, (Math.random()-0.5)*20);
-      bubble.userData.vel = new THREE.Vector3(0, 0.1 + Math.random()*0.2, 0);
+      const bubble = new THREE.Mesh(bubbleGeo, bubbleMat);
+      bubble.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
+      bubble.userData.vel = new THREE.Vector3(0, 0.1 + Math.random() * 0.2, 0);
       bubbleGroup.add(bubble);
     }
+
     for (let i = 0; i < 20; i++) {
-      const stemH = 5 + Math.random()*10;
-      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5,1,stemH,12), new THREE.MeshStandardMaterial({ color:0xdeb887, roughness:0.8 }));
-      stem.position.set((Math.random()-0.5)*80, (Math.random()-0.5)*60, (Math.random()-0.5)*20);
+      const stemH = 5 + Math.random() * 10;
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1, stemH, 12), new THREE.MeshStandardMaterial({ color: 0xdeb887, roughness: 0.8 }));
+      stem.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
       mushroomGroup.add(stem);
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(1.5 + Math.random()*3,16,12,0,Math.PI), createShaderMaterial(palettes[i % palettes.length]));
-      cap.position.copy(stem.position).add(new THREE.Vector3(0, stemH/2, 0)); cap.rotation.x = Math.PI;
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(1.5 + Math.random() * 3, 16, 12, 0, Math.PI), createShaderMaterial(palettes[i % palettes.length]));
+      cap.position.copy(stem.position).add(new THREE.Vector3(0, stemH / 2, 0));
+      cap.rotation.x = Math.PI;
       mushroomGroup.add(cap);
     }
-    const budGeo = new THREE.SphereGeometry(2,12,8);
+
+    const budGeo = new THREE.SphereGeometry(2, 12, 8);
     for (let i = 0; i < 100; i++) {
       const bud = new THREE.Mesh(budGeo, createShaderMaterial(palettes[i % palettes.length]));
-      bud.position.set((Math.random()-0.5)*80,(Math.random()-0.5)*60,(Math.random()-0.5)*20);
+      bud.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
       budGroup.add(bud);
     }
   }
 
   function createBloom(radius, petals, palette) {
-    const group = new THREE.Group(); petals = Math.max(3,petals);
-    for (let i=0;i<petals;i++){
+    const group = new THREE.Group();
+    petals = Math.max(3, petals);
+    for (let i = 0; i < petals; i++) {
       const mesh = new THREE.Mesh(createPetalGeometry(radius), createShaderMaterial(palette));
-      mesh.rotation.z = (i/petals)*Math.PI*2;
+      mesh.rotation.z = (i / petals) * Math.PI * 2;
       group.add(mesh);
     }
     return group;
   }
 
   function createPetalGeometry(radius) {
-    const pts=[];
-    for (let i=0;i<=16;i++){ const t=i/16; pts.push(new THREE.Vector2(Math.sin(t*Math.PI)*radius, Math.cos(t*Math.PI)*radius*0.1)); }
-    return new THREE.LatheGeometry(pts,12);
+    const points = [];
+    for (let i = 0; i <= 16; i++) {
+      const t = i / 16;
+      points.push(new THREE.Vector2(Math.sin(t * Math.PI) * radius, Math.cos(t * Math.PI) * radius * 0.1));
+    }
+    return new THREE.LatheGeometry(points, 12);
   }
 
-  function onWindowResize(){ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); composer.setSize(window.innerWidth,window.innerHeight); }
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
+  }
 
-  function animate(){
+  function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-    // Update shader time uniform for all shader-material meshes
     [bloomGroup, mushroomGroup, budGroup].forEach(group => {
       group.traverse(obj => {
-        if(obj.isMesh && obj.material && obj.material.uniforms && obj.material.uniforms.uTime){
-          obj.material.uniforms.uTime.value = t;
-        }
+        if (obj.isMesh && obj.material.uniforms) obj.material.uniforms.uTime.value = t;
       });
     });
-    // Update bubble positions
     bubbleGroup.children.forEach(b => {
       b.position.add(b.userData.vel);
-      if(b.position.y > 60) b.position.y = -60;
+      if (b.position.y > 60) b.position.y = -60;
     });
-    // Render via composer
     composer.render();
   }
 </script>
