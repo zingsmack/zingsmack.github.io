@@ -42,6 +42,7 @@
   import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
   import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+  import { LuminosityHighPassShader } from 'three/examples/jsm/shaders/LuminosityHighPassShader.js';
 
   // Shader code must be declared before its usage
   const vertexShader = `
@@ -122,6 +123,10 @@
     window.addEventListener('resize', onWindowResize);
 
     clock = new THREE.Clock();
+
+    // Fix missing luminance in high-pass shader
+  LuminosityHighPassShader.fragmentShader = `#include <common>
+` + LuminosityHighPassShader.fragmentShader;
 
     // Post-processing
     composer = new EffectComposer(renderer);
