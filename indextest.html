@@ -73,7 +73,7 @@
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
     document.body.appendChild(renderer.domElement);
@@ -124,7 +124,6 @@
       });
       bloomOutline.scale.multiplyScalar(1.05);
       scene.add(bloomOutline);
-      outlinePass.selectedObjects.push(bloom);
     }
 
     const bubbleGeo = new THREE.SphereGeometry(1.5,16,12);
@@ -139,7 +138,6 @@
       bOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
       bOutline.scale.multiplyScalar(1.05);
       scene.add(bOutline);
-      outlinePass.selectedObjects.push(b);
     }
 
     for(let i=0; i<20; i++){
@@ -155,7 +153,6 @@
       stemOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
       stemOutline.scale.multiplyScalar(1.05);
       scene.add(stemOutline);
-      outlinePass.selectedObjects.push(stem);
 
       const cap = new THREE.Mesh(
         new THREE.SphereGeometry(1.5+Math.random()*3,16,12,0,Math.PI),
@@ -169,7 +166,6 @@
       capOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
       capOutline.scale.multiplyScalar(1.05);
       scene.add(capOutline);
-      outlinePass.selectedObjects.push(cap);
     }
 
     const budGeo = new THREE.SphereGeometry(2,12,8);
@@ -185,7 +181,6 @@
       budOutline.material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
       budOutline.scale.multiplyScalar(1.05);
       scene.add(budOutline);
-      outlinePass.selectedObjects.push(bud);
     }
   }
 
