@@ -26,31 +26,38 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   let current = 0;
 
+  // 2) Grab DOM elements
   const imgEl     = document.querySelector('.viewer img');
   const captionEl = document.querySelector('.viewer figcaption');
   const prevBtn   = document.querySelector('.viewer .prev');
   const nextBtn   = document.querySelector('.viewer .next');
 
+  // 3) Render with fade sequence
   function render() {
     const { src, caption } = reel[current];
 
-    // fade-out
+    // Start fade-out
     imgEl.style.opacity = '0';
 
-    // once faded, swap image & caption
-    imgEl.addEventListener('transitionend', function swap() {
-      imgEl.removeEventListener('transitionend', swap);
+    // Once opacity transition ends, swap src & caption, then fade-in
+    function onFadeOut(e) {
+      if (e.propertyName !== 'opacity') return;
+      imgEl.removeEventListener('transitionend', onFadeOut);
+
       imgEl.src = src;
       imgEl.alt = caption;
       captionEl.textContent = caption;
 
-      // on load, fade in
+      // When new image has loaded, fade back in
       imgEl.onload = () => {
         imgEl.style.opacity = '1';
       };
-    });
+    }
+
+    imgEl.addEventListener('transitionend', onFadeOut);
   }
 
+  // 4) Navigation handlers
   prevBtn.addEventListener('click', () => {
     current = (current - 1 + reel.length) % reel.length;
     render();
@@ -60,11 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   });
 
+  // 5) Keyboard support
   window.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft') prevBtn.click();
+    if (e.key === 'ArrowLeft')  prevBtn.click();
     if (e.key === 'ArrowRight') nextBtn.click();
   });
 
-  // initial display
+  // 6) Touch-swipe support
+  let startX = null;
+  imgEl.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+  imgEl.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx > 50)      prevBtn.click();
+    else if (dx < -50) nextBtn.click();
+    startX = null;
+  });
+
+  // 7) Initial render
+  // Set initial opacity to 1 for the first image
+  imgEl.style.transition = 'opacity 0.4s ease';
+  imgEl.onload = () => { imgEl.style.opacity = '1'; };
   render();
 });
