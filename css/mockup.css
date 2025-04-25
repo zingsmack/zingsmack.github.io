@@ -1,7 +1,7 @@
 /* File: css/mockup.css */
 
-/* Import a stylish serif for captions */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+/* Import Open Sans for captions */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap');
 
 /* Reset & base */
 * {
@@ -105,14 +105,18 @@ body {
   opacity: 1;
 }
 
-/* Caption with custom serif */
+/* Caption with Open Sans, bold, white with black edge */
 .viewer figcaption {
   margin-top: 1rem;
-  color: #333;
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
-  font-size: 1.125rem;
-  font-style: italic;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
 }
 
 /* Navigation buttons */
