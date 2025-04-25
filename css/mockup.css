@@ -78,9 +78,9 @@ body {
   transform: translateY(-50%);
   text-align: center;
 
-  /* ensure the entire viewer never exceeds viewport height */
+  /* allow nav buttons to stick out */
   max-height: 90vh;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Portrait image */
@@ -118,13 +118,14 @@ body {
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.2s;
+  z-index: 3;
 }
 .nav:hover {
   background: rgba(255, 255, 255, 1);
 }
 .prev {
-  left: -3rem;
+  left: 1rem;
 }
 .next {
-  right: -3rem;
+  right: 1rem;
 }
