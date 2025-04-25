@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- silent favicon so CSP warnings disappear -->
+  <link rel="icon" href="data:," />
+  <title>Random Grid – Segmented Curvy Active Line</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#fff; }
+    canvas     { display:block; cursor:crosshair; }
+    #tooltip   { position:fixed; padding:4px 6px; font-family:monospace; font-size:12px;
+                 background:rgba(0,0,0,.85); color:#fff; border-radius:4px; pointer-events:none;
+                 transform:translate(-50%,-150%); opacity:0; transition:opacity .12s; z-index:1000; }
+  </style>
+</head>
+<body>
+<canvas id="gridCanvas"></canvas>
+<div id="tooltip"></div>
+<script>
+// ─────────────────────────── Helpers ───────────────────────────
+const randInt   = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const randFloat = (a,b)=>Math.random()*(b-a)+a;
+const randItem  = arr  =>arr[randInt(0,arr.length-1)];
+
+// ─────────────────────────── Globals ──────────────────────────
+const canvas   = document.getElementById('gridCanvas');
+const ctx      = canvas.getContext('2d');
+const tooltip  = document.getElementById('tooltip');
+const PALETTE  = ['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+let verticalLines=[], horizontalLines=[], innerLines=[];
+let cellColors = [], intersections=[], activeLine=null;
+
+// constants
+const HIT_RADIUS   = 10;
+const TRANS_AMP    = 40;   // ±px sideways/upwards shift of whole line
+const TRANS_SPEED  = 1.5;  // px per frame
+const CURVE_AMP    = 30;   // max bend per anchor
+const EXTRA_SAMPLES= 6;    // subdivisions for polygon edge
+
+// time accumulator for per‑anchor oscillations
+let t = 0;
+
+// ───────────────── Canvas & resize ─────────────────
+function resizeCanvas(){
+  const {innerWidth:w,innerHeight:h}=window;
+  const r=window.devicePixelRatio||1;
+  canvas.width=w*r; canvas.height=h*r;
+  canvas.style.width=`${w}px`; canvas.style.height=`${h}px`;
+  ctx.setTransform(r,0,0,r,0,0);
+}
+
+// ─────────────── Grid creation helpers ─────────────
+function distrib(count,min,max){ const seg=(max-min)/(count+1); return Array.from({length:count},(_,i)=>randFloat(min+i*seg,min+(i+1)*seg)).sort((a,b)=>a-b); }
+const vLine=(x,id,b=false)=>({id,orientation:'v',x,original:x,thickness:b?4:randInt(2,10),dir:1,boundary:b,idx:0});
+const hLine=(y,id,b=false)=>({id,orientation:'h',y,original:y,thickness:b?4:randInt(2,10),dir:1,boundary:b,idx:0});
+function sortAssign(arr,key){arr.sort((a,b)=>a[key]-b[key]).forEach((l,i)=>l.idx=i);}
+
+function buildGrid(){
+  const {width:w,height:h}=canvas.getBoundingClientRect();
+  const vPos=distrib(randInt(3,9),0,w);
+  const hPos=distrib(randInt(3,9),0,h);
+  verticalLines   = [ vLine(0,'VBL',true), ...vPos.map((x,i)=>vLine(x,`VER${i}`)), vLine(w,'VBR',true) ];
+  horizontalLines = [ hLine(0,'HBT',true), ...hPos.map((y,i)=>hLine(y,`HOR${i}`)), hLine(h,'HBB',true) ];
+  sortAssign(verticalLines,'x');
+  sortAssign(horizontalLines,'y');
+  innerLines=[...verticalLines,...horizontalLines].filter(l=>!l.boundary);
+  createCellColors();
+  cacheIntersections();
+}
+
+function createCellColors(){
+  const cols=verticalLines.length-1, rows=horizontalLines.length-1;
+  cellColors=Array.from({length:cols},()=>Array.from({length:rows},()=>randItem(PALETTE)));
+}
+
+// ────────────── Active line: segment anchors ─────────────
+function prepActiveAnchors(){
+  if(!activeLine) return;
+  if(activeLine.orientation==='v'){
+    activeLine.anchors = horizontalLines.map(()=>({phase:randFloat(0,Math.PI*2), speed:randFloat(0.7,1.3)}));
+  }else{
+    activeLine.anchors = verticalLines.map(()=>({phase:randFloat(0,Math.PI*2), speed:randFloat(0.7,1.3)}));
+  }
+}
+
+function anchorOffset(idx){ // returns dynamic offset for anchor i
+  const a=activeLine.anchors[idx];
+  return Math.sin(t*a.speed+a.phase)*CURVE_AMP;
+}
+
+function curveX(y){
+  // only call when active vertical
+  const segIdx = horizontalLines.findIndex((h,i)=> y>=h.y && y<=horizontalLines[i+1]?.y);
+  if(segIdx===-1) return activeLine.x;
+  const y0=horizontalLines[segIdx].y, y1=horizontalLines[segIdx+1].y;
+  const tSeg=(y-y0)/(y1-y0);
+  const off0=anchorOffset(segIdx);
+  const off1=anchorOffset(segIdx+1);
+  return activeLine.x + off0 + (off1-off0)*tSeg;
+}
+function curveY(x){
+  // active horizontal
+  const segIdx = verticalLines.findIndex((v,i)=> x>=v.x && x<=verticalLines[i+1]?.x);
+  if(segIdx===-1) return activeLine.y;
+  const x0=verticalLines[segIdx].x, x1=verticalLines[segIdx+1].x;
+  const tSeg=(x-x0)/(x1-x0);
+  const off0=anchorOffset(segIdx);
+  const off1=anchorOffset(segIdx+1);
+  return activeLine.y + off0 + (off1-off0)*tSeg;
+}
+
+// ─────────────── Intersection cache ────────────────
+function cacheIntersections(){
+  intersections.length=0;
+  horizontalLines.forEach((hL,j)=>{
+    verticalLines.forEach((vL,i)=>{
+      let x=vL.x, y=hL.y;
+      if(activeLine){
+        if(activeLine.orientation==='v' && vL.id===activeLine.id) x=curveX(y);
+        if(activeLine.orientation==='h' && hL.id===activeLine.id) y=curveY(x);
+      }
+      intersections.push({x,y});
+    });
+  });
+}
+
+// ─────────── Polygon sampling along curve ───────────
+function sampleCurveV(y0,y1){
+  const pts=[]; const steps=EXTRA_SAMPLES+1;
+  for(let k=0;k<=steps;k++){ const yy=y0+(y1-y0)*(k/steps); pts.push([curveX(yy),yy]); }
+  return pts;
+}
+function sampleCurveH(x0,x1){
+  const pts=[]; const steps=EXTRA_SAMPLES+1;
+  for(let k=0;k<=steps;k++){ const xx=x0+(x1-x0)*(k/steps); pts.push([xx,curveY(xx)]); }
+  return pts;
+}
+
+// ───────────────────── Drawing routines ─────────────────────
+function drawActivePath(){
+  const {width:w,height:h}=canvas.getBoundingClientRect();
+  ctx.lineWidth=activeLine.thickness; ctx.strokeStyle='#000'; ctx.beginPath();
+  if(activeLine.orientation==='v'){
+    ctx.moveTo(curveX(0),0);
+    for(let y=0;y<=h;y+=8) ctx.lineTo(curveX(y),y);
+  }else{
+    ctx.moveTo(0,curveY(0));
+    for(let x=0;x<=w;x+=8) ctx.lineTo(x,curveY(x));
+  }
+  ctx.stroke();
+}
+
+function draw(){
+  const {width:w,height:h}=canvas.getBoundingClientRect(); ctx.clearRect(0,0,w,h);
+  const v=verticalLines, hLines=horizontalLines;
+  let left,right,above,below;
+  if(activeLine.orientation==='v'){ const id=activeLine.idx; left=id-1; right=id; }
+  else { const id=activeLine.idx; above=id-1; below=id; }
+
+  // draw cells
+  for(let i=0;i<v.length-1;i++){
+    for(let j=0;j<hLines.length-1;j++){
+      ctx.fillStyle=cellColors[i][j];
+      if(activeLine.orientation==='v' && (i===left||i===right)){
+        const y0=hLines[j].y, y1=hLines[j+1].y, fixedX=i===left? v[i].x : v[i+1].x;
+        const curve=sampleCurveV(y0,y1);
+        ctx.beginPath();
+        if(i===left){ ctx.moveTo(fixedX,y0); curve.forEach(([x,y])=>ctx.lineTo(x,y)); ctx.lineTo(fixedX,y1); }
+        else { ctx.moveTo(curve[0][0],curve[0][1]); ctx.lineTo(fixedX,y0); ctx.lineTo(fixedX,y1); for(let p=curve.length-1;p>=0;p--) ctx.lineTo(curve[p][0],curve[p][1]); }
+        ctx.closePath(); ctx.fill();
+      }else if(activeLine.orientation==='h' && (j===above||j===below)){
+        const x0=v[i].x, x1=v[i+1].x, fixedY=j===above? hLines[j].y : hLines[j+1].y;
+        const curve=sampleCurveH(x0,x1);
+        ctx.beginPath();
+        if(j===above){ ctx.moveTo(x0,fixedY); curve.forEach(([x,y])=>ctx.lineTo(x,y)); ctx.lineTo(x1,fixedY); }
+        else { ctx.moveTo(curve[0][0],curve[0][1]); ctx.lineTo(x0,fixedY); ctx.lineTo(x1,fixedY); for(let p=curve.length-1;p>=0;p--) ctx.lineTo(curve[p][0],curve[p][1]); }
+        ctx.closePath(); ctx.fill();
+      }else{
+        ctx.fillRect(v[i].x,hLines[j].y,v[i+1].x-v[i].x,hLines[j+1].y-hLines[j].y);
+      }
+    }
+  }
+  // grid lines excluding active
+  v.forEach(l=>{ if(l.id!==activeLine.id){ ctx.lineWidth=l.thickness; ctx.strokeStyle='#000'; ctx.beginPath(); ctx.moveTo(l.x,0); ctx.lineTo(l.x,h); ctx.stroke(); }});
+  hLines.forEach(l=>{ if(l.id!==activeLine.id){ ctx.lineWidth=l.thickness; ctx.strokeStyle='#000'; ctx.beginPath(); ctx.moveTo(0,l.y); ctx.lineTo(w,l.y); ctx.stroke(); }});
+  drawActivePath();
+}
+
+// ────────────── Motion & animation loop ────────────
+function moveActive(){
+  const {width:w,height:h}=canvas.getBoundingClientRect();
+  if(activeLine.orientation==='v'){
+    activeLine.x+=TRANS_SPEED*activeLine.dir; const d=activeLine.x-activeLine.original;
+    if(Math.abs(d)>=TRANS_AMP||activeLine.x<=0||activeLine.x>=w) activeLine.dir*=-1;
+  }else{
+    activeLine.y+=TRANS_SPEED*activeLine.dir; const d=activeLine.y-activeLine.original;
+    if(Math.abs(d)>=TRANS_AMP||activeLine.y<=0||activeLine.y>=h) activeLine.dir*=-1;
+  }
+}
+function loop(){
+  t+=0.02; // advance time for per‑anchor waves
+  moveActive(); draw(); cacheIntersections(); requestAnimationFrame(loop);
+}
+
+// ─────────────── Init & helpers ───────────────
+function pickActive(){ activeLine=randItem(innerLines); prepActiveAnchors(); }
+function intro(done){ let p=0,FR=60; const {width:w,height:h}=canvas.getBoundingClientRect(); (function step(){ ctx.clearRect(0,0,w,h); verticalLines.forEach(v=>{ ctx.lineWidth=v.thickness; ctx.strokeStyle='#000'; ctx.beginPath(); ctx.moveTo(v.x,0); ctx.lineTo(v.x,h*p); ctx.stroke(); }); horizontalLines.forEach(h=>{ ctx.lineWidth=h.thickness; ctx.strokeStyle='#000'; ctx.beginPath(); ctx.moveTo(0,h.y); ctx.lineTo(w*p,h.y); ctx.stroke(); }); if(p<1){ p+=1/FR; requestAnimationFrame(step);} else done(); })(); }
+
+function init(){ resizeCanvas(); buildGrid(); intro(()=>{ pickActive(); loop(); }); }
+
+// ─────────────── Tooltip events ───────────────
+canvas.addEventListener('mousemove',e=>{ const {clientX:x,clientY:y}=e; const hit=intersections.find(pt=>Math.hypot(pt.x-x,pt.y-y)<=HIT_RADIUS); if(hit){ tooltip.textContent=`${Math.round(hit.x)}, ${Math.round(hit.y)}`; tooltip.style.left=`${x}px`; tooltip.style.top=`${y}px`; tooltip.style.opacity=1;} else tooltip.style.opacity=0; });
+canvas.addEventListener('mouseleave',()=>tooltip.style.opacity=0);
+window.addEventListener('resize',init);
+init();
+</script>
+</body>
+</html>
