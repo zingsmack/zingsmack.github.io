@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Immersive Portrait Corridor</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <!-- Three.js canvas -->
   <canvas id="webgl-canvas"></canvas>
 
-  <!-- Hidden menu overlay -->
   <div id="menu-overlay" class="hidden">
     <button id="close-menu">×</button>
     <nav>
@@ -25,7 +23,7 @@
   </div>
   <button id="menu-toggle">☰</button>
 
-  <!-- Your gallery script as a module -->
+  <!-- only one module entrypoint -->
   <script type="module" src="js/gallery.js"></script>
 </body>
 </html>
