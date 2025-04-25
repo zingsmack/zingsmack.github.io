@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Grid – Curved Active Line (Refactored IDs)</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background:#fff; }
+    canvas      { display:block; cursor:crosshair; }
+    #tooltip    { position:fixed; padding:4px 6px; font-family:monospace; font-size:12px;
+                  background:rgba(0,0,0,.85); color:#fff; border-radius:4px; pointer-events:none;
+                  transform:translate(-50%,-150%); opacity:0; transition:opacity .12s; z-index:1000; }
+  </style>
+</head>
+<body>
+<canvas id="gridCanvas"></canvas>
+<div id="tooltip"></div>
+<script>
+// ─────────────────────────── Helpers & Globals ───────────────────────────
+const randInt   = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const randFloat = (min, max) => Math.random() * (max - min) + min;
+const randChoice= arr => arr[randInt(0, arr.length - 1)];
+
+const canvas = document.getElementById('gridCanvas');
+const ctx    = canvas.getContext('2d');
+const tooltip= document.getElementById('tooltip');
+
+const PALETTE=[ '#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+let verticalLines = [], horizontalLines = [], innerLines = [];
+let cellColors = []; // cellColors[col][row]
+let intersections = [];
+let activeLine = null;
+
+const HIT_RADIUS = 10;
+const AMP        = 40;  // translation range
+const SPEED      = 1.5; // px / frame
+const CURVE_AMP  = 30;  // sine amplitude
+const CURVE_FREQ = 0.015; // sine frequency
+
+// ───────────────────────── Canvas / DPI setup ───────────────────────────
+function resizeCanvas() {
+  const { innerWidth: w, innerHeight: h } = window;
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width  = w * ratio;
+  canvas.height = h * ratio;
+  canvas.style.width  = `${w}px`;
+  canvas.style.height = `${h}px`;
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+}
+
+// ───────────────────── Grid generation with boundaries ───────────────────
+function generatePositions(count, min, max) {
+  const segment = (max - min) / (count + 1);
+  return Array.from({ length: count }, (_, i) => randFloat(min + i * segment, min + (i + 1) * segment)).sort((a, b) => a - b);
+}
+
+function makeVLine(x, id, boundary = false) {
+  return { id, orientation: 'vertical', x, original: x, thickness: boundary ? 4 : randInt(2, 10), dir: 1, boundary, sortIndex: 0 };
+}
+function makeHLine(y, id, boundary = false) {
+  return { id, orientation: 'horizontal', y, original: y, thickness: boundary ? 4 : randInt(2, 10), dir: 1, boundary, sortIndex: 0 };
+}
+function sortAssign(arr, key) {
+  arr.sort((a, b) => a[key] - b[key]).forEach((l, idx) => (l.sortIndex = idx));
+}
+
+function generateGrid() {
+  const { width: w, height: h } = canvas.getBoundingClientRect();
+  const vInner = generatePositions(randInt(3, 9), 0, w);
+  const hInner = generatePositions(randInt(3, 9), 0, h);
+
+  verticalLines = [
+    makeVLine(0,      'VBL', true), // left boundary
+    ...vInner.map((x, i) => makeVLine(x, `VER${i}`)),
+    makeVLine(w,      'VBR', true)  // right boundary
+  ];
+  horizontalLines = [
+    makeHLine(0,      'HBT', true), // top boundary
+    ...hInner.map((y, i) => makeHLine(y, `HOR${i}`)),
+    makeHLine(h,      'HBB', true)  // bottom boundary
+  ];
+
+  sortAssign(verticalLines,   'x');
+  sortAssign(horizontalLines, 'y');
+
+  innerLines = [...verticalLines, ...horizontalLines].filter(l => !l.boundary);
+
+  generateCellColors();
+  updateIntersections();
+}
+
+// ─────────────────────── Cell colour assignment ───────────────────────
+function generateCellColors() {
+  const cols = verticalLines.length - 1;
+  const rows = horizontalLines.length - 1;
+  cellColors = Array.from({ length: cols }, () => Array.from({ length: rows }, () => randChoice(PALETTE)));
+}
+
+// ──────────────────── Intersection cache (for tooltip) ─────────────────
+function updateIntersections() {
+  intersections.length = 0;
+  horizontalLines.forEach(hLine => {
+    verticalLines.forEach(vLine => {
+      let x = vLine.x,
+          y = hLine.y;
+      if (activeLine) {
+        if (activeLine.orientation === 'vertical' && vLine.id === activeLine.id) x = getCurveX(y);
+        if (activeLine.orientation === 'horizontal' && hLine.id === activeLine.id) y = getCurveY(x);
+      }
+      intersections.push({ x, y });
+    });
+  });
+}
+
+// ───────────────────── Active line helpers (curvature) ─────────────────
+function getCurveX(y) { // for vertical active line
+  return activeLine.x + Math.sin(y * CURVE_FREQ) * CURVE_AMP;
+}
+function getCurveY(x) { // for horizontal active line
+  return activeLine.y + Math.sin(x * CURVE_FREQ) * CURVE_AMP;
+}
+
+// ───────────────────────── Drawing utilities ───────────────────────────
+function drawActiveLinePath() {
+  const { width: w, height: h } = canvas.getBoundingClientRect();
+  ctx.lineWidth = activeLine.thickness;
+  ctx.strokeStyle = '#000';
+  ctx.beginPath();
+  if (activeLine.orientation === 'vertical') {
+    ctx.moveTo(getCurveX(0), 0);
+    for (let y = 0; y <= h; y += 20) ctx.lineTo(getCurveX(y), y);
+  } else {
+    ctx.moveTo(0, getCurveY(0));
+    for (let x = 0; x <= w; x += 20) ctx.lineTo(x, getCurveY(x));
+  }
+  ctx.stroke();
+}
+
+function drawFrame() {
+  const { width: w, height: h } = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, w, h);
+
+  const vSegs = verticalLines.slice().sort((a, b) => a.sortIndex - b.sortIndex);
+  const hSegs = horizontalLines.slice().sort((a, b) => a.sortIndex - b.sortIndex);
+
+  let leftIdx, rightIdx, aboveIdx, belowIdx;
+  if (activeLine.orientation === 'vertical') {
+    const idx = activeLine.sortIndex;
+    leftIdx = idx - 1;
+    rightIdx = idx;
+  } else {
+    const idx = activeLine.sortIndex;
+    aboveIdx = idx - 1;
+    belowIdx = idx;
+  }
+
+  const STEPS = 6; // polygon sampling resolution per edge
+  for (let i = 0; i < vSegs.length - 1; i++) {
+    for (let j = 0; j < hSegs.length - 1; j++) {
+      ctx.fillStyle = cellColors[i][j];
+
+      if (activeLine.orientation === 'vertical' && (i === leftIdx || i === rightIdx)) {
+        const y0 = hSegs[j].y, y1 = hSegs[j + 1].y;
+        const fixedX = i === leftIdx ? vSegs[i].x : vSegs[i + 1].x;
+        ctx.beginPath();
+        if (i === leftIdx) {
+          ctx.moveTo(fixedX, y0);
+          for (let s = 0; s <= STEPS; s++) {
+            const t = s / STEPS;
+            const yy = y0 + (y1 - y0) * t;
+            ctx.lineTo(getCurveX(yy), yy);
+          }
+          ctx.lineTo(fixedX, y1);
+        } else {
+          ctx.moveTo(getCurveX(y0), y0);
+          for (let s = 0; s <= STEPS; s++) {
+            const t = s / STEPS;
+            const yy = y0 + (y1 - y0) * t;
+            ctx.lineTo(fixedX, yy);
+          }
+          ctx.lineTo(getCurveX(y1), y1);
+        }
+        ctx.closePath();
+        ctx.fill();
+      } else if (activeLine.orientation === 'horizontal' && (j === aboveIdx || j === belowIdx)) {
+        const x0 = vSegs[i].x, x1 = vSegs[i + 1].x;
+        const fixedY = j === aboveIdx ? hSegs[j].y : hSegs[j + 1].y;
+        ctx.beginPath();
+        if (j === aboveIdx) {
+          ctx.moveTo(x0, fixedY);
+          for (let s = 0; s <= STEPS; s++) {
+            const t = s / STEPS;
+            const xx = x0 + (x1 - x0) * t;
+            ctx.lineTo(xx, getCurveY(xx));
+          }
+          ctx.lineTo(x1, fixedY);
+        } else {
+          ctx.moveTo(x0, getCurveY(x0));
+          for (let s = 0; s <= STEPS; s++) {
+            const t = s / STEPS;
+            const xx = x0 + (x1 - x0) * t;
+            ctx.lineTo(xx, fixedY);
+          }
+          ctx.lineTo(x1, getCurveY(x1));
+        }
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        ctx.fillRect(vSegs[i].x, hSegs[j].y, vSegs[i + 1].x - vSegs[i].x, hSegs[j + 1].y - hSegs[j].y);
+      }
+    }
+  }
+
+  // draw non‑active grid lines
+  vSegs.forEach(line => {
+    if (line.id !== activeLine.id) {
+      ctx.lineWidth = line.thickness;
+      ctx.strokeStyle = '#000';
+      ctx.beginPath();
+      ctx.moveTo(line.x, 0);
+      ctx.lineTo(line.x, h);
+      ctx.stroke();
+    }
+  });
+  hSegs.forEach(line => {
+    if (line.id !== activeLine.id) {
+      ctx.lineWidth = line.thickness;
+      ctx.strokeStyle = '#000';
+      ctx.beginPath();
+      ctx.moveTo(0, line.y);
+      ctx.lineTo(w, line.y);
+      ctx.stroke();
+    }
+  });
+  // finally the curved active line
+  drawActiveLinePath();
+}
+
+// ────────────────────────── Active line motion ─────────────────────────
+function updateActiveLine() {
+  if (!activeLine) return;
+  const { width: w, height: h } = canvas.getBoundingClientRect();
+  if (activeLine.orientation === 'vertical') {
+    activeLine.x += SPEED * activeLine.dir;
+    const d = activeLine.x - activeLine.original;
+    if (Math.abs(d) >= AMP || activeLine.x <= 0 || activeLine.x >= w) activeLine.dir *= -1;
+  } else {
+    activeLine.y += SPEED * activeLine.dir;
+    const d = activeLine.y - activeLine.original;
+    if (Math.abs(d) >= AMP || activeLine.y <= 0 || activeLine.y >= h) activeLine.dir *= -1;
+  }
+}
+
+// ───────────────────────────── Main loop ───────────────────────────────
+function loop() {
+  updateActiveLine();
+  drawFrame();
+  updateIntersections();
+  requestAnimationFrame(loop);
+}
+
+// ───────────── Initial grid draw‑in animation ───────────────
+function animateInitialDraw(done) {
+  let t = 0;
+  const FRAMES = 60;
+  const { width: w, height: h } = canvas.getBoundingClientRect();
+  (function step() {
+    ctx.clearRect(0, 0, w, h);
+    verticalLines.forEach(vLine => {
+      ctx.lineWidth = vLine.thickness;
+      ctx.strokeStyle = '#000';
+      ctx.beginPath();
+      ctx.moveTo(vLine.x, 0);
+      ctx.lineTo(vLine.x, h * t);
+      ctx.stroke();
+    });
+    horizontalLines.forEach(hLine => {
+      ctx.lineWidth = hLine.thickness;
+      ctx.strokeStyle = '#000';
+      ctx.beginPath();
+      ctx.moveTo(0, hLine.y);
+      ctx.lineTo(w * t, hLine.y);
+      ctx.stroke();
+    });
+    if (t < 1) {
+      t += 1 / FRAMES;
+      requestAnimationFrame(step);
+    } else {
+      done();
+    }
+  })();
+}
+
+function selectActiveLine() {
+  activeLine = randChoice(innerLines);
+}
+
+// ───────────────────────────── Tooltip ────────────────────────────────
+function handleMove(e) {
+  const { clientX: x, clientY: y } = e;
+  const hit = intersections.find(pt => Math.hypot(pt.x - x, pt.y - y) <= HIT_RADIUS);
+  if (hit) {
+    tooltip.textContent = `${Math.round(hit.x)}, ${Math.round(hit.y)}`;
+    tooltip.style.left = `${x}px`;
+    tooltip.style.top = `${y}px`;
+    tooltip.style.opacity = 1;
+  } else {
+    tooltip.style.opacity = 0;
+  }
+}
+canvas.addEventListener('mousemove', handleMove);
+canvas.addEventListener('mouseleave', () => (tooltip.style.opacity = 0));
+
+// ───────────────────────── Bootstrap / Reset ───────────────────────────
+function init() {
+  resizeCanvas();
+  generateGrid();
+  animateInitialDraw(() => {
+    selectActiveLine();
+    loop();
+  });
+}
+window.addEventListener('resize', init);
+init();
+</script>
+</body>
+</html>
