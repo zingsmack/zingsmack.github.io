@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Grid Line Animation</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+    }
+
+    canvas {
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Canvas where lines are drawn -->
+  <canvas id="gridCanvas" width="800" height="600"></canvas>
+
+  <script>
+    // Utility helpers ---------------------------------------------------------
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randFloat = (min, max) => Math.random() * (max - min) + min;
+
+    // Canvas setup ------------------------------------------------------------
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    const { width, height } = canvas;
+    const MARGIN = 40; // interior padding so lines never touch canvas edges
+
+    // Generate random vertical & horizontal lines ----------------------------
+    const V_COUNT = randInt(3, 9);
+    const H_COUNT = randInt(3, 9);
+
+    // Distribute positions so spacing feels random but balanced --------------
+    function generateUniquePositions(count, min, max) {
+      const segment = (max - min) / (count + 1);
+      const pos = [];
+      for (let i = 0; i < count; i++) {
+        pos.push(randFloat(min + i * segment, min + (i + 1) * segment));
+      }
+      return pos.sort((a, b) => a - b);
+    }
+
+    const verticalLines = generateUniquePositions(V_COUNT, MARGIN, width - MARGIN).map(x => ({
+      x,
+      thickness: randInt(2, 10)
+    }));
+
+    const horizontalLines = generateUniquePositions(H_COUNT, MARGIN, height - MARGIN).map(y => ({
+      y,
+      thickness: randInt(2, 10)
+    }));
+
+    // Calculate intersection coordinates -------------------------------------
+    const intersections = [];
+    verticalLines.forEach(v => {
+      horizontalLines.forEach(h => {
+        intersections.push({ x: v.x, y: h.y });
+      });
+    });
+
+    // Expose intersections to global scope for dev tools ---------------------
+    window.intersections = intersections;
+
+    // Draw & animate ----------------------------------------------------------
+    let progress = 0;           // 0 → 1
+    const FRAMES = 60;          // animation frames
+
+    function drawFrame() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw vertical lines (top → down)
+      verticalLines.forEach(({ x, thickness }) => {
+        ctx.lineWidth = thickness;
+        ctx.beginPath();
+        ctx.moveTo(x, MARGIN);
+        ctx.lineTo(x, MARGIN + (height - 2 * MARGIN) * progress);
+        ctx.stroke();
+      });
+
+      // Draw horizontal lines (left → right)
+      horizontalLines.forEach(({ y, thickness }) => {
+        ctx.lineWidth = thickness;
+        ctx.beginPath();
+        ctx.moveTo(MARGIN, y);
+        ctx.lineTo(MARGIN + (width - 2 * MARGIN) * progress, y);
+        ctx.stroke();
+      });
+
+      if (progress < 1) {
+        progress += 1 / FRAMES;
+        requestAnimationFrame(drawFrame);
+      } else {
+        // Log the intersection array once the animation completes
+        console.table(intersections);
+      }
+    }
+
+    drawFrame();
+  </script>
+</body>
+</html>
