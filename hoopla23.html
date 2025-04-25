@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Grid Kaleidoscope – Gap‑Free Extreme Swirls</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#fff}
+    canvas{display:block}
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+// ---------- Utilities ----------
+const rand=(a,b)=>Math.random()*(b-a)+a;
+const randInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const choice=a=>a[randInt(0,a.length-1)];
+
+// ---------- Globals ----------
+const PALS=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d',{alpha:true});
+let V=[],H=[],COLS=[];let t=0;
+
+// ---------- Tunables ----------
+const AMP_CURVE=120;    // bend depth
+const ARCH=3;           // quadratic exaggeration
+const SAMPLE=120;       // points per edge – high for zero gaps
+const SPEED_T=0.008;    // time increment
+const DRIFT_RANGE=300;  // ± px drift
+
+// ---------- Resize ----------
+function fit(){const d=window.devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(d,0,0,d,0,0);ctx.lineJoin='round';}
+
+// ---------- Grid Build ----------
+function createLines(){
+  const w=canvas.width/ (window.devicePixelRatio||1),h=canvas.height/ (window.devicePixelRatio||1);
+  const vPos=[0,...Array.from({length:randInt(3,9)},()=>rand(0,w)),w].sort((a,b)=>a-b);
+  const hPos=[0,...Array.from({length:randInt(3,9)},()=>rand(0,h)),h].sort((a,b)=>a-b);
+  V=vPos.map((p,i)=>({p,orig:p,idx:i,bound:i===0||i===vPos.length-1,dir:Math.random()<0.5?1:-1,speed:rand(1,3),anc:[]}));
+  H=hPos.map((p,i)=>({p,orig:p,idx:i,bound:i===0||i===hPos.length-1,dir:Math.random()<0.5?1:-1,speed:rand(1,3),anc:[]}));
+  V.forEach(v=>v.anc=H.map(()=>({ph:rand(0,Math.PI*2),spd:rand(0.02,0.15),str:rand(0.4,1.8)*(Math.random()<0.5?-1:1)})));
+  H.forEach(h=>h.anc=V.map(()=>({ph:rand(0,Math.PI*2),spd:rand(0.02,0.15),str:rand(0.4,1.8)*(Math.random()<0.5?-1:1)})));
+  COLS=Array.from({length:V.length-1},()=>Array.from({length:H.length-1},()=>choice(PALS)));
+}
+
+// ---------- Math helpers ----------
+const quad=(p0,c,p1,u)=>(1-u)*(1-u)*p0+2*(1-u)*u*c+u*u*p1;
+const offset=(l,i)=>Math.sin(t*l.anc[i].spd+l.anc[i].ph)*l.anc[i].str*AMP_CURVE;
+function xAt(i,y){const v=V[i];if(v.bound)return v.p;const seg=H.findIndex((h,k)=>y>=h.p&&y<=H[k+1].p);const u=(y-H[seg].p)/(H[seg+1].p-H[seg].p);const o0=offset(v,seg),o1=offset(v,seg+1);return quad(v.p+o0,v.p+((o0+o1)/2)*ARCH,v.p+o1,u);} 
+function yAt(j,x){const h=H[j];if(h.bound)return h.p;const seg=V.findIndex((v,k)=>x>=v.p&&x<=V[k+1].p);const u=(x-V[seg].p)/(V[seg+1].p-V[seg].p);const o0=offset(h,seg),o1=offset(h,seg+1);return quad(h.p+o0,h.p+((o0+o1)/2)*ARCH,h.p+o1,u);} 
+function vertEdge(i,y0,y1){return Array.from({length:SAMPLE+1},(_,k)=>{const y=y0+(y1-y0)*k/SAMPLE;return[xAt(i,y),y];});}
+function horzEdge(j,x0,x1){return Array.from({length:SAMPLE+1},(_,k)=>{const x=x0+(x1-x0)*k/SAMPLE;return[x,yAt(j,x)];});}
+
+// ---------- Render ----------
+function render(){ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<V.length-1;i++){
+    for(let j=0;j<H.length-1;j++){
+      const yT=H[j].p,yB=H[j+1].p;
+      const left = vertEdge(i,yT,yB);
+      const right= vertEdge(i+1,yB,yT).slice(1);
+      const bottom=horzEdge(j+1,left[left.length-1][0],xAt(i+1,yB)).slice(1);
+      const top=   horzEdge(j,xAt(i+1,yT),xAt(i,yT)).slice(1);
+      const poly=[...left,...bottom,...right,...top];
+      ctx.beginPath();ctx.moveTo(poly[0][0],poly[0][1]);poly.slice(1).forEach(([x,y])=>ctx.lineTo(x,y));ctx.closePath();
+      ctx.fillStyle=COLS[i][j];ctx.fill();
+    }
+  }
+  // Over‑draw outline same fill to seal any AA seam
+  ctx.lineWidth=3;
+  for(let i=0;i<V.length-1;i++){
+    for(let j=0;j<H.length-1;j++){
+      const yT=H[j].p,yB=H[j+1].p;
+      const left = vertEdge(i,yT,yB);
+      const poly=[...left,...horzEdge(j+1,left[left.length-1][0],xAt(i+1,yB)).slice(1),...vertEdge(i+1,yB,yT).slice(1),...horzEdge(j,xAt(i+1,yT),xAt(i,yT)).slice(1)];
+      ctx.beginPath();ctx.moveTo(poly[0][0],poly[0][1]);poly.slice(1).forEach(([x,y])=>ctx.lineTo(x,y));ctx.closePath();
+      ctx.strokeStyle=COLS[i][j];ctx.stroke();
+    }
+  }
+}
+
+// ---------- Motion ----------
+function drift(){const w=canvas.width/(window.devicePixelRatio||1),h=canvas.height/(window.devicePixelRatio||1);
+  V.forEach(v=>{if(v.bound)return;v.p+=v.speed*v.dir;const d=v.p-v.orig;if(Math.abs(d)>=RANGE||v.p<=0||v.p>=w)v.dir*=-1;});
+  H.forEach(l=>{if(l.bound)return;l.p+=l.speed*l.dir;const d=l.p-l.orig;if(Math.abs(d)>=RANGE||l.p<=0||l.p>=h)l.dir*=-1;});
+}
+
+// ---------- Main loop ----------
+function loop(){t+=SPEED_T;drift();render();requestAnimationFrame(loop);} 
+
+// ---------- Init ----------
+function init(){fit();createLines();loop();}
+window.addEventListener('resize',()=>{fit();});
+init();
+</script>
+</body>
+</html>
