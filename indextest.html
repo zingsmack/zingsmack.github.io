@@ -198,7 +198,25 @@
 
   function onWindowResize(){ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); composer.setSize(window.innerWidth,window.innerHeight); }
 
-  function animate(){ requestAnimationFrame(animate); const t=clock.getElapsedTime(); [bloomGroup,mushroomGroup,budGroup].forEach(g=>g.children.forEach(o=>{ if(o.material.uniforms)o.material.uniforms.uTime.value=t;})); bubbleGroup.children.forEach(b=>{ b.position.add(b.userData.vel); if(b.position.y>60)b.position.y=-60; }); composer.render(); }
+  function animate(){
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+    // Update shader time uniform for all shader-material meshes
+    [bloomGroup, mushroomGroup, budGroup].forEach(group => {
+      group.traverse(obj => {
+        if(obj.isMesh && obj.material && obj.material.uniforms && obj.material.uniforms.uTime){
+          obj.material.uniforms.uTime.value = t;
+        }
+      });
+    });
+    // Update bubble positions
+    bubbleGroup.children.forEach(b => {
+      b.position.add(b.userData.vel);
+      if(b.position.y > 60) b.position.y = -60;
+    });
+    // Render via composer
+    composer.render();
+  }
 </script>
 </body>
 </html>
