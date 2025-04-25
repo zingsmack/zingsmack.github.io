@@ -49,6 +49,9 @@
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
   import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
   import { LuminosityHighPassShader } from 'three/examples/jsm/shaders/LuminosityHighPassShader.js';
+  // Prepend common chunk so luminance() is defined for high-pass shader
+  LuminosityHighPassShader.fragmentShader = `#include <common>
+` + LuminosityHighPassShader.fragmentShader;
 
   let scene, camera, renderer, clock, composer;
   const bloomGroup = new THREE.Group();
