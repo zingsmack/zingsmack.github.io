@@ -131,4 +131,25 @@ body {
   height: 100%;
   fill: #000;  /* Update color if desired */
 }
+/* Centered overlay text */
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  text-align: top;
+}
+
+.overlay h1 {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 4rem;
+  color: #fff;
+  text-shadow:
+    2px 2px 0 rgba(0,0,0,0.7),
+   -2px -2px 0 rgba(0,0,0,0.7),
+    2px -2px 0 rgba(0,0,0,0.7),
+   -2px 2px 0 rgba(0,0,0,0.7);
+  white-space: pre-wrap;
+}
 
