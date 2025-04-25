@@ -29,7 +29,7 @@ const AMP_CURVE=120;    // bend depth
 const ARCH=3;           // quadratic exaggeration
 const SAMPLE=120;       // points per edge – high for zero gaps
 const SPEED_T=0.008;    // time increment
-const DRIFT_RANGE=300;  // ± px drift
+const DRIFT_DRIFT_RANGE=300;  // ± px drift
 
 // ---------- Resize ----------
 function fit(){const d=window.devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(d,0,0,d,0,0);ctx.lineJoin='round';}
@@ -83,8 +83,8 @@ function render(){ctx.clearRect(0,0,canvas.width,canvas.height);
 
 // ---------- Motion ----------
 function drift(){const w=canvas.width/(window.devicePixelRatio||1),h=canvas.height/(window.devicePixelRatio||1);
-  V.forEach(v=>{if(v.bound)return;v.p+=v.speed*v.dir;const d=v.p-v.orig;if(Math.abs(d)>=RANGE||v.p<=0||v.p>=w)v.dir*=-1;});
-  H.forEach(l=>{if(l.bound)return;l.p+=l.speed*l.dir;const d=l.p-l.orig;if(Math.abs(d)>=RANGE||l.p<=0||l.p>=h)l.dir*=-1;});
+  V.forEach(v=>{if(v.bound)return;v.p+=v.speed*v.dir;const d=v.p-v.orig;if(Math.abs(d)>=DRIFT_RANGE||v.p<=0||v.p>=w)v.dir*=-1;});
+  H.forEach(l=>{if(l.bound)return;l.p+=l.speed*l.dir;const d=l.p-l.orig;if(Math.abs(d)>=DRIFT_RANGE||l.p<=0||l.p>=h)l.dir*=-1;});
 }
 
 // ---------- Main loop ----------
