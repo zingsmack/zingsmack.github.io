@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 7) Initial render
   // Set initial opacity to 1 for the first image
-  imgEl.style.transition = 'opacity 0.4s ease';
+  imgEl.style.transition = 'opacity 3s ease';
   imgEl.onload = () => { imgEl.style.opacity = '1'; };
   render();
 });
