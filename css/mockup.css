@@ -1,5 +1,8 @@
 /* File: css/mockup.css */
 
+/* Import a stylish serif for captions */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
 /* Reset & base */
 * {
   margin: 0;
@@ -71,8 +74,8 @@ body {
 .viewer {
   position: relative;
   z-index: 2;
-  width: 85vw;
-  max-width: 900px;
+  width: 90vw;        /* slightly wider */
+  max-width: 1000px;  /* allow larger frames */
   margin: 0 auto;
   top: 50%;
   transform: translateY(-50%);
@@ -81,21 +84,20 @@ body {
   overflow: visible;
 }
 
-/* “Canvas” border wrapper */
+/* Portrait image + 3D “canvas” border */
 .viewer img {
-  /* 3D border effect */
   background: #f9f9f9;
   padding: 1rem;
-  box-shadow: 
-    0 2px 8px rgba(0,0,0,0.1),
-    inset 0 0 0 1px rgba(0,0,0,0.05);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
   transform: perspective(600px) rotateX(1deg);
 
-  /* sizing */
+  /* sizing adjustments */
   width: auto;
   height: auto;
-  max-width: 100%;
-  max-height: 80vh;
+  max-width: 90vw;    /* increase max width */
+  max-height: 85vh;   /* bump max height */
 
   display: block;
   margin: 0 auto;
@@ -103,11 +105,14 @@ body {
   opacity: 1;
 }
 
-/* Caption */
+/* Caption with custom serif */
 .viewer figcaption {
   margin-top: 1rem;
-  color: #555;
-  font-size: 1rem;
+  color: #333;
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: 1.125rem;
+  font-style: italic;
 }
 
 /* Navigation buttons */
