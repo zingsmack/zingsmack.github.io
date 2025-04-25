@@ -3,7 +3,8 @@
 import * as THREE        from './libs/three.module.js';
 // Removed DeviceOrientationControls import since it's deprecated
 import gsap             from './libs/gsap.min.js';
-import { ScrollTrigger } from './plugins/ScrollTrigger.min.js';
+import './plugins/ScrollTrigger.min.js';
+const ScrollTrigger = gsap.ScrollTrigger;
 
 gsap.registerPlugin(ScrollTrigger);
 
