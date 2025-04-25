@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Three.js Organic Bloom Animation</title>
   <!-- Import map for local modules -->
   <script type="importmap">
@@ -19,111 +19,47 @@
 </head>
 <body>
 <script type="module">
-  <style>
-    body { margin: 0; overflow: hidden; background: #000; }
-    canvas { display: block; }
-  </style>
-</head>
-<body>
-<script type="module">
   import * as THREE from 'three';
   import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
   import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
   import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
-  // Shader sources
-  const vertexShader = `
-    uniform float uTime;
-    varying vec2 vUv;
-    varying float vUvY;
-    float random(vec2 st) { return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453123); }
-    float noise(vec2 st) {
-      vec2 i = floor(st);
-      vec2 f = fract(st);
-      vec2 u = f * f * (3.0 - 2.0 * f);
-      return mix(
-        mix(random(i), random(i + vec2(1.0, 0.0)), u.x),
-        mix(random(i + vec2(0.0, 1.0)), random(i + vec2(1.0)), u.x),
-        u.y
-      );
-    }
-    void main() {
-      vUv = uv;
-      vUvY = uv.y;
-      float n = noise(uv * 5.0 + uTime * 0.3);
-      vec3 displaced = position + normal * n * 2.5;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
-    }
-  `;
-
-  const fragmentShader = `
-    uniform float uTime;
-    uniform vec3 colorA;
-    uniform vec3 colorB;
-    uniform vec3 colorC;
-    varying vec2 vUv;
-    varying float vUvY;
-    float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
-    void main() {
-      vec3 col = (vUvY < 0.5)
-        ? mix(colorA, colorB, vUvY * 2.0)
-        : mix(colorB, colorC, (vUvY - 0.5) * 2.0);
-      float glow = 1.0 - length((vUv - 0.5) * 2.0);
-      col += glow * 0.2;
-      float n = rand(vUv * uTime);
-      col = mix(col, col * (0.8 + 0.2 * n), 0.5);
-      gl_FragColor = vec4(col, 1.0);
-    }
-  `;
-
-  function createShaderMaterial(colors) {
-    // Cartoon PBR using MeshToonMaterial with flat shading
-    const textureLoader = new THREE.TextureLoader();
-    const gradientMap = textureLoader.load('/js/libs/textures/gradients/toon1.jpg');
-    gradientMap.minFilter = THREE.NearestFilter;
-    gradientMap.magFilter = THREE.NearestFilter;
-    gradientMap.generateMipmaps = false;
-    return new THREE.MeshToonMaterial({
-      color: colors[1],
-      gradientMap: gradientMap,
-      flatShading: true,
-      skinning: false,
-      morphTargets: false
-    });
-  }
-  }
-
+  // Shared variables
   let scene, camera, renderer, clock, composer;
   const bloomGroup = new THREE.Group();
   const bubbleGroup = new THREE.Group();
   const mushroomGroup = new THREE.Group();
   const budGroup = new THREE.Group();
-
+  
   const palettes = [
-    [new THREE.Color(0xffc0cb), new THREE.Color(0x98ff98), new THREE.Color(0xffe4b5)],
-    [new THREE.Color(0xff69b4), new THREE.Color(0x7fffd4), new THREE.Color(0xffd700)],
-    [new THREE.Color(0xda70d6), new THREE.Color(0x00ced1), new THREE.Color(0xff8c00)]
-  ];
+    [0xffc0cb, 0x98ff98, 0xffe4b5],
+    [0xff69b4, 0x7fffd4, 0xffd700],
+    [0xda70d6, 0x00ced1, 0xff8c00]
+  ].map(arr => arr.map(c => new THREE.Color(c)));
 
   init();
   animate();
 
   function init() {
+    // Scene & Camera
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
     camera.position.set(0, 0, 100);
 
+    // Renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
-    renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('resize', () => onWindowResize());
 
+    // Clock
     clock = new THREE.Clock();
 
+    // Composer & Bloom
     composer = new EffectComposer(renderer);
     composer.setPixelRatio(renderer.getPixelRatio());
     composer.setSize(window.innerWidth, window.innerHeight);
@@ -134,11 +70,12 @@
     );
     composer.addPass(bloomPass);
 
+    // Environment
     const pmremGen = new THREE.PMREMGenerator(renderer);
     pmremGen.compileEquirectangularShader();
     new RGBELoader()
       .setDataType(THREE.FloatType)
-      .load('/js/env/env.hdr', hdr => {
+      .load('/js/env/env.hdr', (hdr) => {
         const envMap = pmremGen.fromEquirectangular(hdr).texture;
         scene.environment = envMap;
         scene.background = envMap;
@@ -146,97 +83,109 @@
         pmremGen.dispose();
       });
 
+    // Add groups
     scene.add(bloomGroup, bubbleGroup, mushroomGroup, budGroup);
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
-    dirLight.position.set(1, 1, 1);
-    scene.add(dirLight);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.7);
+    dir.position.set(1,1,1);
+    scene.add(dir);
 
-    // Generate elements
-    for (let i = 0; i < 6; i++) {
-      const bloom = createBloom(20 + Math.random() * 30, 6 + Math.floor(Math.random() * 4), palettes[i % palettes.length]);
-      // Increased spread
-      bloom.position.set(
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 100,
-        (Math.random() - 0.5) * 50
-      );
+    // Create elements spread out
+    for(let i=0; i<6; i++){
+      const bloom = createBloom(20 + Math.random()*30, 5 + Math.floor(Math.random()*5), palettes[i%palettes.length]);
+      bloom.position.set((Math.random()-0.5)*150, (Math.random()-0.5)*100, (Math.random()-0.5)*50);
       bloomGroup.add(bloom);
     }
+    const bubbleGeo = new THREE.SphereGeometry(1.5,16,12);
+    const bubbleMat = new THREE.MeshToonMaterial({ color: 0xffffff, flatShading: true });
+    for(let i=0;i<50;i++){
+      const b = new THREE.Mesh(bubbleGeo, bubbleMat);
+      b.position.set((Math.random()-0.5)*150,(Math.random()-0.5)*100,(Math.random()-0.5)*50);
+      b.userData.vel = new THREE.Vector3(0,0.1+Math.random()*0.2,0);
+      bubbleGroup.add(b);
     }
-
-    const bubbleGeo = new THREE.SphereGeometry(1.5, 16, 12);
-    const bubbleMat = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0.5, emissive: 0xffffff, emissiveIntensity: 0.6 });
-    for (let i = 0; i < 50; i++) {
-      const bubble = new THREE.Mesh(bubbleGeo, bubbleMat);
-      bubble.position.set(
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 100,
-        (Math.random() - 0.5) * 50
+    for(let i=0;i<20;i++){
+      const h = 5+Math.random()*10;
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.5,1,h,12),
+        new THREE.MeshToonMaterial({ color: 0xdeb887, flatShading: true })
       );
-      bubble.userData.vel = new THREE.Vector3(0, 0.1 + Math.random() * 0.2, 0);
-      bubbleGroup.add(bubble);
-    }
-
-    for (let i = 0; i < 20; i++) {
-      const stemH = 5 + Math.random() * 10;
-      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1, stemH, 12), new THREE.MeshStandardMaterial({ color: 0xdeb887, roughness: 0.8 }));
-      stem.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
+      stem.position.set((Math.random()-0.5)*150,(Math.random()-0.5)*100,(Math.random()-0.5)*50);
       mushroomGroup.add(stem);
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(1.5 + Math.random() * 3, 16, 12, 0, Math.PI), createShaderMaterial(palettes[i % palettes.length]));
-      cap.position.copy(stem.position).add(new THREE.Vector3(0, stemH / 2, 0));
+      const cap = new THREE.Mesh(
+        new THREE.SphereGeometry(1.5+Math.random()*3,16,12,0,Math.PI),
+        new THREE.MeshToonMaterial({ color: palettes[i%palettes.length][1], flatShading:true })
+      );
+      cap.position.copy(stem.position).add(new THREE.Vector3(0,h/2,0));
       cap.rotation.x = Math.PI;
       mushroomGroup.add(cap);
     }
-
-    const budGeo = new THREE.SphereGeometry(2, 12, 8);
-    for (let i = 0; i < 100; i++) {
-      const bud = new THREE.Mesh(budGeo, createShaderMaterial(palettes[i % palettes.length]));
-      bud.position.set((Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 20);
+    const budGeo = new THREE.SphereGeometry(2,12,8);
+    for(let i=0;i<100;i++){
+      const mat = new THREE.MeshToonMaterial({ color: palettes[i%palettes.length][1], flatShading:true });
+      const bud = new THREE.Mesh(budGeo, mat);
+      bud.position.set((Math.random()-0.5)*150,(Math.random()-0.5)*100,(Math.random()-0.5)*50);
       budGroup.add(bud);
     }
   }
 
-  function createBloom(radius, petals, palette) {
-    const group = new THREE.Group();
-    petals = Math.max(3, petals);
-    for (let i = 0; i < petals; i++) {
-      const mesh = new THREE.Mesh(createPetalGeometry(radius), createShaderMaterial(palette));
-      mesh.rotation.z = (i / petals) * Math.PI * 2;
-      group.add(mesh);
+  function createBloom(radius, petals, colors){
+    const grp = new THREE.Group();
+    for(let i=0;i<petals;i++){
+      const geom = new THREE.LatheGeometry(
+        Array.from({length:17},(_,j)=>{
+          const t=j/16;
+          return new THREE.Vector2(Math.sin(t*Math.PI)*radius, Math.cos(t*Math.PI)*radius*0.1);
+        }),12
+      );
+      const mat = new THREE.MeshToonMaterial({ color: colors[1], flatShading:true });
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.rotation.z = (i/petals)*Math.PI*2;
+      grp.add(mesh);
     }
-    return group;
+    return grp;
   }
 
-  function createPetalGeometry(radius) {
-    const points = [];
-    for (let i = 0; i <= 16; i++) {
-      const t = i / 16;
-      points.push(new THREE.Vector2(Math.sin(t * Math.PI) * radius, Math.cos(t * Math.PI) * radius * 0.1));
-    }
-    return new THREE.LatheGeometry(points, 12);
-  }
-
-  function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  function onWindowResize(){
+    camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  function animate() {
+  function animate(){
     requestAnimationFrame(animate);
+    const delta = clock.getDelta();
     const t = clock.getElapsedTime();
-    [bloomGroup, mushroomGroup, budGroup].forEach(group => {
-      group.traverse(obj => {
-        if (obj.isMesh && obj.material.uniforms) obj.material.uniforms.uTime.value = t;
-      });
-    });
+
+    // Animate bubbles rising
     bubbleGroup.children.forEach(b => {
       b.position.add(b.userData.vel);
       if (b.position.y > 60) b.position.y = -60;
     });
+
+    // Rotate entire bloom group slowly
+    bloomGroup.rotation.y += delta * 0.1;
+    // Subtle pulse on each bloom radius
+    bloomGroup.children.forEach((bloom, i) => {
+      const scale = 1 + 0.05 * Math.sin(t * 2 + i);
+      bloom.scale.set(scale, scale, scale);
+    });
+
+    // Sway mushrooms
+    mushroomGroup.children.forEach((stem, i) => {
+      stem.rotation.z = 0.1 * Math.sin(t + i);
+    });
+
+    // Bud pulsation
+    budGroup.children.forEach((bud, i) => {
+      const s = 1 + 0.1 * Math.sin(t * 3 + i);
+      bud.scale.set(s, s, s);
+    });
+
+    // Render scene with bloom
     composer.render();
+  }
   }
 </script>
 </body>
