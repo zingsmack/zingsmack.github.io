@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Random Grid – Extreme Curves, No Gaps</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#fff; }
+    canvas     { display:block; cursor:crosshair; }
+  </style>
+</head>
+<body>
+<canvas id="gridCanvas"></canvas>
+<script>
+// ===== Helper shortcuts =====
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rf=(a,b)=>Math.random()*(b-a)+a;
+const pick=a=>a[ri(0,a.length-1)];
+
+// ===== Globals =====
+const canvas=document.getElementById('gridCanvas');
+const ctx=canvas.getContext('2d');
+const PALETTE=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+let vertical=[],horizontal=[],cellColors=[];
+let t=0;
+
+// Tunables for extreme motion & quality
+const CURVE_AMP = 80;       // deeper bends
+const ARCH      = 2.5;      // exaggerated arch control
+const EXTRA     = 96;       // heavy sampling per edge
+const DRAW_STEP = 1;        // line resolution
+const RANGE     = 220;      // drift range
+
+// ===== Canvas fit =====
+function fit(){const{innerWidth:w,innerHeight:h}=window;const d=window.devicePixelRatio||1;canvas.width=w*d;canvas.height=h*d;canvas.style.width=`${w}px`;canvas.style.height=`${h}px`;ctx.setTransform(d,0,0,d,0,0);} 
+
+// ===== Build grid =====
+function distrib(n,a,b){const g=(b-a)/(n+1);return Array.from({length:n},(_,i)=>rf(a+i*g,a+(i+1)*g)).sort((x,y)=>x-y);} 
+function make(orient,pos,bound=false){return{orient,pos,orig:pos,bound,dir:Math.random()<0.5?1:-1,speed:rf(0.4,1.6),thick:bound?4:ri(2,10),anchors:[]};}
+function build(){const{width:w,height:h}=canvas.getBoundingClientRect();
+  vertical=[make('v',0,true),...distrib(ri(3,9),0,w).map(x=>make('v',x)),make('v',w,true)];
+  horizontal=[make('h',0,true),...distrib(ri(3,9),0,h).map(y=>make('h',y)),make('h',h,true)];
+  vertical.forEach((v,i)=>{v.idx=i;v.anchors=Array.from({length:horizontal.length},()=>({phase:rf(0,Math.PI*2),speed:rf(0.05,0.35),str:rf(0.4,1.5)*(Math.random()<0.5?-1:1)}));});
+  horizontal.forEach((h,i)=>{h.idx=i;h.anchors=Array.from({length:vertical.length},()=>({phase:rf(0,Math.PI*2),speed:rf(0.05,0.35),str:rf(0.4,1.5)*(Math.random()<0.5?-1:1)}));});
+  cellColors=Array.from({length:vertical.length-1},()=>Array.from({length:horizontal.length-1},()=>pick(PALETTE)));
+}
+
+// ===== Curve math =====
+function off(line,i){const a=line.anchors[i];return Math.sin(t*a.speed+a.phase)*a.str*CURVE_AMP;}
+const quad=(p0,c,p1,u)=>(1-u)*(1-u)*p0+2*(1-u)*u*c+u*u*p1;
+function xAt(i,y){const v=vertical[i];if(v.bound) return v.pos;const seg=horizontal.findIndex((h,k)=>y>=h.pos&&y<=horizontal[k+1]?.pos);if(seg<0) return v.pos;const y0=horizontal[seg].pos,y1=horizontal[seg+1].pos,u=(y-y0)/(y1-y0);const o0=off(v,seg),o1=off(v,seg+1);return quad(v.pos+o0,v.pos+((o0+o1)/2)*ARCH,v.pos+o1,u);} 
+function yAt(j,x){const h=horizontal[j];if(h.bound) return h.pos;const seg=vertical.findIndex((v,k)=>x>=v.pos&&x<=vertical[k+1]?.pos);if(seg<0) return h.pos;const x0=vertical[seg].pos,x1=vertical[seg+1].pos,u=(x-x0)/(x1-x0);const o0=off(h,seg),o1=off(h,seg+1);return quad(h.pos+o0,h.pos+((o0+o1)/2)*ARCH,h.pos+o1,u);} 
+function sampleVert(i,y0,y1){const pts=[];for(let k=0;k<=EXTRA;k++){const y=y0+(y1-y0)*k/EXTRA;pts.push([xAt(i,y),y]);}return pts;}
+function sampleHorz(j,x0,x1){const pts=[];for(let k=0;k<=EXTRA;k++){const x=x0+(x1-x0)*k/EXTRA;pts.push([x,yAt(j,x)]);}return pts;}
+
+// ===== Draw =====
+ctx.lineJoin='round'; // smooth stroke joins
+function draw(){const{width:w,height:h}=canvas.getBoundingClientRect();ctx.clearRect(0,0,w,h);
+  for(let i=0;i<vertical.length-1;i++){
+    for(let j=0;j<horizontal.length-1;j++){
+      const yT=horizontal[j].pos, yB=horizontal[j+1].pos;
+      const left = sampleVert(i,yT,yB);
+      const bottom = sampleHorz(j+1,left[left.length-1][0],xAt(i+1,yB));
+      const right = sampleVert(i+1,yB,yT);
+      const top = sampleHorz(j,xAt(i+1,yT),xAt(i,yT));
+      const poly=[...left,...bottom.slice(1),...right.slice(1),...top.slice(1)];
+      ctx.beginPath(); ctx.moveTo(poly[0][0],poly[0][1]); poly.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath();
+      ctx.fillStyle=cellColors[i][j]; ctx.fill();
+    }
+  }
+  // optional outline mask in same colour to seal sub‑pixel seams
+  ctx.lineWidth=2;
+  for(let i=0;i<vertical.length-1;i++){
+    for(let j=0;j<horizontal.length-1;j++){
+      const yT=horizontal[j].pos, yB=horizontal[j+1].pos;
+      const left = sampleVert(i,yT,yB);
+      const bottom = sampleHorz(j+1,left[left.length-1][0],xAt(i+1,yB));
+      const right = sampleVert(i+1,yB,yT);
+      const top = sampleHorz(j,xAt(i+1,yT),xAt(i,yT));
+      const poly=[...left,...bottom.slice(1),...right.slice(1),...top.slice(1)];
+      ctx.beginPath(); ctx.moveTo(poly[0][0],poly[0][1]); poly.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath();
+      ctx.strokeStyle=cellColors[i][j]; ctx.stroke();
+    }
+  }
+  // lines hidden (transparent)
+}
+
+// ===== Motion & loop =====
+function drift(){const{width:w,height:h}=canvas.getBoundingClientRect();vertical.forEach(v=>{if(v.bound)return;v.pos+=v.speed*v.dir;const d=v.pos-v.orig;if(Math.abs(d)>=RANGE||v.pos<=0||v.pos>=w)v.dir*=-1;});horizontal.forEach(l=>{if(l.bound)return;l.pos+=l.speed*l.dir;const d=l.pos-l.orig;if(Math.abs(d)>=RANGE||l.pos<=0||l.pos>=h)l.dir*=-1;});}
+function loop(){t+=0.006; drift(); draw(); requestAnimationFrame(loop);} 
+
+// ===== Init =====
+function init(){fit();build();loop();}
+window.addEventListener('resize',init);
+init();
+</script>
+</body>
+</html>
