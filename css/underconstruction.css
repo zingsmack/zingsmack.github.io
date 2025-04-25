@@ -42,7 +42,7 @@ body, html {
   white-space: pre-wrap;
 }
 /* Home button styling */
-.home-button {
+.home-button-new {
   position: absolute;
   top: 1rem;
   left: 1rem;
@@ -55,11 +55,11 @@ body, html {
   align-items: center;
   justify-content: center;
 }
-.home-button:hover {
+.home-button-new:hover {
   opacity: 1;
 }
-.home-button svg {
+.home-button-new svg {
   width: 100%;
   height: 100%;
-  fill: #fff;  /* or change to match your design */
+  fill: #000;  /* Update color if desired */
 }
