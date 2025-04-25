@@ -47,6 +47,10 @@
   import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
   import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+  import { LuminosityHighPassShader } from 'three/examples/jsm/shaders/LuminosityHighPassShader.js';
+  // Ensure luminance() function is available for high-pass filter
+  LuminosityHighPassShader.fragmentShader = `#include <common>
+` + LuminosityHighPassShader.fragmentShader;
   
   
 
