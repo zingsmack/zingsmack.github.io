@@ -1,7 +1,7 @@
 /* File: css/mockup.css */
 
-/* Import Open Sans for captions */
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap');
+/* Import Montserrat for captions */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
 
 /* Reset & base */
 * {
@@ -74,8 +74,8 @@ body {
 .viewer {
   position: relative;
   z-index: 2;
-  width: 90vw;        /* slightly wider */
-  max-width: 1000px;  /* allow larger frames */
+  width: 90vw;
+  max-width: 1000px;
   margin: 0 auto;
   top: 50%;
   transform: translateY(-50%);
@@ -96,8 +96,8 @@ body {
   /* sizing adjustments */
   width: auto;
   height: auto;
-  max-width: 90vw;    /* increase max width */
-  max-height: 85vh;   /* bump max height */
+  max-width: 90vw;
+  max-height: 85vh;
 
   display: block;
   margin: 0 auto;
@@ -105,18 +105,14 @@ body {
   opacity: 1;
 }
 
-/* Caption with Open Sans, bold, white with black edge */
+/* Caption with Montserrat, bold, black */
 .viewer figcaption {
   margin-top: 1rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   font-size: 1.2rem;
-  color: #fff;
-  text-shadow:
-    -1px -1px 0 #000,
-     1px -1px 0 #000,
-    -1px  1px 0 #000,
-     1px  1px 0 #000;
+  color: #000;
+  text-shadow: none;
 }
 
 /* Navigation buttons */
