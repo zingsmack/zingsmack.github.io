@@ -3,9 +3,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   // 1) Define your video reel (replace VIDEO_IDx with real IDs)
   const reel = [
-    { embedId: 'VIDEO_ID1', caption: 'Video 1: [Your title here]' },
-    { embedId: 'VIDEO_ID2', caption: 'Video 2: [Your title here]' },
-    { embedId: 'VIDEO_ID3', caption: 'Video 3: [Your title here]' },
+    { embedId: 'https://www.youtube.com/watch?v=NbRVYsKg2AQ&pp=ygUIbGVvbmxpaWk%3D', caption: 'Video 1: [Your title here]' },
+    { embedId: 'https://www.youtube.com/watch?v=3o9SVt5B4M0&pp=ygUIbGVvbmxpaWk%3D', caption: 'Video 2: [Your title here]' },
+    { embedId: 'https://www.youtube.com/watch?v=Mcr2E1LSJUI&pp=ygUIbGVvbmxpaWk%3D', caption: 'Video 3: [Your title here]' },
     // add more videos as needed
   ];
   let current = 0;
