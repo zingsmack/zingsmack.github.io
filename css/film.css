@@ -1,0 +1,144 @@
+/* File: css/film.css */
+
+/* Import Montserrat for captions */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+/* Reset & base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #fff;
+  font-family: Arial, sans-serif;
+  position: relative;
+}
+
+/* Blob animations */
+.blob-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+.blob {
+  position: absolute;
+  width: 40vw;
+  height: 40vw;
+  background: rgba(200, 230, 255, 0.5);
+  border-radius: 45% 55% 60% 40% / 40% 60% 55% 45%;
+  animation: morph 8s ease-in-out infinite;
+}
+.blob1 {
+  top: -10%;
+  left: -10%;
+  background: rgba(255, 200, 200, 0.5);
+  animation-duration: 10s;
+}
+.blob2 {
+  top: 20%;
+  right: -15%;
+  background: rgba(200, 255, 200, 0.5);
+  animation-duration: 12s;
+}
+.blob3 {
+  bottom: -10%;
+  left: 25%;
+  background: rgba(200, 200, 255, 0.5);
+  animation-duration: 9s;
+}
+
+@keyframes morph {
+  0% {
+    border-radius: 40% 60% 55% 45% / 45% 55% 60% 40%;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    border-radius: 55% 40% 45% 60% / 60% 45% 55% 40%;
+    transform: scale(1.1) rotate(20deg);
+  }
+  100% {
+    border-radius: 40% 60% 55% 45% / 45% 55% 60% 40%;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Viewer container */
+.viewer {
+  position: relative;
+  z-index: 2;
+  width: 90vw;
+  max-width: 1000px;
+  margin: 0 auto;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  max-height: 90vh;
+  overflow: visible;
+}
+
+/* Video container */
+.video-container {
+  background: #f9f9f9;
+  padding: 1rem;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transform: perspective(600px) rotateX(1deg);
+
+  width: auto;
+  height: auto;
+  max-width: 90vw;
+  max-height: 85vh;
+
+  margin: 0 auto;
+  position: relative;
+  transition: opacity 0.4s ease;
+  opacity: 1;
+  z-index: 2;
+}
+.video-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Caption styling */
+.viewer figcaption {
+  margin-top: 1rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #000;
+}
+
+/* Navigation buttons */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  font-size: 2rem;
+  padding: 0.6rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 3;
+}
+.nav:hover {
+  background: rgba(255, 255, 255, 1);
+}
+.prev {
+  left: 1rem;
+}
+.next {
+  right: 1rem;
+}
