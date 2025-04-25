@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Grid – Hover + Active Line Motion</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #fff; }
+    canvas      { display: block; cursor: crosshair; }
+    #tooltip    { position: fixed; padding: 4px 6px; font-family: monospace; font-size: 12px;
+                  background: rgba(0,0,0,.85); color:#fff; border-radius:4px; pointer-events:none;
+                  transform: translate(-50%,-150%); opacity:0; transition:opacity .12s; z-index:1000; }
+  </style>
+</head>
+<body>
+  <canvas id="gridCanvas"></canvas>
+  <div id="tooltip"></div>
+
+  <script>
+    // ──────────────────────────── Helpers ────────────────────────────
+    const randInt   = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randFloat = (min, max) => Math.random() * (max - min) + min;
+
+    // ──────────────────────────── Globals ────────────────────────────
+    const canvas  = document.getElementById('gridCanvas');
+    const tooltip = document.getElementById('tooltip');
+    const ctx     = canvas.getContext('2d');
+
+    let verticalLines = [], horizontalLines = [], allLines = [];
+    let intersections = [];
+    let activeLine    = null;
+
+    const HIT_RADIUS = 10;     // pixels for hover detection
+    const AMP        = 40;     // px movement range for active line
+    const SPEED      = 1.5;    // px per frame speed
+
+    // ──────────────────────────── Canvas setup ────────────────────────────
+    function resizeCanvas() {
+      const { innerWidth: w, innerHeight: h } = window;
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = w * ratio;
+      canvas.height = h * ratio;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0); // reset transform
+    }
+
+    // ──────────────────────────── Grid Generation ────────────────────────────
+    function generatePositions(count, min, max) {
+      const segment = (max - min) / (count + 1);
+      return Array.from({ length: count }, (_, i) =>
+        randFloat(min + i * segment, min + (i + 1) * segment)
+      ).sort((a, b) => a - b);
+    }
+
+    function generateGrid() {
+      const { width: w, height: h } = canvas.getBoundingClientRect();
+      const vCount = randInt(3, 9);
+      const hCount = randInt(3, 9);
+
+      const vPos   = generatePositions(vCount, 0, w);
+      const hPos   = generatePositions(hCount, 0, h);
+
+      verticalLines = vPos.map((x, i) => ({
+        id: `V${i}`,
+        orientation: 'vertical',
+        x,
+        original: x,
+        thickness: randInt(2, 10),
+        dir: 1
+      }));
+
+      horizontalLines = hPos.map((y, i) => ({
+        id: `H${i}`,
+        orientation: 'horizontal',
+        y,
+        original: y,
+        thickness: randInt(2, 10),
+        dir: 1
+      }));
+
+      allLines = [...verticalLines, ...horizontalLines];
+      updateIntersections();
+    }
+
+    // ──────────────────────────── Intersections ────────────────────────────
+    function updateIntersections() {
+      const arr = [];
+      verticalLines.forEach(v => {
+        horizontalLines.forEach(h => arr.push({ x: v.x, y: h.y }));
+      });
+      intersections = arr;
+    }
+
+    // ──────────────────────────── Drawing ────────────────────────────
+    function drawStaticGrid() {
+      const { width: w, height: h } = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, w, h);
+
+      verticalLines.forEach(v => {
+        ctx.lineWidth = v.thickness;
+        ctx.beginPath();
+        ctx.moveTo(v.x, 0);
+        ctx.lineTo(v.x, h);
+        ctx.stroke();
+      });
+
+      horizontalLines.forEach(hLine => {
+        ctx.lineWidth = hLine.thickness;
+        ctx.beginPath();
+        ctx.moveTo(0, hLine.y);
+        ctx.lineTo(w, hLine.y);
+        ctx.stroke();
+      });
+    }
+
+    // Initial draw‑in animation (0 → 1) ------------------------------------
+    function animateInitialDraw(callback) {
+      let progress = 0;
+      const FRAMES = 60;
+      const { width: w, height: h } = canvas.getBoundingClientRect();
+
+      (function step() {
+        ctx.clearRect(0, 0, w, h);
+        verticalLines.forEach(v => {
+          ctx.lineWidth = v.thickness;
+          ctx.beginPath();
+          ctx.moveTo(v.x, 0);
+          ctx.lineTo(v.x, h * progress);
+          ctx.stroke();
+        });
+        horizontalLines.forEach(hLine => {
+          ctx.lineWidth = hLine.thickness;
+          ctx.beginPath();
+          ctx.moveTo(0, hLine.y);
+          ctx.lineTo(w * progress, hLine.y);
+          ctx.stroke();
+        });
+
+        if (progress < 1) {
+          progress += 1 / FRAMES;
+          requestAnimationFrame(step);
+        } else {
+          callback();
+        }
+      })();
+    }
+
+    // ──────────────────────────── Active Line Motion ────────────────────────────
+    function selectActiveLine() {
+      activeLine = allLines[randInt(0, allLines.length - 1)];
+    }
+
+    function animateActiveLine() {
+      const { width: w, height: h } = canvas.getBoundingClientRect();
+
+      // Update position for the chosen line only
+      if (activeLine.orientation === 'vertical') {
+        activeLine.x += SPEED * activeLine.dir;
+        const delta = activeLine.x - activeLine.original;
+        if (Math.abs(delta) >= AMP || activeLine.x <= 0 || activeLine.x >= w) {
+          activeLine.dir *= -1;
+        }
+      } else {
+        activeLine.y += SPEED * activeLine.dir;
+        const delta = activeLine.y - activeLine.original;
+        if (Math.abs(delta) >= AMP || activeLine.y <= 0 || activeLine.y >= h) {
+          activeLine.dir *= -1;
+        }
+      }
+
+      drawStaticGrid();
+      updateIntersections();
+      requestAnimationFrame(animateActiveLine);
+    }
+
+    // ──────────────────────────── Hover Tooltip ────────────────────────────
+    function handleMove(e) {
+      const { clientX: x, clientY: y } = e;
+
+      const target = intersections.find(pt =>
+        Math.hypot(pt.x - x, pt.y - y) <= HIT_RADIUS
+      );
+
+      if (target) {
+        tooltip.textContent = `${Math.round(target.x)}, ${Math.round(target.y)}`;
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+        tooltip.style.opacity = 1;
+      } else {
+        tooltip.style.opacity = 0;
+      }
+    }
+
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseleave', () => (tooltip.style.opacity = 0));
+
+    // ──────────────────────────── Bootstrap / Re‑init ────────────────────────────
+    function init() {
+      resizeCanvas();
+      generateGrid();
+
+      // Draw‑in animation, then choose & animate an active line
+      animateInitialDraw(() => {
+        selectActiveLine();
+        animateActiveLine();
+      });
+    }
+
+    window.addEventListener('resize', () => init());
+    init();
+  </script>
+</body>
+</html>
