@@ -1,31 +1,38 @@
 // File: js/gallery.js
-
 document.addEventListener('DOMContentLoaded', () => {
-  // 1) Define your image reel
   const reel = [
-    { src: 'images/one.jpg',   caption: 'Portrait 1: [Your caption here]' },
-    { src: 'images/two.jpg',   caption: 'Portrait 2: [Your caption here]' },
-    { src: 'images/three.jpg', caption: 'Portrait 3: [Your caption here]' },
-    { src: 'images/four.jpg', caption: 'Portrait 4: [Your caption here]' },
+    { src: 'images/one.jpg',   caption: 'Portrait 1: [Your caption]' },
+    { src: 'images/two.jpg',   caption: 'Portrait 2: [Your caption]' },
+    { src: 'images/three.jpg', caption: 'Portrait 3: [Your caption]' },
+    { src: 'images/four.jpg',  caption: 'Portrait 4: [Your caption]' },
   ];
-
   let current = 0;
 
-  // 2) Grab DOM elements
   const imgEl     = document.querySelector('.viewer img');
   const captionEl = document.querySelector('.viewer figcaption');
   const prevBtn   = document.querySelector('.viewer .prev');
   const nextBtn   = document.querySelector('.viewer .next');
 
-  // 3) Render function to update image and caption
   function render() {
     const { src, caption } = reel[current];
-    imgEl.src = src;
-    imgEl.alt = caption;
-    captionEl.textContent = caption;
+
+    // fade-out
+    imgEl.style.opacity = '0';
+
+    // once faded, swap image & caption
+    imgEl.addEventListener('transitionend', function swap() {
+      imgEl.removeEventListener('transitionend', swap);
+      imgEl.src = src;
+      imgEl.alt = caption;
+      captionEl.textContent = caption;
+
+      // on load, fade in
+      imgEl.onload = () => {
+        imgEl.style.opacity = '1';
+      };
+    });
   }
 
-  // 4) Navigation handlers
   prevBtn.addEventListener('click', () => {
     current = (current - 1 + reel.length) % reel.length;
     render();
@@ -35,25 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   });
 
-  // 5) Keyboard support ← / →
   window.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft')  prevBtn.click();
+    if (e.key === 'ArrowLeft') prevBtn.click();
     if (e.key === 'ArrowRight') nextBtn.click();
   });
 
-  // 6) Touch‐swipe support
-  let startX = null;
-  imgEl.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-  });
-  imgEl.addEventListener('touchend', e => {
-    if (startX === null) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (dx > 50)      prevBtn.click();
-    else if (dx < -50) nextBtn.click();
-    startX = null;
-  });
-
-  // 7) Initial render
+  // initial display
   render();
 });
