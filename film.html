@@ -1,1 +1,37 @@
+<!-- File: film.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Film Gallery</title>
+  <link rel="stylesheet" href="css/mockup.css">
+</head>
+<body>
+  <!-- Ambient blob background (reuse from photography) -->
+  <div class="blob-container">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+  </div>
 
+  <!-- Video viewer -->
+  <figure class="viewer">
+    <button class="nav prev" aria-label="Previous video">&#10094;</button>
+    <div class="video-container">
+      <iframe id="video-frame"
+              width="100%" height="100%"
+              src="https://www.youtube.com/embed/VIDEO_ID1?rel=0&showinfo=0"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen>
+      </iframe>
+    </div>
+    <button class="nav next" aria-label="Next video">&#10095;</button>
+    <figcaption id="video-caption">Title for Video 1</figcaption>
+  </figure>
+
+  <!-- Film gallery script -->
+  <script src="js/film.js" defer></script>
+</body>
+</html>
