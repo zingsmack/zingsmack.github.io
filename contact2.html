@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact – Hyperspace Tunnel</title>
+  <!-- Bold geometric font + vibrant accent -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset & full-screen canvas/frame */
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow-x: hidden; overflow-y: auto;
+      background: #000;
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
+    }
+    /* Background iframe remains fixed, full-screen */
+    #bgFrame {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+      pointer-events: none;
+      z-index: -1;
+    }
+    /* Scroll container for sections */
+    .scroll-container {
+      position: relative;
+      z-index: 1;
+      scroll-behavior: smooth;
+    }
+    /* Each full-screen section */
+    .section {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(100px);
+      transition: opacity 1s ease-out, transform 1s ease-out;
+      padding: 1rem;
+    }
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Titles with gradient & dynamic skew */
+    .section .title {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(45deg, #FF0066, #FFD100, #43EAD4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transform: skew(-4deg) rotate(-1deg);
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    .section .text {
+      font-size: 1.25rem;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+    .section a {
+      color: #fff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed hyperspace background from external page -->
+  <iframe id="bgFrame" src="background5.html"></iframe>
+
+  <div class="scroll-container">
+    <div class="section" id="intro">
+      <h1 class="title">Contact<br>in Hyperspace</h1>
+      <p class="text">Welcome traveler. As you glide through this tunnel, you’ll discover ways to reach out across the void.</p>
+    </div>
+
+    <div class="section" id="email">
+      <h2 class="title">Email</h2>
+      <p class="text"><a href="mailto:you@domain.com">you@domain.com</a></p>
+    </div>
+
+    <div class="section" id="social">
+      <h2 class="title">Social Network</h2>
+      <p class="text">
+        <a href="https://twitter.com/yourhandle" target="_blank">Twitter</a> •
+        <a href="https://instagram.com/yourhandle" target="_blank">Instagram</a> •
+        <a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+      </p>
+    </div>
+
+    <div class="section" id="phone">
+      <h2 class="title">Communicator ID</h2>
+      <p class="text"><a href="tel:+1234567890">+1 (234) 567‑890</a></p>
+    </div>
+
+    <div class="section" id="end">
+      <h2 class="title">End of Tunnel</h2>
+      <p class="text">Thanks for journeying with me. I’ll be awaiting your signal.</p>
+    </div>
+  </div>
+
+  <script>
+    // Intersection Observer for scroll-triggered reveal
+    const sections = document.querySelectorAll('.section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.3 });
+    sections.forEach(sec => observer.observe(sec));
+  </script>
+</body>
+</html>
