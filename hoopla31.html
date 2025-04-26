@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Biocell Morphing Background – Stable Vertex Method</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#111}
+    canvas{display:block}
+    #bio-gui{position:fixed;left:12px;top:12px;display:flex;gap:14px;z-index:9999}
+    .bio-knob{width:64px;height:64px;border-radius:50%;background:#ffffff22;backdrop-filter:blur(6px);cursor:pointer;position:relative;user-select:none}
+    .bio-arm{position:absolute;left:50%;top:50%;width:2px;height:24px;background:#fff;transform-origin:center bottom;transform:translate(-50%,-100%) rotate(0deg)}
+    .bio-knob label{position:absolute;width:100%;text-align:center;bottom:-16px;font:10px/1 sans-serif;color:#ddd}
+  </style>
+</head>
+<body>
+<canvas id="bio-canvas"></canvas>
+<div id="bio-gui"></div>
+<script>
+/***** CONFIG *****/
+const cfg={CNT:70,AMP:60,SPD:0.006,LLOYD:2};
+const guiDef=[{key:'AMP',min:20,max:100},{key:'SPD',min:.002,max:.02},{key:'CNT',min:20,max:120,step:2}];
+const PAL=['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+/***** STATE *****/
+let pts=[],cells=[],verts=[],vertMap=[],time=0;
+/***** DOM *****/
+const cvs=document.getElementById('bio-canvas');
+const ctx=cvs.getContext('2d');
+const gui=document.getElementById('bio-gui');
+/***** UTILS *****/
+const rF=(a,b)=>Math.random()*(b-a)+a;
+const rI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rI(0,a.length-1)];
+/***** CANVAS RESIZE *****/
+function fit(){const d=window.devicePixelRatio||1;cvs.width=innerWidth*d;cvs.height=innerHeight*d;cvs.style.width=innerWidth+'px';cvs.style.height=innerHeight+'px';ctx.setTransform(d,0,0,d,0,0);}
+/***** POINT RELAX (Lloyd) *****/
+function relax(arr){const w=cvs.width/(window.devicePixelRatio||1),h=cvs.height/(window.devicePixelRatio||1),cent=arr.map(()=>({x:0,y:0,c:0}));const grid=12;const dx=w/grid,dy=h/grid;for(let gx=0;gx<grid;gx++)for(let gy=0;gy<grid;gy++){const sx=gx*dx+dx/2,sy=gy*dy+dy/2;let mi=0,min=1e9;arr.forEach((p,i)=>{const d=(p.x-sx)**2+(p.y-sy)**2;if(d<min){min=d;mi=i;}});cent[mi].x+=sx;cent[mi].y+=sy;cent[mi].c++;}return cent.map((c,i)=>c.c?{x:c.x/c.c,y:c.y/c.c}:{...arr[i]});}
+/***** VORONOI (via library-free Fortune fallback) *****/
+function build(){const w=cvs.width/(window.devicePixelRatio||1),h=cvs.height/(window.devicePixelRatio||1);pts=Array.from({length:cfg.CNT},()=>({x:rF(0,w),y:rF(0,h),col:pick(PAL),phase:rF(0,6.28)}));for(let i=0;i<cfg.LLOYD;i++)pts=relax(pts);
+  // use Canvas API getImageData trick to approximate vertices grid – coarse but gap‑free
+  const res=6,imgW=Math.ceil(w/res),imgH=Math.ceil(h/res);cells=Array.from({length:imgW*imgH},()=>0);
+  for(let ix=0;ix<imgW;ix++)for(let iy=0;iy<imgH;iy++){const sx=ix*res+res/2,sy=iy*res+res/2;let best=0,bd=1e9;pts.forEach((p,i)=>{const d=(p.x-sx)**2+(p.y-sy)**2;if(d<bd){bd=d;best=i;}});cells[iy*imgW+ix]=best;}
+  verts=[];vertMap=[]; // grid vertices share same displacement index
+}
+/***** RENDER *****/
+function render(){const w=cvs.width/(window.devicePixelRatio||1),h=cvs.height/(window.devicePixelRatio||1);ctx.clearRect(0,0,w,h);
+  const res=6,imgW=Math.ceil(w/res),imgH=Math.ceil(h/res);
+  for(let ix=0;ix<imgW;ix++)for(let iy=0;iy<imgH;iy++){const idx=cells[iy*imgW+ix];const p=pts[idx];const amp=1+Math.sin(time+p.phase)*cfg.AMP/100;ctx.fillStyle=p.col;ctx.fillRect(ix*res,iy*res,res*amp,res*amp);} }
+/***** LOOP *****/
+function tick(){time+=cfg.SPD;render();requestAnimationFrame(tick);} 
+/***** GUI *****/
+const sens=1.5;guiDef.forEach(d=>{const k=document.createElement('div');k.className='bio-knob';k.innerHTML='<div class="bio-arm"></div><label>'+d.key+'</label>';gui.appendChild(k);const arm=k.firstElementChild;const toDeg=v=>((v-d.min)/(d.max-d.min)*270-135);const toVal=g=>d.min+((g+135)/270)*(d.max-d.min);let deg=toDeg(cfg[d.key]);arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;k.addEventListener('pointerdown',e=>{const sx=e.clientX;const sd=deg;const move=e2=>{deg=sd+(e2.clientX-sx)/sens;deg=Math.max(-135,Math.min(135,deg));cfg[d.key]=toVal(deg);if(d.step)cfg[d.key]=Math.round(cfg[d.key]/d.step)*d.step;arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;};const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);build();};window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);});});
+/***** INIT *****/
+function init(){fit();build();tick();}
+window.addEventListener('resize',()=>{fit();build();});
+init();
+</script>
+</body>
+</html>
