@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact – Hyperspace Tunnel</title>
+  <style>
+    /* Reset & full-screen */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%; height: 100%;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+    }
+    /* Full-screen three.js canvas */
+    #webgl {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: block;
+      z-index: -1;
+    }
+    /* Scroll container spans multiple viewports */
+    #scroll-container {
+      position: relative;
+      width: 100%;
+    }
+    /* Each section: full viewport, centered content */
+    .section {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+      overflow: hidden;
+    }
+    /* Foreground info panel */
+    .info {
+      background: rgba(0,0,0,0.7);
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 600px;
+      text-align: center;
+      transform: translateZ(100px);
+      opacity: 0;
+      transition: transform 1s ease-out, opacity 1s ease-out;
+    }
+    .info.visible {
+      transform: translateZ(0);
+      opacity: 1;
+    }
+    .info h2 {
+      margin: 0 0 1rem;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+    .info p, .info a {
+      font-size: 1.2rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .info a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <!-- three.js background canvas -->
+  <canvas id="webgl"></canvas>
+
+  <!-- Page content sections -->
+  <div id="scroll-container">
+    <div class="section" id="intro">
+      <div class="info">
+        <h2>Contact in Hyperspace</h2>
+        <p>Scroll to navigate the tunnel to my contact points.</p>
+      </div>
+    </div>
+    <div class="section" id="email">
+      <div class="info">
+        <h2>Email</h2>
+        <p><a href="mailto:you@domain.com">you@domain.com</a></p>
+      </div>
+    </div>
+    <div class="section" id="social">
+      <div class="info">
+        <h2>Social</h2>
+        <p>
+          <a href="https://twitter.com/yourhandle" target="_blank">Twitter</a> •
+          <a href="https://instagram.com/yourhandle" target="_blank">Instagram</a> •
+          <a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+        </p>
+      </div>
+    </div>
+    <div class="section" id="phone">
+      <div class="info">
+        <h2>Phone</h2>
+        <p><a href="tel:+1234567890">+1 (234) 567-890</a></p>
+      </div>
+    </div>
+    <div class="section" id="end">
+      <div class="info">
+        <h2>End of Tunnel</h2>
+        <p>Thanks for journeying—reach out anytime.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- three.js modules loaded from js/libs -->
+  <script type="module">
+    import * as THREE from './js/libs/three.module.js';
+
+    // Scene, camera, renderer
+    const canvas = document.getElementById('webgl');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.z = 0; // ensure camera starts at origin
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // Attach canvas size and scroll height on resize
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.style.height = `${window.innerHeight * 5}px`;
+    }
+    window.addEventListener('resize', onResize);
+    onResize();
+
+    // Starfield (points)
+    const starCount = 20000;
+    const positions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      positions[i*3]     = (Math.random() - 0.5) * 200;
+      positions[i*3 + 1] = (Math.random() - 0.5) * 200;
+      positions[i*3 + 2] = -Math.random() * 2000;
+    }
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    // Handle scroll
+    let scrollY = window.scrollY;
+    window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+    // Section reveal observer
+    const infos = document.querySelectorAll('.info');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.4 });
+    infos.forEach(el => obs.observe(el));
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      camera.position.z = scrollY * 2;
+      stars.rotation.z += 0.0005;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
