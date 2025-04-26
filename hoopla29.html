@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Grid Kaleidoscope – GUI‑tuned Swirls (gap‑free)</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#fff}
+    canvas{display:block}
+    #zdf-GUI-overlay{position:fixed;left:10px;top:10px;display:flex;gap:14px;z-index:9999}
+    .zdf-knob{width:70px;height:70px;border-radius:50%;background:#e0e0e0bb;backdrop-filter:blur(4px);position:relative;cursor:pointer;user-select:none}
+    .zdf-arm{position:absolute;left:50%;top:50%;width:2px;height:28px;background:#111;transform-origin:center bottom;transform:translate(-50%,-100%) rotate(0deg);}
+    .zdf-knob label{position:absolute;width:100%;text-align:center;bottom:-18px;font:11px/1 sans-serif;color:#333}
+  </style>
+</head>
+<body>
+<canvas id="zdf-canvas"></canvas>
+<div id="zdf-GUI-overlay"></div>
+<script>
+/******** CONFIGURABLE PARAMS *********/
+const zdfParams={ AMP:120, ARCH:3, DENS:180, DRIFT:220, SPD:0.008 };
+
+/******** RUNTIME STATE *********/
+let vLines=[], hLines=[], cellCols=[], t=0;
+
+/******** CANVAS SETUP *********/
+const cvs=document.getElementById('zdf-canvas');
+const ctx=cvs.getContext('2d');
+const offCan=document.createElement('canvas');
+const offCtx=offCan.getContext('2d');
+ctx.imageSmoothingEnabled=false; offCtx.imageSmoothingEnabled=false;
+
+const gui=document.getElementById('zdf-GUI-overlay');
+const PAL=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+/******** UTILS *********/
+const rF=(a,b)=>Math.random()*(b-a)+a;
+const rI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rI(0,a.length-1)];
+const q=(p0,c,p1,u)=>(1-u)*(1-u)*p0+2*(1-u)*u*c+u*u*p1;
+
+/******** RESIZE *********/
+function fit(){const d=window.devicePixelRatio||1;cvs.width=innerWidth*d;cvs.height=innerHeight*d;cvs.style.width=innerWidth+'px';cvs.style.height=innerHeight+'px';ctx.setTransform(d,0,0,d,0,0);offCan.width=cvs.width;offCan.height=cvs.height;offCtx.setTransform(d,0,0,d,0,0);}
+
+/******** GRID *********/
+function buildGrid(){const w=cvs.width/(window.devicePixelRatio||1), h=cvs.height/(window.devicePixelRatio||1);
+  const vx=[0,...Array.from({length:rI(3,9)},()=>rF(0,w)),w].sort((a,b)=>a-b);
+  const hy=[0,...Array.from({length:rI(3,9)},()=>rF(0,h)),h].sort((a,b)=>a-b);
+  vLines=vx.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===vx.length-1,dir:Math.random()<.5?1:-1,spd:rF(.7,2.5),a:[]}));
+  hLines=hy.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===hy.length-1,dir:Math.random()<.5?1:-1,spd:rF(.7,2.5),a:[]}));
+  vLines.forEach(v=>v.a=hLines.map(()=>({ph:rF(0,6.28),spd:rF(.015,.08),str:rF(.4,2)*(Math.random()<.5?-1:1)})));
+  hLines.forEach(h=>h.a=vLines.map(()=>({ph:rF(0,6.28),spd:rF(.015,.08),str:rF(.4,2)*(Math.random()<.5?-1:1)})));
+  cellCols=Array.from({length:vLines.length-1},()=>Array.from({length:hLines.length-1},()=>pick(PAL)));
+}
+
+/******** CURVE MATH *********/
+function off(line,i){const a=line.a[i];return Math.sin(t*a.spd+a.ph)*a.str*zdfParams.AMP;}
+function X(i,y){const v=vLines[i];if(v.bound) return v.p;let s=hLines.findIndex((h,k)=>y>=h.p&&y<=hLines[k+1]?.p);if(s<0)s=hLines.length-2;const u=(y-hLines[s].p)/(hLines[s+1].p-hLines[s].p);const o0=off(v,s),o1=off(v,s+1);return q(v.p+o0, v.p+((o0+o1)/2)*zdfParams.ARCH, v.p+o1, u);} 
+function Y(j,x){const h=hLines[j];if(h.bound) return h.p;let s=vLines.findIndex((v,k)=>x>=v.p&&x<=vLines[k+1]?.p);if(s<0)s=vLines.length-2;const u=(x-vLines[s].p)/(vLines[s+1].p-vLines[s].p);const o0=off(h,s),o1=off(h,s+1);return q(h.p+o0, h.p+((o0+o1)/2)*zdfParams.ARCH, h.p+o1, u);} 
+const vEdge=(i,y0,y1)=>Array.from({length:zdfParams.DENS+1},(_,k)=>{const y=y0+(y1-y0)*k/zdfParams.DENS;return[X(i,y),y];});
+const hEdge=(j,x0,x1)=>Array.from({length:zdfParams.DENS+1},(_,k)=>{const x=x0+(x1-x0)*k/zdfParams.DENS;return[x,Y(j,x)];});
+
+/******** RENDER *********/
+function render(){const b=offCtx;b.clearRect(0,0,offCan.width,offCan.height);
+  for(let i=0;i<vLines.length-1;i++){
+    for(let j=0;j<hLines.length-1;j++){
+      const yT=hLines[j].p, yB=hLines[j+1].p;
+      const L=vEdge(i,yT,yB);
+      const R=vEdge(i+1,yB,yT).slice(1);
+      const B=hEdge(j+1,X(i+1,yB),X(i,yB)).reverse().slice(1);
+      const T=hEdge(j,X(i,yT),X(i+1,yT)).reverse().slice(1);
+      const poly=[...L,...B,...R,...T];
+      b.beginPath();b.moveTo(poly[0][0],poly[0][1]);poly.slice(1).forEach(p=>b.lineTo(...p));b.closePath();
+      b.fillStyle=cellCols[i][j];b.fill();
+    }
+  }
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  ctx.drawImage(offCan,0,0);
+}
+
+/******** MOTION *********/
+function drift(){vLines.forEach(v=>{if(v.bound)return;v.p+=v.spd*v.dir;if(Math.abs(v.p-v.orig)>=zdfParams.DRIFT)v.dir*=-1;});
+  hLines.forEach(h=>{if(h.bound)return;h.p+=h.spd*h.dir;if(Math.abs(h.p-h.orig)>=zdfParams.DRIFT)h.dir*=-1;});}
+function loop(){t+=zdfParams.SPD;drift();render();requestAnimationFrame(loop);} 
+
+/******** GUI *********/
+const defs=[{key:'AMP',min:20,max:200},{key:'ARCH',min:.5,max:5},{key:'DENS',min:30,max:240,step:6},{key:'DRIFT',min:50,max:350},{key:'SPD',min:.002,max:.03}];
+const SENS=1.5;
+defs.forEach(def=>{
+  const k=document.createElement('div');k.className='zdf-knob';k.innerHTML='<div class="zdf-arm"></div><label>'+def.key+'</label>';gui.appendChild(k);
+  const arm=k.firstElementChild;
+  const toDeg=v=>((v-def.min)/(def.max-def.min)*270-135);
+  const toVal=d=>def.min+((d+135)/270)*(def.max-def.min);
+  let deg=toDeg(zdfParams[def.key]);arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;
+  k.addEventListener('pointerdown',e=>{
+    const startX=e.clientX, startDeg=deg, startVal=zdfParams[def.key];
+    const move=e2=>{deg=startDeg+(e2.clientX-startX)/SENS;deg=Math.max(-135,Math.min(135,deg));zdfParams[def.key]=toVal(deg);if(def.step)zdfParams[def.key]=Math.round(zdfParams[def.key]/def.step)*def.step;arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;};
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);buildGrid();};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
+  });
+});
+
+/******** INIT *********/
+function init(){fit();buildGrid();loop();}
+window.addEventListener('resize',()=>{fit();buildGrid();});
+init();
+</script>
+</body>
+</html>
