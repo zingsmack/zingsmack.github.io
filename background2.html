@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Particle Network with Unique Triangle Pulses</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    #bg {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: #0a0a0a;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <script>
+    (function() {
+      const canvas = document.getElementById('bg');
+      const ctx = canvas.getContext('2d');
+      let width, height, particles;
+
+      // —— CONFIGURATION —— 
+      const config = {
+        particleCount: 100,
+        maxVelocity: 0.6,
+        connectionDistance: 140,
+        particleSize: 2.0,
+        triangleOpacityMin: 0.05,
+        triangleOpacityMax: 0.15
+      };
+
+      // Simple deterministic “hash” from three indices → 32-bit int
+      function triHash(i, j, k) {
+        // large primes, XOR mix
+        let h = i * 73856093 ^ j * 19349663 ^ k * 83492791;
+        return h >>> 0;
+      }
+      // Given tri-hash, derive hue, pulse speed, and phase offset
+      function getTriangleParams(i, j, k) {
+        const h = triHash(i,j,k);
+        const hue = h % 360;
+        // speed between 0.01 and 1.0 (cycles per second)
+        const speed = 0.01 + ((h >>> 8) % 1000) / 1000 * 0.99;
+        // offset so they don’t all pulse in sync
+        const phaseOffset = ((h >>> 16) % 360) * Math.PI / 180;
+        return { hue, speed, phaseOffset };
+      }
+
+      function resize() {
+        width  = canvas.width  = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < config.particleCount; i++) {
+          particles.push({
+            x:  Math.random() * width,
+            y:  Math.random() * height,
+            vx: (Math.random() - 0.5) * config.maxVelocity,
+            vy: (Math.random() - 0.5) * config.maxVelocity
+          });
+        }
+      }
+
+      function animate() {
+        const t = performance.now() / 1000;  // seconds
+        ctx.clearRect(0, 0, width, height);
+
+        // Move & bounce particles
+        for (let p of particles) {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > width)  p.vx *= -1;
+          if (p.y < 0 || p.y > height) p.vy *= -1;
+        }
+
+        // Fill triangles
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p1 = particles[i], p2 = particles[j];
+            const d12 = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+            if (d12 > config.connectionDistance) continue;
+
+            for (let k = j + 1; k < particles.length; k++) {
+              const p3 = particles[k];
+              const d13 = Math.hypot(p1.x - p3.x, p1.y - p3.y);
+              const d23 = Math.hypot(p2.x - p3.x, p2.y - p3.y);
+              if (d13 <= config.connectionDistance && d23 <= config.connectionDistance) {
+                // get this triangle's own color & speed
+                const { hue, speed, phaseOffset } = getTriangleParams(i,j,k);
+                // sin-pulse between min/max opacity
+                const base = Math.sin(t * speed * 2 * Math.PI + phaseOffset) * 0.5 + 0.5;
+                const alpha = config.triangleOpacityMin +
+                              (config.triangleOpacityMax - config.triangleOpacityMin) * base;
+
+                ctx.fillStyle = `hsla(${hue}, 70%, 50%, ${alpha.toFixed(3)})`;
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.lineTo(p3.x, p3.y);
+                ctx.closePath();
+                ctx.fill();
+              }
+            }
+          }
+        }
+
+        // Draw connecting lines
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p1 = particles[i], p2 = particles[j];
+            const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+            if (dist < config.connectionDistance) {
+              const lineAlpha = 1 - dist / config.connectionDistance;
+              // static hue for lines
+              ctx.strokeStyle = `hsla(200, 70%, 60%, ${lineAlpha.toFixed(3)})`;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Draw particles
+        for (let p of particles) {
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, config.particleSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      initParticles();
+      animate();
+    })();
+  </script>
+</body>
+</html>
