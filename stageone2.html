@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage One – Flashing Cube</title>
+  <style>
+    /* PAGE SETUP */
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden; background: #000;
+    }
+
+    /* OVERSIZED, CENTERED CANVAS */
+    canvas#bg {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: block;
+    }
+
+    /* CENTER SHAPE */
+    #center {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 80px; height: 80px;
+      transform: translate(-50%, -50%);
+      cursor: pointer; z-index: 2;
+      pointer-events: all;
+    }
+    #center svg {
+      width: 100%; height: 100%;
+    }
+
+    /* FLASHING CUBE ANIMATION */
+    @keyframes flash {
+      0%   { fill: red;   }
+      25%  { fill: green; }
+      50%  { fill: blue;  }
+      75%  { fill: white; }
+      100% { fill: red;   }
+    }
+    .cube {
+      /* override default white fill */
+      animation: flash 0.2s steps(4) infinite;
+      transition: opacity 0.3s ease;
+    }
+
+    /* STAR BEHAVIOUR */
+    .star {
+      fill: #fff;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #center:hover .cube { opacity: 0; }
+    #center:hover .star { opacity: 1; }
+    .pressed .star .tri1 { transform: translate(-20px, -20px); }
+    .pressed .star .tri2 { transform: translate(20px, 20px); }
+    .pressed .star polygon { transition: transform 0.3s ease; }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <div id="center">
+    <svg viewBox="0 0 100 100">
+      <!-- flashing cube -->
+      <rect class="cube" x="10" y="10" width="80" height="80" rx="8"></rect>
+      <!-- six-point star -->
+      <g class="star">
+        <polygon class="tri1" points="50,15 80,65 20,65"></polygon>
+        <polygon class="tri2" points="50,85 80,35 20,35"></polygon>
+      </g>
+    </svg>
+  </div>
+
+  <script>
+    // BACKGROUND CANVAS SETUP
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    function resize() {
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const diag = Math.ceil(Math.sqrt(vw*vw + vh*vh));
+      W = H = diag;
+      canvas.width  = W;
+      canvas.height = H;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // GRID + WAVE LINES
+    const baseHue = 200;
+    const colors  = [ baseHue, (baseHue+150)%360, (baseHue+210)%360 ];
+    const lineCount = 5, amp = 20, speed = 0.002;
+    const lines = [];
+    for (let i = 0; i <= lineCount; i++) {
+      const t = i/lineCount, p = Math.random()*Math.PI*2;
+      lines.push({type:'h', y:t, phase:p});
+      lines.push({type:'v', x:t, phase:p});
+    }
+    let angle = 0;
+    function draw(time) {
+      ctx.clearRect(0,0,W,H);
+      ctx.save();
+      ctx.translate(W/2, H/2);
+      angle += 0.0002 * time;
+      ctx.rotate(angle);
+      const s = Math.SQRT2;
+      ctx.scale(s,s);
+      ctx.translate(-W/2, -H/2);
+
+      // colored cells
+      const cw = W/lineCount, ch = H/lineCount;
+      for (let i=0; i<lineCount; i++) {
+        for (let j=0; j<lineCount; j++) {
+          ctx.fillStyle = `hsl(${colors[(i+j)%colors.length]},70%,60%)`;
+          ctx.fillRect(i*cw, j*ch, cw, ch);
+        }
+      }
+
+      // wavy overlay
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#000';
+      lines.filter(l=>l.type==='h').forEach(l=>{
+        ctx.beginPath();
+        const y0 = l.y * H;
+        for (let x=0; x<=W; x+=10) {
+          const y = y0 + Math.sin(x*0.02 + l.phase + time*speed) * amp;
+          x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      });
+      lines.filter(l=>l.type==='v').forEach(l=>{
+        ctx.beginPath();
+        const x0 = l.x * W;
+        for (let y=0; y<=H; y+=10) {
+          const x = x0 + Math.sin(y*0.02 + l.phase + time*speed) * amp;
+          y===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      });
+
+      ctx.restore();
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // INTERACTION: mousedown & navigation
+    const center = document.getElementById('center');
+    center.addEventListener('mousedown', ()=> center.classList.add('pressed'));
+    document.addEventListener('mouseup', ()=>{
+      if (center.classList.contains('pressed')) {
+        window.location.href = 'hi.html';
+      }
+    });
+  </script>
+</body>
+</html>
