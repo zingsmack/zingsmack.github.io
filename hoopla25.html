@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Grid Kaleidoscope – GUI‑tuned Swirls (namespace‑safe)</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#fff}
+    canvas{display:block}
+    #zdf-GUI-overlay{position:fixed;left:10px;top:10px;display:flex;gap:12px;z-index:9999}
+    .zdf-knob{width:70px;height:70px;border-radius:50%;background:#e0e0e0aa;backdrop-filter:blur(4px);position:relative;cursor:pointer;user-select:none}
+    .zdf-knob .zdf-arm{position:absolute;left:50%;top:50%;width:2px;height:28px;background:#111;transform-origin:bottom center}
+    .zdf-knob label{position:absolute;width:100%;text-align:center;bottom:-18px;font:11px/1 sans-serif;color:#333}
+  </style>
+</head>
+<body>
+<canvas id="zdf-canvas"></canvas>
+<div id="zdf-GUI-overlay"></div>
+<script>
+/***************************
+ *  ZDF NAMESPACE CONSTANTS *
+ ***************************/
+const zdfParams={ AMP:120, ARCH:3, DENS:120, DRIFT:220, SPD:0.008 };
+
+/**************  STATE  **************/
+let zdfVert=[], zdfHorz=[], zdfColors=[]; let zdfT=0;
+
+/**************  DOM  **************/
+const zdfCanvas=document.getElementById('zdf-canvas');
+const zdfCtx=zdfCanvas.getContext('2d');
+const zdfGUI=document.getElementById('zdf-GUI-overlay');
+
+const zdfPalette=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+/**************  UTILS  **************/
+const zdfRand =(a,b)=>Math.random()*(b-a)+a;
+const zdfRandI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const zdfChoice=a=>a[zdfRandI(0,a.length-1)];
+const zdfQuad =(p0,c,p1,u)=>(1-u)*(1-u)*p0+2*(1-u)*u*c+u*u*p1;
+
+/**************  CANVAS RESIZE  **************/
+function zdfFitCanvas(){const dpr=window.devicePixelRatio||1;zdfCanvas.width=innerWidth*dpr;zdfCanvas.height=innerHeight*dpr;zdfCanvas.style.width=innerWidth+'px';zdfCanvas.style.height=innerHeight+'px';zdfCtx.setTransform(dpr,0,0,dpr,0,0);zdfCtx.lineJoin='round';}
+
+/**************  GRID BUILD  **************/
+function zdfBuildGrid(){
+  const cvsW=zdfCanvas.width/(window.devicePixelRatio||1);
+  const cvsH=zdfCanvas.height/(window.devicePixelRatio||1);
+  const vPos=[0,...Array.from({length:zdfRandI(3,9)},()=>zdfRand(0,cvsW)),cvsW].sort((a,b)=>a-b);
+  const hPos=[0,...Array.from({length:zdfRandI(3,9)},()=>zdfRand(0,cvsH)),cvsH].sort((a,b)=>a-b);
+  zdfVert=vPos.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===vPos.length-1,dir:Math.random()<0.5?1:-1,spd:zdfRand(0.7,2.5),anc:[]}));
+  zdfHorz=hPos.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===hPos.length-1,dir:Math.random()<0.5?1:-1,spd:zdfRand(0.7,2.5),anc:[]}));
+  zdfVert.forEach(v=>v.anc=zdfHorz.map(()=>({ph:zdfRand(0,Math.PI*2),spd:zdfRand(0.03,0.12),str:zdfRand(0.5,2)*(Math.random()<0.5?-1:1)})));
+  zdfHorz.forEach(h=>h.anc=zdfVert.map(()=>({ph:zdfRand(0,Math.PI*2),spd:zdfRand(0.03,0.12),str:zdfRand(0.5,2)*(Math.random()<0.5?-1:1)})));
+  zdfColors=Array.from({length:zdfVert.length-1},()=>Array.from({length:zdfHorz.length-1},()=>zdfChoice(zdfPalette)));
+}
+
+/**************  GEOMETRY  **************/
+function zdfOffset(line,i){const a=line.anc[i];return Math.sin(zdfT*a.spd+a.ph)*a.str*zdfParams.AMP;}
+function zdfX(i,y){const v=zdfVert[i];if(v.bound)return v.p;const s=zdfHorz.findIndex((h,k)=>y>=h.p&&y<=zdfHorz[k+1].p);const u=(y-zdfHorz[s].p)/(zdfHorz[s+1].p-zdfHorz[s].p);const o0=zdfOffset(v,s),o1=zdfOffset(v,s+1);return zdfQuad(v.p+o0,v.p+((o0+o1)/2)*zdfParams.ARCH,v.p+o1,u);}
+function zdfY(j,x){const h=zdfHorz[j];if(h.bound)return h.p;const s=zdfVert.findIndex((v,k)=>x>=v.p&&x<=zdfVert[k+1].p);const u=(x-zdfVert[s].p)/(zdfVert[s+1].p-zdfVert[s].p);const o0=zdfOffset(h,s),o1=zdfOffset(h,s+1);return zdfQuad(h.p+o0,h.p+((o0+o1)/2)*zdfParams.ARCH,h.p+o1,u);}
+const zdfVertEdge=(i,y0,y1)=>Array.from({length:zdfParams.DENS+1},(_,k)=>{const y=y0+(y1-y0)*k/zdfParams.DENS;return[zdfX(i,y),y];});
+const zdfHorzEdge=(j,x0,x1)=>Array.from({length:zdfParams.DENS+1},(_,k)=>{const x=x0+(x1-x0)*k/zdfParams.DENS;return[x,zdfY(j,x)];});
+
+/**************  RENDER  **************/
+function zdfRender(){zdfCtx.clearRect(0,0,zdfCanvas.width,zdfCanvas.height);
+  for(let i=0;i<zdfVert.length-1;i++){
+    for(let j=0;j<zdfHorz.length-1;j++){
+      const y0=zdfHorz[j].p, y1=zdfHorz[j+1].p;
+      const left=zdfVertEdge(i,y0,y1);
+      const right=zdfVertEdge(i+1,y1,y0).slice(1);
+      const bottom=zdfHorzEdge(j+1,left[left.length-1][0],zdfX(i+1,y1)).slice(1);
+      const top=zdfHorzEdge(j,zdfX(i+1,y0),zdfX(i,y0)).slice(1);
+      const poly=[...left,...bottom,...right,...top];
+      zdfCtx.beginPath();zdfCtx.moveTo(poly[0][0],poly[0][1]);poly.slice(1).forEach(p=>zdfCtx.lineTo(...p));zdfCtx.closePath();
+      zdfCtx.fillStyle=zdfColors[i][j];zdfCtx.fill();zdfCtx.strokeStyle=zdfColors[i][j];zdfCtx.lineWidth=2;zdfCtx.stroke();
+    }
+  }
+}
+
+/**************  MOTION  **************/
+function zdfDrift(){const w=zdfCanvas.width/(window.devicePixelRatio||1),h=zdfCanvas.height/(window.devicePixelRatio||1);
+  zdfVert.forEach(v=>{if(v.bound)return;v.p+=v.spd*v.dir;const d=v.p-v.orig;if(Math.abs(d)>=zdfParams.DRIFT)v.dir*=-1;});
+  zdfHorz.forEach(l=>{if(l.bound)return;l.p+=l.spd*l.dir;const d=l.p-l.orig;if(Math.abs(d)>=zdfParams.DRIFT)l.dir*=-1;});
+}
+
+function zdfLoop(){zdfT+=zdfParams.SPD;zdfDrift();zdfRender();requestAnimationFrame(zdfLoop);} 
+
+/**************  GUI  **************/
+const zdfKnobs=[{key:'AMP',min:20,max:200},{key:'ARCH',min:0.5,max:5},{key:'DENS',min:30,max:240,step:6},{key:'DRIFT',min:50,max:350},{key:'SPD',min:0.002,max:0.03}];
+
+zdfKnobs.forEach(def=>{
+  const knob=document.createElement('div');knob.className='zdf-knob';knob.innerHTML='<div class="zdf-arm"></div><label>'+def.key+'</label>';zdfGUI.appendChild(knob);
+  const arm=knob.querySelector('.zdf-arm');
+  const valToAng=v=>( (v-def.min)/(def.max-def.min)*270-135 );
+  const angToVal=a=>def.min+((a+135)/270)*(def.max-def.min);
+  let ang=valToAng(zdfParams[def.key]);arm.style.transform=`rotate(${ang}deg)`;
+  knob.addEventListener('pointerdown',e=>{
+    const rect=knob.getBoundingClientRect();const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+    const startAng=Math.atan2(e.clientY-cy,e.clientX-cx);
+    const startVal=zdfParams[def.key];
+    const move=e2=>{const a=Math.atan2(e2.clientY-cy,e2.clientX-cx);let delta=(a-startAng)*180/Math.PI;ang=valToAng(startVal)+delta;ang=Math.max(-135,Math.min(135,ang));zdfParams[def.key]=angToVal(ang);if(def.step)zdfParams[def.key]=Math.round(zdfParams[def.key]/def.step)*def.step;arm.style.transform=`rotate(${ang}deg)`;};
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);zdfBuildGrid();};
+    window.addEventListener('pointermove',move);
+    window.addEventListener('pointerup',up);
+  });
+});
+
+/**************  INIT  **************/
+function zdfInit(){zdfFitCanvas();zdfBuildGrid();zdfLoop();}
+window.addEventListener('resize',()=>{zdfFitCanvas();zdfBuildGrid();});
+zdfInit();
+</script>
+</body>
+</html>
