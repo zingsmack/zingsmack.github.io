@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Particle Network Background</title>
+  <style>
+    /* reset & full-screen canvas */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    #bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1; /* sit behind your content */
+      background: #0a0a0a;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('bg');
+      const ctx = canvas.getContext('2d');
+      let width, height, particles;
+
+      // —— CONFIGURATION —— 
+      const config = {
+        particleCount: 120,           // total dots
+        maxVelocity: 0.6,             // speed of particles
+        connectionDistance: 140,      // max distance to draw a line
+        hueSpeed: 0.3,                // how fast the colors cycle
+        particleSize: 2.0             // radius of each dot
+      };
+
+      // handle resizing
+      function resize() {
+        width  = canvas.width  = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // initialize particles with random positions & velocities
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < config.particleCount; i++) {
+          particles.push({
+            x:  Math.random() * width,
+            y:  Math.random() * height,
+            vx: (Math.random() - 0.5) * config.maxVelocity,
+            vy: (Math.random() - 0.5) * config.maxVelocity
+          });
+        }
+      }
+
+      let hue = 0;
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        hue = (hue + config.hueSpeed) % 360;
+
+        // move & bounce particles
+        for (let p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0 || p.x > width)  p.vx *= -1;
+          if (p.y < 0 || p.y > height) p.vy *= -1;
+        }
+
+        // draw connections
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p1 = particles[i], p2 = particles[j];
+            const dx = p1.x - p2.x, dy = p1.y - p2.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < config.connectionDistance) {
+              const alpha = 1 - dist / config.connectionDistance;
+              ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        // draw particles
+        for (let p of particles) {
+          ctx.fillStyle = `hsla(${hue}, 70%, 50%, 0.9)`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, config.particleSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      // kick it off
+      initParticles();
+      animate();
+    })();
+  </script>
+</body>
+</html>
