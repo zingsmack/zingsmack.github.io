@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Grid Kaleidoscope – GUI‑tuned Swirls</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#fff}
+    canvas{display:block}
+    /* zdf‑GUI‑overlay */
+    #zdf-GUI-overlay{position:fixed;left:10px;top:10px;display:flex;gap:12px;z-index:9999}
+    .knob{width:70px;height:70px;border-radius:50%;background:#e0e0e0aa;backdrop-filter:blur(4px);position:relative;cursor:pointer;user-select:none}
+    .knob .arm{position:absolute;left:50%;top:50%;width:2px;height:28px;background:#111;transform-origin:bottom center}
+    .knob label{position:absolute;width:100%;text-align:center;bottom:-18px;font:11px/1 sans-serif;color:#333}
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="zdf-GUI-overlay"></div>
+<script>
+// ===== PARAMETERS (mutable via GUI) =====
+let params={
+  CURVE_AMP:120,
+  ARCH:3,
+  SAMPLE:120,
+  DRIFT_RANGE:220,
+  SPEED_T:0.008
+};
+
+// internal state arrays
+let V=[],H=[],COLS=[];let t=0;
+
+// === Canvas & ctx ===
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+const PAL=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+// ====== GUI creation ======
+const gui=document.getElementById('zdf-GUI-overlay');
+const knobDefs=[
+  {key:'CURVE_AMP',min:20,max:200},
+  {key:'ARCH',min:0.5,max:5},
+  {key:'SAMPLE',min:30,max:240,step:6},
+  {key:'DRIFT_RANGE',min:50,max:350},
+  {key:'SPEED_T',min:0.002,max:0.03}
+];
+
+knobDefs.forEach(def=>{
+  const k=document.createElement('div');k.className='knob';
+  k.innerHTML='<div class="arm"></div><label>'+def.key+'</label>';
+  gui.appendChild(k);
+  const arm=k.querySelector('.arm');
+  let ang=0,startAng=0,startVal=0;
+  const update=()=>{arm.style.transform=`rotate(${ang}deg)`;};
+  const angToVal=a=>{
+    const norm=(a+135)/270; // map -135..135° to 0..1
+    return def.min+norm*(def.max-def.min);
+  };
+  const valToAng=v=>( (v-def.min)/(def.max-def.min)*270-135 );
+  // init
+  ang=valToAng(params[def.key]);update();
+  k.addEventListener('pointerdown',e=>{
+    startAng=Math.atan2(e.clientY-k.getBoundingClientRect().y-35,e.clientX-k.getBoundingClientRect().x-35);
+    startVal=params[def.key];
+    const move=e2=>{
+      const a=Math.atan2(e2.clientY-k.getBoundingClientRect().y-35,e2.clientX-k.getBoundingClientRect().x-35);
+      let delta=(a-startAng)*180/Math.PI;
+      ang=valToAng(startVal)+(delta);
+      ang=Math.max(-135,Math.min(135,ang));
+      params[def.key]= angToVal(ang);
+      if(def.step){params[def.key]=Math.round(params[def.key]/def.step)*def.step;}
+      update();
+    };
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up); rebuild();};
+    window.addEventListener('pointermove',move);
+    window.addEventListener('pointerup',up);
+  });
+});
+
+// ===== Helper fns =====
+const rand=(a,b)=>Math.random()*(b-a)+a;
+const randI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const choice=a=>a[randI(0,a.length-1)];
+const quad=(p0,c,p1,u)=>(1-u)*(1-u)*p0+2*(1-u)*u*c+u*u*p1;
+
+function fit(){const d=window.devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(d,0,0,d,0,0);ctx.lineJoin='round';}
+
+function buildGrid(){const w=canvas.width/(window.devicePixelRatio||1),h=canvas.height/(window.devicePixelRatio||1);
+  const v=[0,...Array.from({length:randI(3,9)},()=>rand(0,w)),w].sort((a,b)=>a-b);
+  const h=[0,...Array.from({length:randI(3,9)},()=>rand(0,h)),h].sort((a,b)=>a-b);
+  V=v.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===v.length-1,dir:Math.random()<0.5?1:-1,speed:rand(0.7,2.5),a:[]}));
+  H=h.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===h.length-1,dir:Math.random()<0.5?1:-1,speed:rand(0.7,2.5),a:[]}));
+  V.forEach(v=>v.a=H.map(()=>({ph:rand(0,Math.PI*2),spd:rand(0.03,0.12),str:rand(0.5,2)*(Math.random()<0.5?-1:1)})));
+  H.forEach(h=>h.a=V.map(()=>({ph:rand(0,Math.PI*2),spd:rand(0.03,0.12),str:rand(0.5,2)*(Math.random()<0.5?-1:1)})));
+  COLS=Array.from({length:V.length-1},()=>Array.from({length:H.length-1},()=>choice(PAL)));
+}
+
+function getOff(line,i){const a=line.a[i];return Math.sin(t*a.spd+a.ph)*a.str*params.CURVE_AMP;}
+function xAt(i,y){const v=V[i];if(v.bound)return v.p;const s=H.findIndex((h,k)=>y>=h.p&&y<=H[k+1].p);const u=(y-H[s].p)/(H[s+1].p-H[s].p);const o0=getOff(v,s),o1=getOff(v,s+1);return quad(v.p+o0,v.p+((o0+o1)/2)*params.ARCH,v.p+o1,u);} 
+function yAt(j,x){const h=H[j];if(h.bound)return h.p;const s=V.findIndex((v,k)=>x>=v.p&&x<=V[k+1].p);const u=(x-V[s].p)/(V[s+1].p-V[s].p);const o0=getOff(h,s),o1=getOff(h,s+1);return quad(h.p+o0,h.p+((o0+o1)/2)*params.ARCH,h.p+o1,u);} 
+function vert(i,y0,y1){return Array.from({length:params.SAMPLE+1},(_,k)=>{const y=y0+(y1-y0)*k/params.SAMPLE;return[xAt(i,y),y];});}
+function horz(j,x0,x1){return Array.from({length:params.SAMPLE+1},(_,k)=>{const x=x0+(x1-x0)*k/params.SAMPLE;return[x,yAt(j,x)];});}
+
+function drift(){const w=canvas.width/(window.devicePixelRatio||1),h=canvas.height/(window.devicePixelRatio||1);
+  V.forEach(v=>{if(v.bound)return;v.p+=v.speed*v.dir;const d=v.p-v.orig; if(Math.abs(d)>=params.DRIFT_RANGE)v.dir*=-1;});
+  H.forEach(l=>{if(l.bound)return;l.p+=l.speed*l.dir;const d=l.p-l.orig; if(Math.abs(d)>=params.DRIFT_RANGE)l.dir*=-1;});
+}
+
+function render(){ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<V.length-1;i++)for(let j=0;j<H.length-1;j++){
+    const y0=H[j].p, y1=H[j+1].p;
+    const left  = vert(i,y0,y1);
+    const right = vert(i+1,y1,y0).slice(1);
+    const bottom= horz(j+1,left[left.length-1][0],xAt(i+1,y1)).slice(1);
+    const top   = horz(j,xAt(i+1,y0),xAt(i,y0)).slice(1);
+    const poly=[...left,...bottom,...right,...top];
+    ctx.beginPath();ctx.moveTo(poly[0][0],poly[0][1]);poly.slice(1).forEach(p=>ctx.lineTo(...p));ctx.closePath();
+    ctx.fillStyle=COLS[i][j];ctx.fill();ctx.strokeStyle=COLS[i][j];ctx.lineWidth=2;ctx.stroke();
+  }
+}
+
+function loop(){t+=params.SPEED_T;drift();render();requestAnimationFrame(loop);} 
+
+function rebuild(){buildGrid();}
+
+function init(){fit();buildGrid();loop();}
+window.addEventListener('resize',()=>{fit();rebuild();});
+init();
+</script>
+</body>
+</html>
