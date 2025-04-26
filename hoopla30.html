@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Biocell Morphing Background</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#111}
+    canvas{display:block}
+    #bio-gui{position:fixed;left:12px;top:12px;display:flex;gap:14px;z-index:9999}
+    .bio-knob{width:64px;height:64px;border-radius:50%;background:#ffffff22;backdrop-filter:blur(6px);cursor:pointer;position:relative;user-select:none}
+    .bio-arm{position:absolute;left:50%;top:50%;width:2px;height:24px;background:#fff;transform-origin:center bottom;transform:translate(-50%,-100%) rotate(0deg)}
+    .bio-knob label{position:absolute;width:100%;text-align:center;bottom:-16px;font:10px/1 sans-serif;color:#ddd}
+  </style>
+</head>
+<body>
+<canvas id="bio-canvas"></canvas>
+<div id="bio-gui"></div>
+<script>
+/***** PARAMETERS *****/
+const bioCfg={COUNT:60,AMP:40,SPEED:0.004,LLOYD:2};
+/***** STATE *****/
+let bioCells=[], bioT=0;
+/***** DOM *****/
+const canvas=document.getElementById('bio-canvas');
+const ctx=canvas.getContext('2d');
+/***** HELPERS *****/
+const rnd=(a,b)=>Math.random()*(b-a)+a;
+const rndInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const palette=['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+/***** RESIZE *****/
+function fit(){const d=window.devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(d,0,0,d,0,0);}
+/***** VORONOI (naïve) *****/
+function lloydRelax(points){const centroids=points.map(()=>({x:0,y:0,c:0}));
+  const w=canvas.width/(window.devicePixelRatio||1),h=canvas.height/(window.devicePixelRatio||1);
+  const grid=10;const dx=w/grid,dy=h/grid;
+  for(let gx=0;gx<grid;gx++)for(let gy=0;gy<grid;gy++){
+    const sx=gx*dx+dx/2, sy=gy*dy+dy/2;
+    let min=1e9,idx=0;points.forEach((p,i)=>{const d=(p.x-sx)**2+(p.y-sy)**2;if(d<min){min=d;idx=i;}});
+    centroids[idx].x+=sx;centroids[idx].y+=sy;centroids[idx].c++;
+  }
+  return centroids.map((c,i)=>c.c?{x:c.x/c.c,y:c.y/c.c}:{...points[i]});
+}
+function buildCells(){const w=canvas.width/(window.devicePixelRatio||1),h=canvas.height/(window.devicePixelRatio||1);
+  let pts=Array.from({length:bioCfg.COUNT},()=>({x:rnd(0,w),y:rnd(0,h)}));
+  for(let i=0;i<bioCfg.LLOYD;i++) pts=lloydRelax(pts);
+  bioCells=pts.map(p=>({x:p.x,y:p.y,phase:rnd(0,6.28),col:palette[rndInt(0,palette.length-1)]}));
+}
+/***** TRIANGULATION & POLYGONS (Delaunay via tiny library) *****/
+function getPolys(){const pts=bioCells.map(c=>[c.x,c.y]);
+  // minimal Delaunay using Bowyer–Watson (small n)
+  const edges=[];
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++)edges.push([i,j]);
+  const polys=bioCells.map(()=>[]);
+  edges.forEach(([a,b])=>{const midx=(pts[a][0]+pts[b][0])/2,midy=(pts[a][1]+pts[b][1])/2;
+    const dirx=pts[b][1]-pts[a][1],diry=-(pts[b][0]-pts[a][0]);
+    const farx=midx+dirx, fary=midy+diry;
+    let side=null,ok=true;
+    for(let k=0;k<pts.length;k++)if(k!==a&&k!==b){const s=Math.sign((farx-midx)*(pts[k][1]-midy)-(fary-midy)*(pts[k][0]-midx));if(side===null)side=s;else if(s!==0&&s!==side){ok=false;break;}}
+    if(ok){polys[a].push(b);polys[b].push(a);} });
+  return polys;
+}
+let neighbors=[];
+function rebuild(){buildCells();neighbors=getPolys();}
+/***** ANIMATE *****/
+function render(){ctx.clearRect(0,0,canvas.width,canvas.height);
+  const w=canvas.width/(window.devicePixelRatio||1),h=canvas.height/(window.devicePixelRatio||1);
+  ctx.fillStyle='#111';ctx.fillRect(0,0,w,h);
+  bioCells.forEach((c,i)=>{
+    const scale=1+Math.sin(bioT+ c.phase)*bioCfg.AMP/100;
+    const vx=c.x*w/(w*scale),vy=c.y*h/(h*scale);
+  });
+  // draw polygons
+  ctx.lineJoin='round';
+  neighbors.forEach((list,i)=>{
+    const cell=bioCells[i];
+    const verts=list.map(idx=>bioCells[idx]);
+    ctx.beginPath();ctx.moveTo(cell.x,cell.y);
+    verts.forEach(v=>ctx.lineTo(v.x,v.y));ctx.closePath();
+    const amp=1+Math.sin(bioT+cell.phase)*bioCfg.AMP/100;
+    ctx.save();ctx.translate(cell.x,cell.y);ctx.scale(amp,amp);ctx.translate(-cell.x,-cell.y);
+    ctx.fillStyle=cell.col;ctx.fill();ctx.restore();
+  });
+}
+function step(){bioT+=bioCfg.SPEED;render();requestAnimationFrame(step);} 
+/***** GUI *****/
+const defs=[{key:'AMP',min:10,max:80},{key:'SPEED',min:.001,max:.02},{key:'COUNT',min:20,max:120,step:2}];
+const sens=1.5;
+defs.forEach(d=>{const k=document.createElement('div');k.className='bio-knob';k.innerHTML='<div class="bio-arm"></div><label>'+d.key+'</label>';gui.appendChild(k);
+  const arm=k.firstElementChild;const toDeg=v=>((v-d.min)/(d.max-d.min)*270-135);const toVal=g=>d.min+((g+135)/270)*(d.max-d.min);
+  let deg=toDeg(bioCfg[d.key]);arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;
+  k.addEventListener('pointerdown',e=>{const sx=e.clientX,sd=deg;
+    const move=e2=>{deg=sd+(e2.clientX-sx)/sens;deg=Math.max(-135,Math.min(135,deg));bioCfg[d.key]=toVal(deg);if(d.step)bioCfg[d.key]=Math.round(bioCfg[d.key]/d.step)*d.step;arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;};
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);rebuild();};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
+  });});
+/***** INIT *****/
+function init(){fit();rebuild();step();}
+window.addEventListener('resize',()=>{fit();rebuild();});
+init();
+</script>
+</body>
+</html>
