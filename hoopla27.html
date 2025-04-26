@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Grid Kaleidoscope – GUI‑tuned Swirls (horizontal knobs)</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#fff}
+    canvas{display:block}
+    #zdf-GUI-overlay{position:fixed;left:10px;top:10px;display:flex;gap:12px;z-index:9999}
+    .zdf-knob{width:70px;height:70px;border-radius:50%;background:#e0e0e0bb;backdrop-filter:blur(4px);position:relative;cursor:pointer;user-select:none}
+    .zdf-arm{position:absolute;left:50%;top:50%;width:2px;height:28px;background:#111;transform-origin:center bottom;transform:translate(-50%,-100%) rotate(0deg);}
+    .zdf-knob label{position:absolute;width:100%;text-align:center;bottom:-18px;font:11px/1 sans-serif;color:#333}
+  </style>
+</head>
+<body>
+<canvas id="zdf-canvas"></canvas>
+<div id="zdf-GUI-overlay"></div>
+<script>
+// ================= Parameters ================
+const zdfParams={ AMP:120, ARCH:3, DENS:120, DRIFT:220, SPD:0.008 };
+
+// ================= Runtime state =============
+let zdfVert=[], zdfHorz=[], zdfColors=[], zdfT=0;
+
+// ================= DOM refs ==================
+const cvs=document.getElementById('zdf-canvas');
+const ctx=cvs.getContext('2d');
+const gui=document.getElementById('zdf-GUI-overlay');
+const PALETTE=['#ff595e','#ff924c','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff4d6d','#06d6a0','#118ab2','#ff7f50','#be4bdb'];
+
+// ============= Helper shortcuts ==============
+const rF=(a,b)=>Math.random()*(b-a)+a;
+const rI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rI(0,a.length-1)];
+const quad=(p0,c,p1,u)=>(1-u)*(1-u)*p0+2*(1-u)*u*c+u*u*p1;
+
+// ============= Resize canvas =================
+function fit(){const d=window.devicePixelRatio||1;cvs.width=innerWidth*d;cvs.height=innerHeight*d;cvs.style.width=innerWidth+'px';cvs.style.height=innerHeight+'px';ctx.setTransform(d,0,0,d,0,0);ctx.lineJoin='round';}
+
+// ============= Grid generation ===============
+function buildGrid(){const w=cvs.width/(window.devicePixelRatio||1),h=cvs.height/(window.devicePixelRatio||1);
+  const v=[0,...Array.from({length:rI(3,9)},()=>rF(0,w)),w].sort((a,b)=>a-b);
+  const hv=[0,...Array.from({length:rI(3,9)},()=>rF(0,h)),h].sort((a,b)=>a-b);
+  zdfVert=v.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===v.length-1,dir:Math.random()<0.5?1:-1,spd:rF(0.7,2.5),a:[]}));
+  zdfHorz=hv.map((p,i)=>({p,orig:p,idx:i,bound:!i||i===hv.length-1,dir:Math.random()<0.5?1:-1,spd:rF(0.7,2.5),a:[]}));
+  zdfVert.forEach(vl=>vl.a=zdfHorz.map(()=>({ph:rF(0,Math.PI*2),spd:rF(0.03,0.12),str:rF(0.5,2)*(Math.random()<0.5?-1:1)})));
+  zdfHorz.forEach(hl=>hl.a=zdfVert.map(()=>({ph:rF(0,Math.PI*2),spd:rF(0.03,0.12),str:rF(0.5,2)*(Math.random()<0.5?-1:1)})));
+  zdfColors=Array.from({length:zdfVert.length-1},()=>Array.from({length:zdfHorz.length-1},()=>pick(PALETTE)));
+}
+
+// ============= Geometry evaluators ===========
+function offset(line,i){const a=line.a[i];return Math.sin(zdfT*a.spd+a.ph)*a.str*zdfParams.AMP;}
+function X(i,y){const v=zdfVert[i];if(v.bound)return v.p;let s=zdfHorz.findIndex((h,k)=>y>=h.p&&y<=zdfHorz[k+1]?.p);if(s<0)s=zdfHorz.length-2;const u=(y-zdfHorz[s].p)/(zdfHorz[s+1].p-zdfHorz[s].p);const o0=offset(v,s),o1=offset(v,s+1);return quad(v.p+o0,v.p+((o0+o1)/2)*zdfParams.ARCH,v.p+o1,u);}
+function Y(j,x){const h=zdfHorz[j];if(h.bound)return h.p;let s=zdfVert.findIndex((v,k)=>x>=v.p&&x<=zdfVert[k+1]?.p);if(s<0)s=zdfVert.length-2;const u=(x-zdfVert[s].p)/(zdfVert[s+1].p-zdfVert[s].p);const o0=offset(h,s),o1=offset(h,s+1);return quad(h.p+o0,h.p+((o0+o1)/2)*zdfParams.ARCH,h.p+o1,u);}
+const vEdge=(i,y0,y1)=>Array.from({length:zdfParams.DENS+1},(_,k)=>{const y=y0+(y1-y0)*k/zdfParams.DENS;return[X(i,y),y];});
+const hEdge=(j,x0,x1)=>Array.from({length:zdfParams.DENS+1},(_,k)=>{const x=x0+(x1-x0)*k/zdfParams.DENS;return[x,Y(j,x)];});
+
+// ============= Draw frame ====================
+function render(){ctx.clearRect(0,0,cvs.width,cvs.height);
+  for(let i=0;i<zdfVert.length-1;i++) for(let j=0;j<zdfHorz.length-1;j++){
+    const y0=zdfHorz[j].p, y1=zdfHorz[j+1].p;
+    const left=vEdge(i,y0,y1);
+    const right=vEdge(i+1,y1,y0).slice(1);
+    const bottom=hEdge(j+1,left[left.length-1][0],X(i+1,y1)).slice(1);
+    const top=hEdge(j,X(i+1,y0),X(i,y0)).slice(1);
+    const poly=[...left,...bottom,...right,...top];
+    ctx.beginPath();ctx.moveTo(poly[0][0],poly[0][1]);poly.slice(1).forEach(p=>ctx.lineTo(...p));ctx.closePath();
+    ctx.fillStyle=zdfColors[i][j];ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=zdfColors[i][j];ctx.stroke();
+  }
+}
+
+// ============= Motion ========================
+function drift(){zdfVert.forEach(v=>{if(v.bound)return;v.p+=v.spd*v.dir;if(Math.abs(v.p-v.orig)>=zdfParams.DRIFT)v.dir*=-1;});
+  zdfHorz.forEach(h=>{if(h.bound)return;h.p+=h.spd*h.dir;if(Math.abs(h.p-h.orig)>=zdfParams.DRIFT)h.dir*=-1;});}
+
+function loop(){zdfT+=zdfParams.SPD;drift();render();requestAnimationFrame(loop);} 
+
+// ============= GUI knobs (horizontal) ========
+const knobs=[{key:'AMP',min:20,max:200},{key:'ARCH',min:0.5,max:5},{key:'DENS',min:30,max:240,step:6},{key:'DRIFT',min:50,max:350},{key:'SPD',min:0.002,max:0.03}];
+const PIX_PER_DEG=1.5; // sensitivity: 1.5px horizontal drag = 1deg rotation
+knobs.forEach(def=>{
+  const k=document.createElement('div');k.className='zdf-knob';k.innerHTML='<div class="zdf-arm"></div><label>'+def.key+'</label>';gui.appendChild(k);
+  const arm=k.querySelector('.zdf-arm');
+  const valToDeg=v=>((v-def.min)/(def.max-def.min)*270-135);
+  const degToVal=d=>def.min+((d+135)/270)*(def.max-def.min);
+  let deg=valToDeg(zdfParams[def.key]);arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;
+  k.addEventListener('pointerdown',e=>{
+    const startX=e.clientX;const startVal=zdfParams[def.key];const startDeg=deg;
+    const move=e2=>{
+      const deltaX=e2.clientX-startX;deg=startDeg+deltaX/PIX_PER_DEG;deg=Math.max(-135,Math.min(135,deg));zdfParams[def.key]=degToVal(deg);if(def.step)zdfParams[def.key]=Math.round(zdfParams[def.key]/def.step)*def.step;arm.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;};
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);buildGrid();};
+    window.addEventListener('pointermove',move);
+    window.addEventListener('pointerup',up);
+  });
+});
+
+// ============= Init ==========================
+function init(){fit();buildGrid();loop();}
+window.addEventListener('resize',()=>{fit();buildGrid();});
+init();
+</script>
+</body>
+</html>
