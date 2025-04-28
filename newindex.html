@@ -4,15 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quantum Journey</title>
-  <!-- Provide a no-op favicon to prevent 404 -->
   <link rel="icon" href="data:;," />
 
-  <!--
-    IMPORT MAP NOTES:
-    - We’re using dynamic imports with Blob URLs to ensure correct CORS and MIME.
-    - The `crossorigin` attribute on the module script forces proper CORS requests.
-    - No static import-map needed; dynamicImportModule handles raw fetch and wraps with `application/javascript`.
-  -->
   <style>
     body { margin: 0; overflow-x: hidden; height: 400vh; }
     canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
@@ -24,26 +17,13 @@
   </style>
 </head>
 <body>
-  <!-- Scroll-driver divs: one per scene -->
   <div id="section1" class="scroll-section"></div>
   <div id="section2" class="scroll-section"></div>
   <div id="section3" class="scroll-section"></div>
   <div id="section4" class="scroll-section"></div>
 
   <script type="module" crossorigin>
-    <!--
-      WARNING: Browsers will by default attempt to GET `/favicon.ico`, resulting in a 404 if none exists. This is harmless.
-      To fully suppress the request, you can serve a favicon or use a data-URL:
-      <link rel="icon" href="data:;base64,=" />
-    -->
-    // NOTE: The "TypeError: setting getter-only property 'window'" occurs because the UMD GSAP bundle (gsap.min.js)
-    // expects to run as a <script> and mutate the global `window` object, but dynamic imports run in strict mode
-    // where `this` is undefined. When GSAP’s UMD wrapper does `this.window = this`, it fails.
-
-    /**
-     * Fetches a module, wraps it in a Blob with proper MIME, and imports it.
-     * Bypasses CORS/MIME issues by using fetch + Blob URL.
-     */
+    // Fetches a module, wraps it in a Blob with application/javascript MIME, then imports it.
     async function dynamicImportModule(url) {
       const res = await fetch(url, { mode: 'cors' });
       const code = await res.text();
@@ -52,48 +32,40 @@
       return import(blobUrl);
     }
 
-        // Load GSAP and ScrollTrigger from an ESM-first CDN (esm.sh)
+    // Load GSAP and ScrollTrigger from esm.sh (ESM-only)
     const gsapModule = await dynamicImportModule('https://esm.sh/gsap@3.12.2');
     const gsap = gsapModule.default || gsapModule.gsap;
     const { ScrollTrigger } = await dynamicImportModule('https://esm.sh/gsap@3.12.2/ScrollTrigger');
     gsap.registerPlugin(ScrollTrigger);
 
-    // Load Three.js core and helpers from an ESM-first CDN (esm.sh)
+    // Load Three.js core and examples from esm.sh
     const THREE = await dynamicImportModule('https://esm.sh/three@0.150.1');
     const { GLTFLoader } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/loaders/GLTFLoader.js');
     const { EffectComposer } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/postprocessing/EffectComposer.js');
     const { RenderPass } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/postprocessing/RenderPass.js');
     const { UnrealBloomPass } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/postprocessing/UnrealBloomPass.js');
-    const THREE = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js');
-    const { GLTFLoader } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/loaders/GLTFLoader.js');
-    const { EffectComposer } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/postprocessing/EffectComposer.js');
-    const { RenderPass } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/postprocessing/RenderPass.js');
-    const { UnrealBloomPass } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/postprocessing/UnrealBloomPass.js');
 
-    // Renderer, camera, composer, and loader setup
     let renderer, camera, composer;
     const loader = new GLTFLoader();
     const setups = [];
 
-    // Scene-creation functions
     function createCave(scene) {
       scene.background = new THREE.Color(0x111111);
-      // TODO: load cave model via loader.load
+      // TODO: loader.load('model.gltf', ...);
     }
     function createDesert(scene) {
       scene.background = new THREE.Color(0xDDCC99);
-      // TODO: load desert model via loader.load
+      // TODO: loader.load('model.gltf', ...);
     }
     function createSubmarine(scene) {
       scene.background = new THREE.Color(0x223355);
-      // TODO: load submarine interior via loader.load
+      // TODO: loader.load('model.gltf', ...);
     }
     function createFinalScene(scene) {
       scene.background = new THREE.Color(0x000000);
       // TODO: next environment
     }
 
-    // Initialization
     function init() {
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
