@@ -65,7 +65,7 @@ body {
 /* Portrait + border “canvas” */
 .viewer img {
   background: #f9f9f9;
-  padding: 1rem;
+  /* padding: 1rem; */
   box-shadow:
     0 2px 8px rgba(0,0,0,0.1),
     inset 0 0 0 1px rgba(0,0,0,0.05);
@@ -73,7 +73,7 @@ body {
 
   width: auto; height: auto;
   max-width: 90vw;
-  max-height: 85vh;
+  max-height: 88vh;
 
   display: block;
   margin: 0 auto;
