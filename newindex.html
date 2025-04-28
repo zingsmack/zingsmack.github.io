@@ -4,15 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quantum Journey</title>
+  <!-- Favicon to avoid 404 -->
+  <link rel="icon" href="/favicon.ico" />
 
-  <!-- Import map to resolve bare specifiers -->
+  <!--
+    IMPORT MAP NOTES:
+    - Maps bare specifiers 'three' and 'three/' to the exact ESM build on jsDelivr.
+    - Maps 'gsap' and 'gsap/' to the UMD ESM-friendly bundles.
+    - Maps 'gsap/ScrollTrigger.min.js' to the ESM ScrollTrigger plugin.
+    - **Currently covers all used imports in the document:**
+      • three, three/examples/jsm/*
+      • gsap, gsap/ScrollTrigger.min.js
+    - If you add more GSAP plugins (e.g., ScrollToPlugin) or Three.js examples modules, add similar mappings here.
+    - Update versions here when bumping Three.js or GSAP.
+    - Ensure this <script> appears before any <script type="module"> to take effect.
+    - For broader browser support, consider 'es-module-shims' polyfill.
+  -->
   <script type="importmap">
   {
     "imports": {
       "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
       "three/": "https://cdn.jsdelivr.net/npm/three@0.150.1/",
       "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js?module",
-      "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/"
+      "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/",
+      "gsap/ScrollTrigger.min.js": "https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.esm.js"
     }
   }
   </script>
@@ -28,64 +43,86 @@
   </style>
 </head>
 <body>
+  <!-- Scroll-driver divs: one per scene -->
   <div id="section1" class="scroll-section"></div>
   <div id="section2" class="scroll-section"></div>
   <div id="section3" class="scroll-section"></div>
   <div id="section4" class="scroll-section"></div>
 
   <script type="module">
-    // GSAP via import map
-    import gsap from 'gsap';
+    /*
+      SCRIPT NOTES:
+      - Import map above handles remapping of 'three' and 'gsap', including ScrollTrigger plugin.
+      - Keep bare imports (no relative paths) so updates to versions only need import-map changes.
+      - To update Three.js or GSAP, change the URLs in the import map.
+      - If adding other Three.js examples or plugins, just import from 'three/examples/jsm/...'.
+    */
+
+    // GSAP & ScrollTrigger via import map
+    import gsap from 'gsap';  // mapped to gsap.min.js?module
     import { ScrollTrigger } from 'gsap/ScrollTrigger.min.js';
     gsap.registerPlugin(ScrollTrigger);
 
-    // Three.js and examples via import map
+    // Three.js core and example modules via import map
     import * as THREE from 'three';
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
     import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
     import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
     import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
+    // Renderer, camera, composer, and loader setup
     let renderer, camera, composer;
     const loader = new GLTFLoader();
     const setups = [];
 
+    // Scene-creation functions
     function createCave(scene) {
       scene.background = new THREE.Color(0x111111);
+      // TODO: load cave model
       // loader.load('https://cdn.jsdelivr.net/.../cave.gltf', gltf => scene.add(gltf.scene));
     }
     function createDesert(scene) {
       scene.background = new THREE.Color(0xDDCC99);
+      // TODO: load desert monolith
       // loader.load('https://cdn.jsdelivr.net/.../desert_monolith.gltf', gltf => scene.add(gltf.scene));
     }
     function createSubmarine(scene) {
       scene.background = new THREE.Color(0x223355);
+      // TODO: load submarine interior
       // loader.load('https://cdn.jsdelivr.net/.../submarine_interior.gltf', gltf => scene.add(gltf.scene));
     }
     function createFinalScene(scene) {
       scene.background = new THREE.Color(0x000000);
-      // Next environment...
+      // TODO: insert next environment
     }
 
+    // Initialization
     function init() {
+      // Setup WebGL renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
+      // Setup camera
       camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.set(0, 0, 5);
 
+      // Setup post-processing composer
       composer = new EffectComposer(renderer);
+
+      // Create and store each scene
       [createCave, createDesert, createSubmarine, createFinalScene].forEach(fn => {
         const scene = new THREE.Scene();
         fn(scene);
         setups.push(scene);
       });
 
+      // Initial render pass + bloom effect
       composer.addPass(new RenderPass(setups[0], camera));
       composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.4, 0.85));
 
+      // Scroll-triggered scene switching
       setups.forEach((_, i) => {
         ScrollTrigger.create({
           trigger: `#section${i + 1}`,
@@ -95,19 +132,23 @@
         });
       });
 
+      // Handle resize and start animation loop
       window.addEventListener('resize', onResize);
       animate();
     }
 
+    // Switch the composer to render a different scene
     function switchScene(index) {
       composer.passes[0] = new RenderPass(setups[index], camera);
     }
 
+    // Animation loop
     function animate() {
       requestAnimationFrame(animate);
       composer.render();
     }
 
+    // Resize handler
     function onResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -115,6 +156,7 @@
       composer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    // Kick off everything
     init();
   </script>
 </body>
