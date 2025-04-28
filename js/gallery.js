@@ -23,6 +23,7 @@ window.onload = () => {
     { src: 'images/eighteen.jpg', caption: 'Portrait 18: [Your caption]' },
     { src: 'images/nineteen.jpg', caption: 'Portrait 19: [Your caption]' },
     { src: 'images/twenty.jpg', caption: 'Portrait 20: [Your caption]' },
+    { src: 'images/twentyone.jpg', caption: 'Portrait 21: [Your caption]' },
   ];
   let current = 0;
 
@@ -33,7 +34,7 @@ window.onload = () => {
   const nextBtn   = document.querySelector('.viewer .next');
 
   // 3) Configure a single 3s opacity transition
-  imgEl.style.transition = 'opacity 2s ease';
+  imgEl.style.transition = 'opacity 1.8s ease';
 
   // 4) Helper to load & fade in
   function fadeIn() {
