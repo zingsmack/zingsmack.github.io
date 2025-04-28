@@ -32,13 +32,13 @@
 
   <!-- Main ES-module script -->
   <script type="module">
-    import * as THREE              from 'three';
-    import { GLTFLoader }         from 'three/examples/jsm/loaders/GLTFLoader.js';
-    import { EffectComposer }     from 'three/examples/jsm/postprocessing/EffectComposer.js';
-    import { RenderPass }         from 'three/examples/jsm/postprocessing/RenderPass.js';
-    import { UnrealBloomPass }    from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-    import gsap                   from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js';
-    import { ScrollTrigger }      from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.min.js';
+    import * as THREE           from 'three';
+    import { GLTFLoader }       from 'three/examples/jsm/loaders/GLTFLoader.js';
+    import { EffectComposer }   from 'three/examples/jsm/postprocessing/EffectComposer.js';
+    import { RenderPass }       from 'three/examples/jsm/postprocessing/RenderPass.js';
+    import { UnrealBloomPass }  from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+    import gsap                 from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.esm.js';
+    import { ScrollTrigger }    from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.esm.js';
     gsap.registerPlugin(ScrollTrigger);
 
     let renderer, camera, composer;
