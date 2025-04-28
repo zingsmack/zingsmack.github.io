@@ -28,7 +28,7 @@
       const res = await fetch(url, { mode: 'cors' });
       let code = await res.text();
       // Rewrite esm.sh internal absolute imports (/path) to full URLs
-      code = code.replace(/from\s+['\"]\/(.*?)['\"]/g, (match, p1) => `from 'https://esm.sh/${p1}'`);
+      code = code.replace(/(['"])\/([^"']+)\1/g, (match, quote, p1) => `${quote}https://esm.sh/${p1}${quote}`);
       const blob = new Blob([code], { type: 'application/javascript' });
       const blobUrl = URL.createObjectURL(blob);
       return import(blobUrl);
