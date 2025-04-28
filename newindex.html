@@ -52,14 +52,18 @@
       return import(blobUrl);
     }
 
-    // Load GSAP and ScrollTrigger dynamically
-    // Load GSAP ESM build to avoid UMD global/window errors
-    const gsapModule = await dynamicImportModule('https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.esm.js');
+        // Load GSAP and ScrollTrigger from an ESM-first CDN (esm.sh)
+    const gsapModule = await dynamicImportModule('https://esm.sh/gsap@3.12.2');
     const gsap = gsapModule.default || gsapModule.gsap;
-    const { ScrollTrigger } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.esm.js');
+    const { ScrollTrigger } = await dynamicImportModule('https://esm.sh/gsap@3.12.2/ScrollTrigger');
     gsap.registerPlugin(ScrollTrigger);
 
-    // Load Three.js core and helpers dynamically
+    // Load Three.js core and helpers from an ESM-first CDN (esm.sh)
+    const THREE = await dynamicImportModule('https://esm.sh/three@0.150.1');
+    const { GLTFLoader } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/loaders/GLTFLoader.js');
+    const { EffectComposer } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/postprocessing/EffectComposer.js');
+    const { RenderPass } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/postprocessing/RenderPass.js');
+    const { UnrealBloomPass } = await dynamicImportModule('https://esm.sh/three@0.150.1/examples/jsm/postprocessing/UnrealBloomPass.js');
     const THREE = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js');
     const { GLTFLoader } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/loaders/GLTFLoader.js');
     const { EffectComposer } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/postprocessing/EffectComposer.js');
