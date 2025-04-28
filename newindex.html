@@ -26,7 +26,9 @@
     // Fetches a module, wraps it in a Blob with application/javascript MIME, then imports it.
     async function dynamicImportModule(url) {
       const res = await fetch(url, { mode: 'cors' });
-      const code = await res.text();
+      let code = await res.text();
+      // Rewrite esm.sh internal absolute imports (/path) to full URLs
+      code = code.replace(/from\s+['\"]\/(.*?)['\"]/g, (match, p1) => `from 'https://esm.sh/${p1}'`);
       const blob = new Blob([code], { type: 'application/javascript' });
       const blobUrl = URL.createObjectURL(blob);
       return import(blobUrl);
