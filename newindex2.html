@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quantum Journey Field</title>
     <!-- Import map to resolve bare "three" specifier -->
+    <!-- Import map to resolve imports -->
   <script type="importmap">
   {
     "imports": {
       "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
-      "three/": "https://cdn.jsdelivr.net/npm/three@0.150.1/"
+      "three/": "https://cdn.jsdelivr.net/npm/three@0.150.1/",
+      "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js?module",
+      "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/"
     }
   }
   </script>
@@ -26,10 +29,10 @@
   <div id="section2" class="scroll-section"></div>
 
   <script type="module" crossorigin>
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
-    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js';
-    import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js';
-    import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.min.js';
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    import gsap from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger.min.js';
     gsap.registerPlugin(ScrollTrigger);
 
     let scene, camera, renderer;
