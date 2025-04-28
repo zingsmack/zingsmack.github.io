@@ -21,17 +21,17 @@
   <div id="section4" class="scroll-section"></div>
 
   <script type="module">
-    // GSAP & ScrollTrigger via CDN ESM
-    import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js?module';
-    import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.min.js?module';
+    // GSAP & ScrollTrigger via unpkg (ESM compatible)
+    import gsap from 'https://unpkg.com/gsap@3.12.2/dist/gsap.min.js?module';
+    import { ScrollTrigger } from 'https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js?module';
     gsap.registerPlugin(ScrollTrigger);
 
-    // Three.js & helpers via CDN
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/loaders/GLTFLoader.js';
-    import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/postprocessing/UnrealBloomPass.js';
+    // Three.js & helpers via unpkg (with ?module to rewrite imports)
+    import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js?module';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js?module';
+    import { EffectComposer } from 'https://unpkg.com/three@0.150.1/examples/jsm/postprocessing/EffectComposer.js?module';
+    import { RenderPass } from 'https://unpkg.com/three@0.150.1/examples/jsm/postprocessing/RenderPass.js?module';
+    import { UnrealBloomPass } from 'https://unpkg.com/three@0.150.1/examples/jsm/postprocessing/UnrealBloomPass.js?module';
 
     let renderer, camera, composer;
     const loader = new GLTFLoader();
@@ -39,15 +39,15 @@
 
     function createCave(scene) {
       scene.background = new THREE.Color(0x111111);
-      // loader.load('https://cdn.jsdelivr.net/…/cave.gltf', gltf => scene.add(gltf.scene));
+      // loader.load('https://cdn.jsdelivr.net/.../cave.gltf', gltf => scene.add(gltf.scene));
     }
     function createDesert(scene) {
       scene.background = new THREE.Color(0xDDCC99);
-      // loader.load('https://cdn.jsdelivr.net/…/desert_monolith.gltf', gltf => scene.add(gltf.scene));
+      // loader.load('https://cdn.jsdelivr.net/.../desert_monolith.gltf', gltf => scene.add(gltf.scene));
     }
     function createSubmarine(scene) {
       scene.background = new THREE.Color(0x223355);
-      // loader.load('https://cdn.jsdelivr.net/…/submarine_interior.gltf', gltf => scene.add(gltf.scene));
+      // loader.load('https://cdn.jsdelivr.net/.../submarine_interior.gltf', gltf => scene.add(gltf.scene));
     }
     function createFinalScene(scene) {
       scene.background = new THREE.Color(0x000000);
