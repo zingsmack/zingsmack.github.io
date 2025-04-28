@@ -33,7 +33,7 @@ window.onload = () => {
   const nextBtn   = document.querySelector('.viewer .next');
 
   // 3) Configure a single 3s opacity transition
-  imgEl.style.transition = 'opacity 3s ease';
+  imgEl.style.transition = 'opacity 2s ease';
 
   // 4) Helper to load & fade in
   function fadeIn() {
