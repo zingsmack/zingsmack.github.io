@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quantum Journey</title>
-  <!-- Favicon to avoid 404 -->
-  <link rel="icon" href="/favicon.ico" />
+  <!-- Provide a no-op favicon to prevent 404 -->
+  <link rel="icon" href="data:;," />
 
   <!--
     IMPORT MAP NOTES:
@@ -31,6 +31,15 @@
   <div id="section4" class="scroll-section"></div>
 
   <script type="module" crossorigin>
+    <!--
+      WARNING: Browsers will by default attempt to GET `/favicon.ico`, resulting in a 404 if none exists. This is harmless.
+      To fully suppress the request, you can serve a favicon or use a data-URL:
+      <link rel="icon" href="data:;base64,=" />
+    -->
+    // NOTE: The "TypeError: setting getter-only property 'window'" occurs because the UMD GSAP bundle (gsap.min.js)
+    // expects to run as a <script> and mutate the global `window` object, but dynamic imports run in strict mode
+    // where `this` is undefined. When GSAP’s UMD wrapper does `this.window = this`, it fails.
+
     /**
      * Fetches a module, wraps it in a Blob with proper MIME, and imports it.
      * Bypasses CORS/MIME issues by using fetch + Blob URL.
@@ -44,7 +53,8 @@
     }
 
     // Load GSAP and ScrollTrigger dynamically
-    const gsapModule = await dynamicImportModule('https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js');
+    // Load GSAP ESM build to avoid UMD global/window errors
+    const gsapModule = await dynamicImportModule('https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.esm.js');
     const gsap = gsapModule.default || gsapModule.gsap;
     const { ScrollTrigger } = await dynamicImportModule('https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.esm.js');
     gsap.registerPlugin(ScrollTrigger);
