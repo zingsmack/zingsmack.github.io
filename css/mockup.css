@@ -27,7 +27,7 @@ body {
   position: absolute;
   width: 40vw; height: 40vw;
   border-radius: 45% 55% 60% 40% / 40% 60% 55% 45%;
-  animation: morph 6s ease-in-out infinite;
+  animation: morph 4s ease-in-out infinite;
 }
 .blob1 { top: -10%; left: -10%; background: rgba(255,200,200,0.5); animation-duration:10s; }
 .blob2 { top: 20%; right: -15%; background: rgba(200,255,200,0.5); animation-duration:12s; }
