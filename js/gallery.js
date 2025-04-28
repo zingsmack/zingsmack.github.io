@@ -24,6 +24,7 @@ window.onload = () => {
     { src: 'images/nineteen.jpg', caption: 'Portrait 19: [Your caption]' },
     { src: 'images/twenty.jpg', caption: 'Portrait 20: [Your caption]' },
     { src: 'images/twentyone.jpg', caption: 'Portrait 21: [Your caption]' },
+    { src: 'images/twentytwo.jpg', caption: 'Portrait 22: [Your caption]' },
   ];
   let current = 0;
 
