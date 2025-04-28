@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quantum Journey Field</title>
+    <!-- Import map to resolve bare "three" specifier -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
+      "three/": "https://cdn.jsdelivr.net/npm/three@0.150.1/"
+    }
+  }
+  </script>
   <style>
     body { margin: 0; overflow-x: hidden; height: 200vh; }
     canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
