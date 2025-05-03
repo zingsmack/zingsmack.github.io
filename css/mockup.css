@@ -29,9 +29,9 @@ body {
   border-radius: 45% 55% 60% 40% / 40% 60% 55% 45%;
   animation: morph 4s ease-in-out infinite;
 }
-.blob1 { top: -10%; left: -10%; background: rgba(255,200,200,0.5); animation-duration:10s; }
-.blob2 { top: 20%; right: -15%; background: rgba(200,255,200,0.5); animation-duration:12s; }
-.blob3 { bottom: -10%; left: 25%; background: rgba(200,200,255,0.5); animation-duration:9s; }
+.blob1 { top: -10%; left: -10%; background: rgba(93,53,109,0.5); animation-duration:10s; }
+.blob2 { top: 20%; right: -15%; background: rgba(65,16,102,0.5); animation-duration:12s; }
+.blob3 { bottom: -10%; left: 25%; background: rgba(126,108,133,0.5); animation-duration:9s; }
 
 @keyframes morph {
   0% {
