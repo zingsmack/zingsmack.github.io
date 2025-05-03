@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LEONLIII Portfolio</title>
-  <!-- Logo-inspired fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+  <!-- Logo as image + Montserrat for nav -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
   <style>
     /* Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -17,6 +17,8 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     /* Animated background */
     #bgCanvas {
@@ -25,21 +27,18 @@
       width: 100%; height: 100%;
       z-index: -1;
     }
-    /* Header with logo text */
+    /* Header with logo image */
     header {
       flex: 1 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 60vh;
+      padding: 2rem 0;
     }
-    header h1 {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 12vw;
-      color: #6C1BAA; /* Logo purple */
-      letter-spacing: 0.5rem;
-      line-height: 1;
+    header img.logo {
+      width: 60vw;
+      max-width: 800px;
+      height: auto;
     }
     /* Navigation */
     nav {
@@ -74,7 +73,7 @@
 <body>
   <canvas id="bgCanvas"></canvas>
   <header>
-    <h1>LEONLIII</h1>
+    <img class="logo" src="assets/logoo.PNG" alt="LEONLIII Logo">
   </header>
   <nav>
     <a href="https://leonliii.com/photography.html">Photography</a>
@@ -86,7 +85,7 @@
     &copy; 2025 LEONLIII
   </footer>
   <script>
-    // Animated floating squares
+    // Animated floating particles
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
     let w = canvas.width = window.innerWidth;
