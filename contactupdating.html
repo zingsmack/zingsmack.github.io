@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f0f4f8;
+      --bg-dark: #1e1e2e;
+      --card-bg: rgba(255, 255, 255, 0.2);
+      --accent: #ff005d;
+      --text: #111;
+      --text-inverse: #fff;
+      --focus: 2px solid var(--accent);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-light: #1e1e2e;
+        --text: #fff;
+        --card-bg: rgba(0, 0, 0, 0.3);
+      }
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--accent);
+      color: var(--text-inverse);
+      padding: 0.5rem;
+      z-index: 100;
+      text-decoration: none;
+      transition: top 0.3s ease;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+    a:focus-visible {
+      outline: var(--focus);
+      outline-offset: 2px;
+    }
+    .container {
+      backdrop-filter: blur(12px) brightness(1.1);
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+    .icons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .icon-btn {
+      width: 3rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    .icon-btn:hover {
+      transform: translateY(-4px) scale(1.1);
+      background: rgba(255,255,255,0.5);
+    }
+    .icon-btn:focus-visible {
+      outline: var(--focus);
+      outline-offset: 2px;
+    }
+    .icon-btn svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      fill: var(--accent);
+    }
+    header {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+    }
+    .home-icon {
+      width: 2rem;
+      height: 2rem;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .home-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: #000;
+      transition: transform 0.2s ease;
+    }
+    .home-icon:hover svg {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link" aria-label="Skip to main content">Skip to content</a>
+  <header aria-label="Main navigation">
+    <a href="https://leonliii.com/hi3.html" class="home-icon" aria-label="Home">
+      <svg viewBox="0 0 576 512" aria-hidden="true" focusable="false">
+        <title>Home</title>
+        <path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112-.29a16 16 0 0 0 16-15.74V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v96.06a16 16 0 0 0 16 15.74l112 .29a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0z"/>
+        <path d="M571.6 251.47L488 182.6V44a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31a12 12 0 0 0 16.9 1.6L64 270.69V464a48 48 0 0 0 48 48h112a48 48 0 0 0 48-48v-96h64v96a48 48 0 0 0 48 48h112a48 48 0 0 0 48-48V270.7l18.88 15.34a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.68-16.97z"/>
+      </svg>
+    </a>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <div class="container">
+      <h1>Get in Touch</h1>
+      <p>Find me on social media or shoot me an email.</p>
+      <div class="icons" role="group" aria-label="Social media and contact links">
+        <a href="https://www.youtube.com/@LEONLIII" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="YouTube">
+          <svg viewBox="0 0 576 512" aria-hidden="true" focusable="false">
+            <path d="M549.655 124.083c-6.281-23.718-24.843-42.28-48.562-48.562C458.09 64 288 64 288 64s-170.09 0-213.093 11.52c-23.718 6.281-42.28 24.843-48.562 48.563C16 167.087 16 256 16 256s0 88.913 10.345 131.917c6.281 23.718 24.843 42.28 48.563 48.562C117.91 448 288 448 288 448s170.09 0 213.093-11.52c23.718-6.281 42.28-24.843 48.562-48.562C560 344.913 560 256 560 256s0-88.913-10.345-131.917zM232 334V178l142 78-142 78z"/>
+          </svg>
+        </a>
+        <a href="https://www.instagram.com/LEONLIII" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Instagram">
+          <svg viewBox="0 0 448 512" aria-hidden="true" focusable="false">
+            <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9S160.5 370.8 224.1 370.8 339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.2 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.5 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.9-26.9 26.9-14.9 0-26.9-12-26.9-26.9s12-26.9 26.9-26.9 26.9 12 26.9 26.9zm76.1 27.2c-1.7-35.7-9.9-67.3-36.3-93.7-26.5-26.5-58-34.6-93.7-36.3-37-2.1-147.9-2.1-184.9 0-35.7 1.7-67.3 9.9-93.7 36.3-26.5 26.5-34.6 58-36.3 93.7-2.1 37-2.1 147.9 0 184.9 1.7 35.7 9.9 67.3 36.3 93.7 26.5 26.5 58 34.6 93.7 36.3 37 2.1 147.9 2.1 184.9 0 35.7-1.7 67.3-9.9 93.7-36.3 26.5-26.5 34.6-58 36.3-93.7 2.1-37 2.1-147.9 0-184.9zM398.8 388c-7.8 19.6-23 35-42.6 42.6-29.5 11.7-99.5 9-132.2 9s-102.7 2.6-132.2-9c-19.6-7.8-35-23-42.6-42.6-11.7-29.5-9-99.5-9-132.2s-2.6-102.7 9-132.2c7.8-19.6 23-35 42.6-42.6 29.5-11.7 99.5-9 132.2-9s102.7-2.6 132.2 9c19.6 7.8 35 23 42.6 42.6 11.7 29.5 9 99.5 9 132.2s2.7 102.7-9 132.2z"/>
+          </svg>
+        </a>
+        <a href="mailto:orangetalisman@outlook.com" class="icon-btn" aria-label="Email">
+          <svg viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+            <path d="M502.3 190.8L327.4 338.1c-13.8 11.6-34.3 11.6-48.1 0L9.7 190.8C3.9 186.1 0 178.9 0 171.1V80c0-26.5 21.5-48 48-48h416c26.
