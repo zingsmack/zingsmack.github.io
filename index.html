@@ -18,6 +18,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      /* Space above header to reveal background */
+      padding-top: 50px;
     }
     /* Animated background */
     #bgCanvas {
@@ -39,13 +41,14 @@
       align-items: center;
       position: relative;
       z-index: 2;
+      margin-top: 20px;        /* a bit more space after padding */
     }
     .header-band img.logo {
-      height: 200px;          /* logo height larger than band */
+      height: 600px;          /* 3× bigger */
       width: auto;
       max-width: 90vw;
       object-fit: cover;
-      margin-top: -25px;       /* adjust crop: lift image up */
+      margin-top: -225px;      /* crop equally top/bottom */
     }
     /* Navigation */
     nav {
