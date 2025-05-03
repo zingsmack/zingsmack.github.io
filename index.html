@@ -8,8 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
   <style>
     /* Reset */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; }
     body {
       font-family: 'Montserrat', sans-serif;
       background: #000;
@@ -18,68 +18,77 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 50px; /* show background above */
+      padding-top: 50px; /* reveal background above header */
     }
     /* Animated background */
     #bgCanvas {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: -1;
+      top:0; left:0;
+      width:100%; height:100%;
+      z-index:-1;
     }
-    /* Black band with logo inside */
+    /* Header band */
     .header-band {
-      width: 100%;
-      height: 400px;         /* adjusted band height */
+      width:100%;
+      height:400px;
       background: #000;
-      border-top: 1px solid #222;
-      border-bottom: 1px solid #222;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      z-index: 2;
-      margin-top: 20px;
+      border-top:1px solid #222;
+      border-bottom:1px solid #222;
+      overflow:hidden;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+      z-index:2;
+      margin-bottom:20px;
     }
     .header-band img.logo {
-      height: 600px;        /* logo height remains large */
-      width: auto;
-      max-width: 90vw;
-      object-fit: cover;
-      margin-top: -100px;    /* center crop: (600 - 400)/2 = 100 */
-      position: relative;
-      z-index: 3;           /* ensure logo in front */
+      height:600px;
+      width:auto;
+      max-width:90vw;
+      object-fit:cover;
+      margin-top:-100px; /* center logo in band */
+      position:relative;
+      z-index:3;
     }
-    /* Navigation */
+    /* Navigation band */
+    .nav-band {
+      width:100%;
+      height:120px;             /* adjust for equal space above/below links */
+      background: #000;
+      border-top:1px solid #222;
+      border-bottom:1px solid #222;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+      z-index:2;
+    }
     nav {
       display: flex;
-      justify-content: center;
+      align-items: center;
       gap: 4rem;
-      padding: 2rem;
-      position: relative;
-      z-index: 2;
     }
     nav a {
-      font-size: 1.2rem;
-      font-weight: 300;
-      text-decoration: none;
-      text-transform: uppercase;
-      letter-spacing: 0.2rem;
-      color: #fff;
-      transition: color 0.3s ease;
+      font-size:1.2rem;
+      font-weight:300;
+      text-decoration:none;
+      text-transform:uppercase;
+      letter-spacing:0.2rem;
+      color:#fff;
+      transition:color 0.3s ease;
     }
     nav a:hover {
-      color: #6C1BAA;
+      color:#6C1BAA;
     }
     /* Footer */
     footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      color: #555;
-      position: relative;
-      z-index: 2;
+      text-align:center;
+      padding:1rem;
+      font-size:0.9rem;
+      color:#555;
+      position:relative;
+      z-index:2;
     }
   </style>
 </head>
@@ -88,12 +97,14 @@
   <div class="header-band">
     <img class="logo" src="assets/logoo.png" alt="LEONLIII Logo">
   </div>
-  <nav>
-    <a href="https://leonliii.com/photography.html">Photography</a>
-    <a href="https://leonliii.com/film.html">Film</a>
-    <a href="https://leonliii.com/music.html">Music</a>
-    <a href="https://leonliii.com/contact.html">Contact</a>
-  </nav>
+  <div class="nav-band">
+    <nav>
+      <a href="https://leonliii.com/photography.html">Photography</a>
+      <a href="https://leonliii.com/film.html">Film</a>
+      <a href="https://leonliii.com/music.html">Music</a>
+      <a href="https://leonliii.com/contact.html">Contact</a>
+    </nav>
+  </div>
   <footer>
     &copy; 2025 LEONLIII
   </footer>
@@ -104,11 +115,11 @@
     let w = canvas.width = window.innerWidth;
     let h = canvas.height = window.innerHeight;
     window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
-    const colors = ['#6C1BAA', '#9B59B6', '#8E44AD', '#D2B4DE'];
+    const colors = ['#6C1BAA','#9B59B6','#8E44AD','#D2B4DE'];
     class Particle {
       constructor(){ this.init(); }
       init(){
-        this.size = 20 + Math.random()*40;
+        this.size = 20+Math.random()*40;
         this.x = Math.random()*w;
         this.y = Math.random()*h;
         this.vx = (Math.random()-0.5)*0.5;
@@ -116,29 +127,19 @@
         this.color = colors[Math.floor(Math.random()*colors.length)];
       }
       draw(){
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = 0.6;
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-        ctx.fill();
-        this.move();
+        ctx.beginPath();ctx.fillStyle=this.color;ctx.globalAlpha=0.6;
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();this.move();
       }
       move(){
-        this.x += this.vx;
-        this.y += this.vy;
-        if(this.x < -this.size) this.x = w + this.size;
-        if(this.x > w + this.size) this.x = -this.size;
-        if(this.y < -this.size) this.y = h + this.size;
-        if(this.y > h + this.size) this.y = -this.size;
+        this.x+=this.vx;this.y+=this.vy;
+        if(this.x<-this.size)this.x=w+this.size;
+        if(this.x>w+this.size)this.x=-this.size;
+        if(this.y<-this.size)this.y=h+this.size;
+        if(this.y>h+this.size)this.y=-this.size;
       }
     }
-    const particles = Array.from({length: 40}, () => new Particle());
-    function animate(){
-      ctx.clearRect(0, 0, w, h);
-      particles.forEach(p => p.draw());
-      requestAnimationFrame(animate);
-    }
-    animate();
+    const particles = Array.from({length:40},()=>new Particle());
+    function animate(){ctx.clearRect(0,0,w,h);particles.forEach(p=>p.draw());requestAnimationFrame(animate);}animate();
   </script>
 </body>
 </html>
