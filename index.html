@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LEONLIII Portfolio</title>
-  <!-- Logo as image + Montserrat for nav -->
+  <!-- Montserrat for nav -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
   <style>
     /* Reset */
@@ -26,33 +26,26 @@
       width: 100%; height: 100%;
       z-index: -1;
     }
-    /* Logo container: cropping the logo image */
-    .logo-container {
+    /* Black band with logo inside */
+    .header-band {
       width: 100%;
-      height: 120px;           /* container height for cropping */
+      height: 150px;           /* band height */
+      background: #000;
+      border-top: 1px solid #222;
+      border-bottom: 1px solid #222;
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
       position: relative;
       z-index: 2;
-      background: transparent;
     }
-    .logo-container img.logo {
-      height: 240px;          /* double container height */
+    .header-band img.logo {
+      height: 200px;          /* logo height larger than band */
       width: auto;
       max-width: 90vw;
       object-fit: cover;
-      position: relative;
-      top: -40px;             /* adjust to crop top/bottom */
-    }
-    /* Black band underneath logo */
-    .black-band {
-      width: 100%;
-      height: 80px;           /* increased thickness */
-      background: #000;
-      position: relative;
-      z-index: 1;
+      margin-top: -25px;       /* adjust crop: lift image up */
     }
     /* Navigation */
     nav {
@@ -88,10 +81,9 @@
 </head>
 <body>
   <canvas id="bgCanvas"></canvas>
-  <div class="logo-container">
+  <div class="header-band">
     <img class="logo" src="assets/logoo.png" alt="LEONLIII Logo">
   </div>
-  <div class="black-band"></div>
   <nav>
     <a href="https://leonliii.com/photography.html">Photography</a>
     <a href="https://leonliii.com/film.html">Film</a>
