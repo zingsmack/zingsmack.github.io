@@ -18,7 +18,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
     /* Animated background */
     #bgCanvas {
@@ -27,22 +26,33 @@
       width: 100%; height: 100%;
       z-index: -1;
     }
-    /* Header with logo image */
-    header {
-      flex: 1 0 auto;
+    /* Logo container */
+    .logo-container {
+      width: 100%;
+      align-self: stretch;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 2rem 0;
+      align-items: center;
+      height: 150px; /* adjust container height */
+      overflow: hidden;
+      position: relative;
     }
-    header img.logo {
-      width: 60vw;
-      max-width: 800px;
-      height: auto;
+    .logo-container img.logo {
+      height: 100%;
+      width: auto;
+      max-width: 90vw;
+    }
+    /* Black band under logo */
+    .black-band {
+      width: 100%;
+      align-self: stretch;
+      height: 50px;
+      background: #000;
+      border-top: 1px solid #222;
+      border-bottom: 1px solid #222;
     }
     /* Navigation */
     nav {
-      flex: 0 0 auto;
       display: flex;
       justify-content: center;
       gap: 4rem;
@@ -62,7 +72,6 @@
     }
     /* Footer */
     footer {
-      flex: 0 0 auto;
       text-align: center;
       padding: 1rem;
       font-size: 0.9rem;
@@ -72,9 +81,10 @@
 </head>
 <body>
   <canvas id="bgCanvas"></canvas>
-  <header>
+  <div class="logo-container">
     <img class="logo" src="assets/logoo.png" alt="LEONLIII Logo">
-  </header>
+  </div>
+  <div class="black-band"></div>
   <nav>
     <a href="https://leonliii.com/photography.html">Photography</a>
     <a href="https://leonliii.com/film.html">Film</a>
