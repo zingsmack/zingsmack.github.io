@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LEONLIII Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">  
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
   <style>
     /* Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,38 +38,33 @@
       text-shadow: 0 4px 12px rgba(0,0,0,0.6);
       letter-spacing: 0.5rem;
     }
-    /* Navigation styled like high-fashion label */
+    /* Links section with profile background */
     nav {
       display: flex;
       justify-content: center;
       gap: 4rem;
-      margin: 3rem 0;
+      margin: 3rem 20px;
+      position: relative;
+      background: url('assets/profile.jpg') center/cover no-repeat;
+      padding: 60px 20px;
+      border-radius: 20px;
+      overflow: hidden;
     }
     nav a {
-      position: relative;
       text-decoration: none;
       font-family: 'Playfair Display', serif;
-      font-weight: 400;
+      font-weight: 600;
       font-size: 1.2rem;
       text-transform: uppercase;
       color: #111;
-      transition: color 0.3s ease;
-    }
-    nav a::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0; bottom: -4px;
-      height: 2px;
-      background: #111;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.3s ease;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 8px;
+      transition: color 0.3s ease, background 0.3s ease;
     }
     nav a:hover {
       color: #555;
-    }
-    nav a:hover::after {
-      transform: scaleX(1);
+      background: rgba(255,255,255,1);
     }
     /* Footer minimal */
     footer {
