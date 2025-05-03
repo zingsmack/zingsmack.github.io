@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LEONLIII Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;600&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     /* Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -21,49 +21,56 @@
       width: 100%; height: 100%;
       z-index: -1;
     }
-    /* Hero section with nature shot and title */
+    /* Hero section with nature shot and title overlapping image */
     .hero {
       position: relative;
       background: url('assets/nature.jpg') center/cover no-repeat;
-      height: 60vh;
+      height: 50vh;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
+      padding-bottom: 2rem;
     }
     .hero h1 {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 8vw;
+      font-size: 10vw;
       color: #fff;
       text-transform: uppercase;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.6);
-      letter-spacing: 0.5rem;
+      text-shadow: 0 6px 16px rgba(0,0,0,0.7);
+      letter-spacing: 0.6rem;
+      margin-bottom: -2rem; /* Overlap nav */
+      z-index: 1;
     }
-    /* Links section with profile background */
+    /* Links section with profile background overlapping hero */
     nav {
       display: flex;
       justify-content: center;
-      gap: 4rem;
-      margin: 3rem 20px;
+      gap: 3rem;
+      margin: -80px 20px 3rem;
       position: relative;
       background: url('assets/profile.jpg') center/cover no-repeat;
-      padding: 120px 20px; /* Increased vertical padding for more image visibility */
+      padding: 200px 20px;
       border-radius: 20px;
       overflow: hidden;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
     }
     nav a {
       text-decoration: none;
-      font-family: 'Playfair Display', serif;
-      font-weight: 600;
-      font-size: 1.2rem;
-      text-transform: uppercase;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.5rem;
+      font-style: italic;
+      text-transform: none;
       color: #111;
-      padding: 10px 20px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 8px;
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 10px;
       transition: color 0.3s ease, background 0.3s ease;
     }
     nav a:hover {
-      color: #555;
+      color: #333;
       background: rgba(255,255,255,1);
     }
     /* Footer minimal */
@@ -97,16 +104,39 @@
     let h = canvas.height = window.innerHeight;
     window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
     const colors = ['#FF3D00', '#2962FF', '#00BFA5', '#FFD600', '#D500F9'];
-    class Square { constructor(){ this.init(); }
-      init(){ this.size = 30 + Math.random()*70; this.x = Math.random()*w; this.y = h + this.size; this.speed = 0.5+Math.random(); this.angle=0; this.rotationSpeed=(Math.random()-0.5)*0.02; this.color=colors[Math.floor(Math.random()*colors.length)]; }
-      draw(){ ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
-        ctx.fillStyle=this.color; ctx.globalAlpha=0.7;
+    class Square {
+      constructor(){ this.init(); }
+      init(){ 
+        this.size = 30 + Math.random()*70;
+        this.x = Math.random()*w;
+        this.y = h + this.size;
+        this.speed = 0.5+Math.random();
+        this.angle = 0;
+        this.rotationSpeed = (Math.random()-0.5)*0.02;
+        this.color = colors[Math.floor(Math.random()*colors.length)];
+      }
+      draw(){ 
+        ctx.save();
+        ctx.translate(this.x,this.y);
+        ctx.rotate(this.angle);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = 0.7;
         ctx.fillRect(-this.size/2,-this.size/2,this.size,this.size);
-        ctx.restore(); this.update(); }
-      update(){ this.angle+=this.rotationSpeed; this.y-=this.speed; if(this.y<-this.size) this.init(); }
+        ctx.restore();
+        this.update();
+      }
+      update(){ 
+        this.angle += this.rotationSpeed;
+        this.y -= this.speed;
+        if(this.y < -this.size) this.init();
+      }
     }
     const squares = Array.from({length:30},()=>new Square());
-    (function anim(){ ctx.clearRect(0,0,w,h); squares.forEach(s=>s.draw()); requestAnimationFrame(anim); })();
+    (function animate(){
+      ctx.clearRect(0,0,w,h);
+      squares.forEach(s=>s.draw());
+      requestAnimationFrame(animate);
+    })();
   </script>
 </body>
 </html>
