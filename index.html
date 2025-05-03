@@ -31,7 +31,7 @@
     /* Black band with logo inside */
     .header-band {
       width: 100%;
-      height: 150px;           /* band height */
+      height: 300px;          /* increased band height */
       background: #000;
       border-top: 1px solid #222;
       border-bottom: 1px solid #222;
@@ -41,14 +41,16 @@
       align-items: center;
       position: relative;
       z-index: 2;
-      margin-top: 20px;        /* a bit more space after padding */
+      margin-top: 20px;
     }
     .header-band img.logo {
-      height: 600px;          /* 3× bigger */
+      height: 600px;         /* keep logo large */
       width: auto;
       max-width: 90vw;
       object-fit: cover;
-      margin-top: -225px;      /* crop equally top/bottom */
+      margin-top: -150px;     /* crop top/bottom equally */
+      position: relative;
+      z-index: 3;            /* ensure logo in front */
     }
     /* Navigation */
     nav {
