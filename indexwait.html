@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>what a wonderful whirl</title>
+  <style>
+    html, body { margin:0; padding:0; width:100%; height:100%; background: #f4f4f4; overflow:hidden; font-family: sans-serif; }
+    canvas { position:absolute; top:0; left:0; z-index:0; }
+    .game-container { position:relative; width:100%; height:100%; }
+    /* Stone tablet triangle */
+    .tablet {
+      position:absolute;
+      top:50%; left:50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 260px;
+      background: #ccc;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.3);
+      z-index:1;
+    }
+    /* Indentations for I, II, III */
+    .indent {
+      position:absolute;
+      width: 40px; height: 40px;
+      color: #555; font-size: 1.2rem; text-align:center; line-height:40px;
+      font-weight:bold;
+      pointer-events:none;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    /* Positions inside tablet */
+    .indent.i1 { top: 20px; left: 50%; transform: translateX(-50%); }
+    .indent.i2 { bottom: 20px; left: 20%; }
+    .indent.i3 { bottom: 20px; right: 20%; }
+    /* Draggable symbols */
+    .symbol {
+      position:absolute;
+      width: 50px; height: 50px;
+      background: #fff;
+      border-radius: 50%;
+      border: 2px solid #888;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; font-weight:bold;
+      cursor: grab;
+      user-select:none;
+      transition: box-shadow 0.3s;
+      z-index:2;
+    }
+    .symbol.dragging { opacity:0.7; cursor: grabbing; }
+    .symbol.locked { box-shadow: 0 0 15px 5px rgba(255,215,0,0.8); }
+  </style>
+</head>
+<body>
+  <div>LEONLIII is currently being renovated :)...</div>
+  <div class="game-container">
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="tablet">
+      <div class="indent i1" data-key="I">I</div>
+      <div class="indent i2" data-key="II">II</div>
+      <div class="indent i3" data-key="III">III</div>
+    </div>
+
+    <!-- Symbols placed randomly -->
+    <div class="symbol" data-key="I" style="top:10%; left:10%;">I</div>
+    <div class="symbol" data-key="II" style="top:15%; right:15%;">II</div>
+    <div class="symbol" data-key="III" style="bottom:10%; left:20%;">III</div>
+  </div>
+
+  <script>
+    // Background blobs (white background)
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+    const blobs = Array.from({length:6}, ()=>({
+      x: Math.random()*W, y: Math.random()*H,
+      r: 150 + Math.random()*150,
+      phase: Math.random()*Math.PI*2,
+      speed: 0.0008 + Math.random()*0.0012
+    }));
+    function draw(t) {
+      ctx.clearRect(0, 0, W, H);
+      blobs.forEach((b,i)=>{
+        const tt = t*b.speed + b.phase;
+        const rad = b.r + Math.sin(tt)*b.r*0.25;
+        const x = b.x + Math.cos(tt*1.4)*80;
+        const y = b.y + Math.sin(tt*1.2)*80;
+        const grad = ctx.createRadialGradient(x,y,rad*0.2,x,y,rad);
+        const hue = (t*0.02 + i*60) % 360;
+        grad.addColorStop(0, `hsla(${hue},70%,70%,0.6)`);
+        grad.addColorStop(1, `hsla(${(hue+60)%360},80%,50%,0)`);
+        ctx.beginPath(); ctx.fillStyle = grad;
+        ctx.arc(x,y,rad,0,2*Math.PI); ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // Drag & drop logic
+    const symbols = document.querySelectorAll('.symbol');
+    const indents = document.querySelectorAll('.indent');
+    let active = null, offset = {x:0,y:0};
+    let placed = 0;
+
+    symbols.forEach(s => {
+      s.addEventListener('mousedown', e => {
+        active = s;
+        s.classList.add('dragging');
+        const rect = s.getBoundingClientRect();
+        offset.x = e.clientX - rect.left;
+        offset.y = e.clientY - rect.top;
+      });
+    });
+    document.addEventListener('mousemove', e => {
+      if (!active) return;
+      active.style.left = `${e.clientX - offset.x}px`;
+      active.style.top  = `${e.clientY - offset.y}px`;
+    });
+    document.addEventListener('mouseup', e => {
+      if (!active) return;
+      active.classList.remove('dragging');
+      // check drop
+      const key = active.dataset.key;
+      const indent = document.querySelector(`.indent[data-key="${key}"]`);
+      const a = active.getBoundingClientRect();
+      const b = indent.getBoundingClientRect();
+      const dx = (a.left + a.width/2) - (b.left + b.width/2);
+      const dy = (a.top + a.height/2) - (b.top + b.height/2);
+      const dist = Math.hypot(dx, dy);
+      if (dist < 50) {
+        // lock in place
+        active.style.left = `${b.left + window.scrollX + (b.width - a.width)/2}px`;
+        active.style.top  = `${b.top + window.scrollY  + (b.height - a.height)/2}px`;
+        active.classList.add('locked');
+        indent.style.color = '#222';
+        indent.style.textShadow = '0 0 5px gold';
+        active.removeEventListener('mousedown',null);
+        placed++;
+        if (placed === symbols.length) {
+          // all placed — next stage
+          window.location.href = 'stageone3.html';
+        }
+      }
+      active = null;
+    });
+  </script>
+</body>
+</html>
