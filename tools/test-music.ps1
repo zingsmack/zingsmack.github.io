@@ -36,10 +36,10 @@ Assert-True ($css -match 'prefers-reduced-motion:\s*reduce') 'Reduced-motion sty
 Assert-True ($css -match '@media \(max-width: 620px\)') 'Narrow-screen release stacking breakpoint is missing.'
 
 $sectionNames = @($content.sections.PSObject.Properties.Name)
-$expectedSections = @('introduction', 'showreel', 'releases', 'recognition', 'montage', 'workingTogether')
+$expectedSections = @('introduction', 'showreel', 'releases', 'recognition', 'montage', 'studioVideo', 'workingTogether')
 Assert-True (($sectionNames -join ',') -eq ($expectedSections -join ',')) 'Music sections are not in the required order.'
 
-$videos = @($content.sections.introduction.video, $content.sections.showreel.video) + @($content.sections.releases.items)
+$videos = @($content.sections.introduction.video, $content.sections.showreel.video, $content.sections.studioVideo.video) + @($content.sections.releases.items)
 foreach ($video in $videos) {
     Assert-True (-not [string]::IsNullOrWhiteSpace($video.title)) 'A video title is missing.'
     Assert-True (-not [string]::IsNullOrWhiteSpace($video.url)) 'A video URL is missing.'

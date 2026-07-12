@@ -73,6 +73,7 @@
       buildReleases(content),
       buildRecognition(content),
       buildMontage(content),
+      buildStudioVideo(content),
       buildWorkingTogether(content),
       buildFooter(content)
     );
@@ -95,6 +96,7 @@
       ["releases", content.sections.releases.navLabel || content.sections.releases.heading],
       ["recognition", content.sections.recognition.navLabel || content.sections.recognition.heading],
       ["studio", content.sections.montage.navLabel || content.sections.montage.heading],
+      ["mobile-studio-montage", content.sections.studioVideo.navLabel || content.sections.studioVideo.heading],
       ["working-together", content.sections.workingTogether.navLabel || content.sections.workingTogether.heading]
     ];
     destinations.forEach(([id, label], index) => {
@@ -175,6 +177,17 @@
       grid.append(figure);
     });
     section.append(intro, grid);
+    return section;
+  }
+
+  function buildStudioVideo(content) {
+    const data = content.sections.studioVideo;
+    const section = sectionElement("mobile-studio-montage", "editorial-section split-section");
+    section.append(
+      sectionHeading(data),
+      contentText("p", "section-copy reveal", data.copy),
+      videoComponent(data.video, "split-section__media reveal")
+    );
     return section;
   }
 

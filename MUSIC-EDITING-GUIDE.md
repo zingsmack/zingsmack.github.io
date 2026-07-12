@@ -21,7 +21,7 @@ After editing, run:
 
 ## Update text
 
-Open `music-content.json`, find the relevant section under `sections`, and replace the text between the double quotes. Each section also has a short `navLabel` used in the top index. The page sections are `introduction`, `showreel`, `releases`, `recognition`, `montage`, and `workingTogether`.
+Open `music-content.json`, find the relevant section under `sections`, and replace the text between the double quotes. Each section also has a short `navLabel` used in the top index. The page sections are `introduction`, `showreel`, `releases`, `recognition`, `montage`, `studioVideo`, and `workingTogether`.
 
 Long technical copy is stored in `workingTogether.paragraphs`. Each quoted item is one paragraph. The short checklist is `workingTogether.tldr`.
 

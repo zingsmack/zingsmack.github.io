@@ -119,8 +119,20 @@
                                                ],
                                      "navLabel":  "Studio"
                                  },
+                     "studioVideo":  {
+                                         "number":  "06",
+                                         "heading":  "Mobile Studio Montage",
+                                         "navLabel":  "Mobile Studio Montage",
+                                         "copy":  "TBC",
+                                         "video":  {
+                                                       "title":  "Mobile Studio Montage",
+                                                       "url":  "https://www.youtube.com/watch?v=PlvOl9xiRu4",
+                                                       "captions":  "TBC",
+                                                       "transcript":  "TBC"
+                                                   }
+                                     },
                      "workingTogether":  {
-                                             "number":  "06",
+                                             "number":  "07",
                                              "heading":  "Working Together",
                                              "subheading":  "Technical details",
                                              "paragraphs":  [

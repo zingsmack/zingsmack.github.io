@@ -35,7 +35,8 @@ A more austere direction inspired by independent-film credits and recording logs
 5. Selected Releases: three horizontal cards with index/year, title/credit, poster/play control, captions status, and transcript disclosure.
 6. Native Instruments recognition: award image and copy in an asymmetrical composition; testimonial image spans below with a transcription placeholder.
 7. Artist studio montage: staggered two-column contact sheet with varied image ratios and restrained lower-edge overlays.
-8. Working Together: sticky heading/CTA on the left and technical details on the right, followed by a closing footer.
+8. Mobile Studio Montage: full editorial video treatment with a click-to-load poster, captions status, and transcript disclosure.
+9. Working Together: sticky heading/CTA on the left and technical details on the right, followed by a closing footer.
 
 ### Tablet, approximately 768px
 
