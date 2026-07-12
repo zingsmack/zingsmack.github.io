@@ -1,22 +1,48 @@
-<!-- File: music.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Music - Under Construction</title>
-  <link rel="stylesheet" href="css/underconstruction.css">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+  <title>Music &mdash; Production, Releases &amp; Collaboration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/music.css">
+  <script src="js/music.js" defer></script>
 </head>
-<body>
-  <canvas id="fractalCanvas"></canvas>
-  <div class="overlay">
-    <h1>Music Page<br>Under Construction</h1>
-  </div>
-  <script src="js/underconstruction.js" defer></script>
-  <a href="hi.html" class="home-button-new" aria-label="Home">
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-  </svg>
-</a>
+<body class="is-locked">
+  <a class="skip-link" href="#music-main">Skip to main content</a>
+  <div class="site-frame" aria-hidden="true"></div>
+  <header class="gate-header">
+    <a class="home-link" href="hi.html" aria-label="Return to the home page">
+      <span aria-hidden="true">&larr;</span>
+      <span>Home</span>
+    </a>
+    <span class="gate-folio">Private viewing / Music</span>
+  </header>
+  <main id="music-main">
+    <section class="lock-screen" aria-labelledby="lock-title">
+      <div class="lock-screen__index" aria-hidden="true">M / 001</div>
+      <div class="lock-screen__content">
+        <p class="eyebrow">LEONLIII / MUSIC</p>
+        <h1 id="lock-title">Music <span>&mdash; Production, Releases &amp; Collaboration</span></h1>
+        <p class="lock-screen__note">Enter the shared word to open this private portfolio preview.</p>
+        <form class="unlock-form" id="music-unlock-form" novalidate>
+          <label for="music-word">Viewing word</label>
+          <div class="unlock-form__row">
+            <input id="music-word" name="music-word" type="password" autocomplete="off" required>
+            <button type="submit">Enter portfolio</button>
+          </div>
+          <p class="unlock-status" id="music-unlock-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+      <div class="lock-screen__rule" aria-hidden="true"></div>
+    </section>
+  </main>
+  <noscript>
+    <p class="noscript-message">JavaScript is required to open this portfolio.</p>
+  </noscript>
 </body>
 </html>
