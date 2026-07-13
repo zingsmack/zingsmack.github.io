@@ -48,6 +48,8 @@ Assert-True ($css -match '(?s)\.is-film-portfolio \.music-header\s*\{.*?position
 Assert-True ($css -match '(?s)\.is-film-portfolio \.music-nav\s*\{.*?flex-wrap:\s*wrap;.*?overflow-x:\s*visible;') 'The moviemakers navigation can still scroll horizontally.'
 Assert-True ($css -match '(?s)\.is-film-portfolio \.music-nav a.*?text-transform:\s*none;') 'Film navigation capitalization is not preserved from content.'
 Assert-True ($css -match '(?s)\.montage-item__overlay\s*\{.*?text-transform:\s*uppercase;') 'Montage tags are no longer uppercase.'
+Assert-True ($css -match '(?s)\.is-film-portfolio \.hero-pattern\s*\{\s*visibility:\s*hidden;') 'The film hero artwork is not hidden.'
+Assert-True ($script -match 'portfolioImage\(content\.media\.pattern, "hero-pattern reveal"\)') 'The hero artwork container was removed.'
 Assert-True ($css -match 'prefers-reduced-motion:\s*reduce') 'Reduced-motion styling is missing.'
 Assert-True ($css -match '(?s)prefers-reduced-motion:\s*reduce.*?\.js \.reveal\s*\{\s*opacity:\s*1;\s*transform:\s*none;') 'Reduced-motion reveals are not forced visible.'
 Assert-True ($script -match 'matchMedia\("\(prefers-reduced-motion: reduce\)"\)') 'Reduced-motion JavaScript handling is missing.'

@@ -456,6 +456,11 @@ a {
   filter: saturate(0.75) contrast(1.1);
 }
 
+/* Keep the film layout slot intact while this artwork is temporarily hidden. */
+.is-film-portfolio .hero-pattern {
+  visibility: hidden;
+}
+
 .hero-video {
   grid-column: 2 / 12;
   margin-top: clamp(48px, 8vw, 110px);
