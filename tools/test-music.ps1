@@ -90,6 +90,20 @@ Assert-True ($script -match 'video\.poster') 'Custom video poster support is mis
 Assert-True ($script -match 'pathname\.startsWith\("/shorts/"\)') 'YouTube Shorts URL support is missing.'
 Assert-True ($filmContent.sections.releases.items.Count -eq 3) 'The film release collection must contain three cards.'
 Assert-True ($filmContent.sections.filmClips.items.Count -eq 3) 'The Music to TV / Film collection must contain three cards.'
+$expectedClipCredits = @(
+    'HBO/Westworld Scoring',
+    'The Captain / 8Dio',
+    'The Wonders and Hardships of Love in a Hopeless Place'
+)
+$expectedDescriptionCounts = @(3, 2, 6)
+Assert-True (($filmContent.sections.filmClips.items.credit -join ',') -eq ($expectedClipCredits -join ',')) 'A film clip title changed unexpectedly.'
+$descriptionCounts = @($filmContent.sections.filmClips.items | ForEach-Object { @($_.description).Count })
+Assert-True (($descriptionCounts -join ',') -eq ($expectedDescriptionCounts -join ',')) 'A film clip description paragraph is missing.'
+foreach ($clip in $filmContent.sections.filmClips.items) {
+    Assert-True (-not (@($clip.description) | Where-Object { [string]::IsNullOrWhiteSpace($_) })) "A film clip description contains an empty paragraph: $($clip.title)"
+}
+Assert-True ($script -match 'clip\.description') 'Film clip description rendering is missing.'
+Assert-True ($css -match '\.film-clip__description') 'Film clip description styling is missing.'
 
 $videos = @($content.sections.introduction.video, $content.sections.showreel.video, $content.sections.studioVideo.video) + @($content.sections.releases.items) + $filmVideos
 foreach ($video in $videos) {

@@ -63,7 +63,9 @@ In `sections.releases.items`, each release has `title`, `year`, `url`, `credit`,
 
 ## Update the film clips
 
-In `moviemakers-content.json`, section 06 is `sections.filmClips`. Each clip has `title`, `url`, `credit`, `captions`, and `transcript`. Keep its three objects in the order you want them displayed; the page labels them C / 01 through C / 03 automatically.
+In `moviemakers-content.json`, section 06 is `sections.filmClips`. Each clip has `title`, `url`, `credit`, `description`, `captions`, and `transcript`. Keep its three objects in the order you want them displayed; the page labels them C / 01 through C / 03 automatically.
+
+The `description` field is a list of quoted paragraphs. Add, remove, or reorder those quoted items to change the compact text shown in the left-hand column beside each clip.
 
 ## Update testimonials
 

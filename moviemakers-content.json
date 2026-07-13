@@ -131,26 +131,43 @@
                                                          "title":  "clip1",
                                                          "year":  "",
                                                          "url":  "https://youtube.com/watch?v=cRHXCJmf1XA",
-                                                         "credit":  "HBO/Westworld",
+                                                         "credit":  "HBO/Westworld Scoring",
                                                          "captions":  "TBC",
                                                          "transcript":  "TBC",
-                                                         "poster":  "assets/musicassetsextrafilm/optimized/06_01.jpg"
+                                                         "poster":  "assets/musicassetsextrafilm/optimized/06_01.jpg",
+                                                         "description":  [
+                                                                             "The brief was to compose a full score and sound design for this 4min+ piece of footage provided by HBO WestWorld courtesy of Spitfire.",
+                                                                             "I composed, produced, mixed and mastered the music, audio arrangement and sound design.",
+                                                                             "The full final mix and master for the entire audio (which included the dialogue, and a few sound effects such as gunshots, car screeching), is not demonstrated here."
+                                                                         ]
                                                      },
                                                      {
                                                          "title":  "clip2",
                                                          "year":  "",
                                                          "url":  "https://www.youtube.com/watch?v=Ki4mFaVpLrc",
-                                                         "credit":  "The Captain / 8dio",
+                                                         "credit":  "The Captain / 8Dio",
                                                          "captions":  "TBC",
-                                                         "transcript":  "TBC"
+                                                         "transcript":  "TBC",
+                                                         "description":  [
+                                                                             "The brief was to compose an original score to this 3min+ piece of silent footage provided by 8DIO.",
+                                                                             "Music composition, audio production, sound design, mixing and mastering all completed by LEONLIII."
+                                                                         ]
                                                      },
                                                      {
                                                          "title":  "clip3",
                                                          "year":  "",
                                                          "url":  "https://youtu.be/HS8tS66gStI",
-                                                         "credit":  "the wonders and hardship of love in a hopeless place",
+                                                         "credit":  "The Wonders and Hardships of Love in a Hopeless Place",
                                                          "captions":  "TBC",
-                                                         "transcript":  "TBC"
+                                                         "transcript":  "TBC",
+                                                         "description":  [
+                                                                             "This is a song for a movie.",
+                                                                             "The original static artwork picture was provided by: https://www.artstation.com/artwork/8w...",
+                                                                             "The brief was to make an original score under 90 seconds inspired by this image.",
+                                                                             "I imagined that this told the story of two star-crossed lovers in a time where all human meetings are prescheduled and authorised / denied by a controlling system, and when the person on the bike gets conscripted for war, this is the last chance they get to meet, and possibly the last time they\u0027ll ever see each other.",
+                                                                             "I then created some musical sketches, settling on one of a number of ideas I made for this, experimenting a lot with sound design. To finish it, I found a vocal sample that I felt gave it Dune-esque vibes.",
+                                                                             "I then broke out the elements of the original static artwork image into photoshop and premiere pro, to turn the still image into a dynamic animation."
+                                                                         ]
                                                      }
                                                  ],
                                        "navLabel":  "Music to TV / Film"

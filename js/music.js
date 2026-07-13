@@ -210,12 +210,18 @@
     intro.append(sectionHeading(data), contentText("p", "section-copy reveal", data.copy));
     const list = element("div", "release-list");
     data.items.forEach((clip, index) => {
-      const article = element("article", "release-card reveal");
+      const article = element("article", "release-card film-clip-card reveal");
       const meta = element("div", "release-card__meta");
       meta.append(element("span", "release-card__index", `C / ${String(index + 1).padStart(2, "0")}`));
       const title = element("div", "release-card__title");
       title.append(element("h3", "", clip.title), contentText("p", "release-card__credit", clip.credit));
-      article.append(meta, title, videoComponent(clip, "release-card__video"));
+      article.append(meta, title);
+      if (Array.isArray(clip.description) && clip.description.length) {
+        const description = element("div", "film-clip__description");
+        clip.description.forEach((paragraph) => description.append(contentText("p", "", paragraph)));
+        article.append(description);
+      }
+      article.append(videoComponent(clip, "release-card__video"));
       list.append(article);
     });
     section.append(intro, list);
