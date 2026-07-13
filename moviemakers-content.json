@@ -12,7 +12,7 @@
                                           "copy":  "TBC",
                                           "video":  {
                                                         "title":  "LEONLIII introduction",
-                                                        "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                        "url":  "https://youtube.com/shorts/FGa79I45HzE",
                                                         "captions":  "TBC",
                                                         "transcript":  "TBC"
                                                     },
@@ -24,7 +24,7 @@
                                       "copy":  "TBC",
                                       "video":  {
                                                     "title":  "ambient/tv/film music showreel",
-                                                    "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                    "url":  "https://youtu.be/BvV3s_7KNGQ",
                                                     "captions":  "TBC",
                                                     "transcript":  "TBC"
                                                 },
@@ -127,7 +127,7 @@
                                                      {
                                                          "title":  "clip1",
                                                          "year":  "",
-                                                         "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                         "url":  "https://youtube.com/watch?v=cRHXCJmf1XA",
                                                          "credit":  "HBO/Westworld",
                                                          "captions":  "TBC",
                                                          "transcript":  "TBC"
@@ -135,7 +135,7 @@
                                                      {
                                                          "title":  "clip2",
                                                          "year":  "",
-                                                         "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                         "url":  "https://www.youtube.com/watch?v=Ki4mFaVpLrc",
                                                          "credit":  "The Captain / 8dio",
                                                          "captions":  "TBC",
                                                          "transcript":  "TBC"
@@ -143,7 +143,7 @@
                                                      {
                                                          "title":  "clip3",
                                                          "year":  "",
-                                                         "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                         "url":  "https://youtu.be/HS8tS66gStI",
                                                          "credit":  "the wonders and hardship of love in a hopeless place",
                                                          "captions":  "TBC",
                                                          "transcript":  "TBC"
@@ -158,21 +158,21 @@
                                              "paragraphs":  [
                                                                 "Firstly, if you have any specific inspirations or references for any part, please tell me, as it will help me to achieve your vision.",
                                                                 "If you have existing audio that you would like mixed, I would need to receive the stems as 32-bit, 48kHz WAV files. Please label them appropriately in the following format: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION_DRYorFX. For example: A24_Midsommar_000222_GroupedDialogue_Dry.",
-                                                                "The time is written in the format [hhmmss], and will be for the rough starting time in the guide_video provided (wether that guide video is full or a scene or a clip) being worked on.",
-                                                                "If providing stems for a full mix of audio, then please ensure character names are provided, and depending on recording method, stems isolated to specific characters (where possible) or scenenames (if no dubbing and room/overhead mics were used).",
+                                                                "The time is written in the format [hhmmss], and will be for the rough starting time in the \u0027guide video\u0027 provided (wether that guide video is the full movie or just a scene or a clip). If the audio is already synced or you are unsure please input \u0027000000\u0027.",
+                                                                "If providing stems for a full mix of audio, then please ensure character names are provided in the description, and depending on recording method, stems isolated to specific characters (where possible) or scene names/codes (in the cases of no dubbing or where room/overhead mics were used).",
                                                                 "You can upload stems to a Google Drive folder (remember to set permissions), Dropbox, WeTransfer, or another file-sharing service. Please send the email link to orangetalisman@outlook.com.",
                                                                 "I will provide the following final output file as a 48kHz, 24-bit stereo WAV file.",
-                                                                "I won\u0027t use any AI or machine-learning processing on your stems. To produce your track, I will use my DAW and a selection of industry-standard plugins in addition to outboard hardware, where appropriate. Where necessary, I may rework some stems in order to fulfil the demands of the production.",
-                                                                "Your stems will only be used for the purposes of creating this track. If you agree for me to use any of those stems for another purpose, such as in a remix, demo or promotional material, or another production, that will be covered by a separate agreement.",
-                                                                "The ownership of any music I create will be retained by me, and the filmmaker will be granted a non-exclusive licence to use that music only in the film provided.",
+                                                                "I won\u0027t use any AI or machine-learning processing on material you provide to me. To produce your track, I will use my DAW and a selection of industry-standard plugins in addition to outboard hardware, where appropriate. Where necessary, I may rework some stems in order to fulfil the demands of the production.",
+                                                                "Material you provide to me will only be used for the purposes of fulfilling the requirements of this project. If you agree for me to use any of that material for another purpose, such as in a remix, demo or promotional material, or another production, that will be covered by a separate agreement.",
+                                                                "The ownership of any music I create will be retained by myself, and the filmmaker will be granted a non-exclusive licence to use that music only in the project provided, without any alterations. If the exported audio is desired for use in further processing, such as in a remaster, then i can provide an unmastered audio for this purpose, and this would be under a separate agreement, where it would be required that I give final cut approval on any audio used.",
                                                                 "For any music sent to me to be incorporated into a production, I will assume that the relevant copyright permissions have been obtained, and that the filmmaker is aware of related implications.",
-                                                                "As you now have my number and email, please feel free to message or leave me a voice note at any time."
+                                                                "I\u0027m happy to answer any questions you may have and as you now have my number and email, please feel free to message or leave me a voice note at any time."
                                                             ],
                                              "tldr":  [
-                                                          "Please send song references, inspirations, or track aspirations.",
+                                                          "Please send references, inspirations, or aspirations.",
                                                           "Export your existing stems as 32-bit, 48kHz WAV files.",
-                                                          "Name files PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION_DRYorFX. If there is no BPM, write FREE.",
-                                                          "Please provide only one piece of visual footage.",
+                                                          "Name files in the following convention: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION_DRYorFX.",
+                                                          "please provide only one piece of visual footage, that the audio will be synched to.",
                                                           "Email the download link to orangetalisman@outlook.com."
                                                       ],
                                              "contactLabel":  "Discuss a project",

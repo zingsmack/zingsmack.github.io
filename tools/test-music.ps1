@@ -58,17 +58,18 @@ Assert-True (($filmContent.sections.montage | ConvertTo-Json -Depth 20 -Compress
 Assert-True (($filmContent.media | ConvertTo-Json -Depth 20 -Compress) -eq ($content.media | ConvertTo-Json -Depth 20 -Compress)) 'Film media no longer matches the shared Music media.'
 
 $expectedFilmUrls = @(
-    'https://www.youtube.com/watch?v=hx4aRwIlr5U',
-    'https://www.youtube.com/watch?v=hx4aRwIlr5U',
+    'https://youtube.com/shorts/FGa79I45HzE',
+    'https://youtu.be/BvV3s_7KNGQ',
     'https://www.youtube.com/watch?v=tS7JZtRBbiI',
     'https://www.youtube.com/watch?v=QuPaTz6wl5I',
     'https://www.youtube.com/watch?v=ZuCNQZj7xjw',
-    'https://www.youtube.com/watch?v=hx4aRwIlr5U',
-    'https://www.youtube.com/watch?v=hx4aRwIlr5U',
-    'https://www.youtube.com/watch?v=hx4aRwIlr5U'
+    'https://youtube.com/watch?v=cRHXCJmf1XA',
+    'https://www.youtube.com/watch?v=Ki4mFaVpLrc',
+    'https://youtu.be/HS8tS66gStI'
 )
 $filmVideos = @($filmContent.sections.introduction.video, $filmContent.sections.showreel.video) + @($filmContent.sections.releases.items) + @($filmContent.sections.filmClips.items)
 Assert-True (($filmVideos.url -join ',') -eq ($expectedFilmUrls -join ',')) 'A supplied film video URL changed unexpectedly.'
+Assert-True ($script -match 'pathname\.startsWith\("/shorts/"\)') 'YouTube Shorts URL support is missing.'
 Assert-True ($filmContent.sections.releases.items.Count -eq 3) 'The film release collection must contain three cards.'
 Assert-True ($filmContent.sections.filmClips.items.Count -eq 3) 'The Music to TV / Film collection must contain three cards.'
 
