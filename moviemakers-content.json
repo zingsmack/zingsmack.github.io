@@ -157,7 +157,7 @@
                                              "subheading":  "Technical details",
                                              "paragraphs":  [
                                                                 "Firstly, if you have any specific inspirations or references for any part, please tell me, as it will help me to achieve your vision.",
-                                                                "If you have existing audio that you would like mixed, I would need to receive the stems as 32-bit, 48kHz WAV files. Please label them appropriately in the following format: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION_DRYorFX. For example: A24_Midsommar_000222_GroupedDialogue_Dry.",
+                                                                "If you have existing audio that you would like mixed, I would need to receive the stems as 32-bit, 48kHz WAV files. Please label them appropriately in the following format: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION. For example: A24_Midsommar_000222_GroupedDialogue",
                                                                 "The time is written in the format [hhmmss], and will be for the rough starting time in the \u0027guide video\u0027 provided (wether that guide video is the full movie or just a scene or a clip). If the audio is already synced or you are unsure please input \u0027000000\u0027.",
                                                                 "If providing stems for a full mix of audio, then please ensure character names are provided in the description, and depending on recording method, stems isolated to specific characters (where possible) or scene names/codes (in the cases of no dubbing or where room/overhead mics were used).",
                                                                 "You can upload stems to a Google Drive folder (remember to set permissions), Dropbox, WeTransfer, or another file-sharing service. Please send the email link to orangetalisman@outlook.com.",
@@ -171,7 +171,7 @@
                                              "tldr":  [
                                                           "Please send references, inspirations, or aspirations.",
                                                           "Export your existing stems as 32-bit, 48kHz WAV files.",
-                                                          "Name files in the following convention: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION_DRYorFX.",
+                                                          "Name files in the following convention: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION.",
                                                           "please provide only one piece of visual footage, that the audio will be synched to.",
                                                           "Email the download link to orangetalisman@outlook.com."
                                                       ],
