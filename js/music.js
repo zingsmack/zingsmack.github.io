@@ -132,14 +132,14 @@
     const folio = element("div", "section-folio reveal");
     folio.append(element("span", "", intro.number), element("span", "", intro.heading));
     const pattern = portfolioImage(content.media.pattern, "hero-pattern reveal");
-    section.append(headingBlock, folio, pattern, videoComponent(intro.video, "hero-video reveal"));
+    section.append(headingBlock, folio, pattern, videoComponent(intro.video, "hero-video reveal", content.page.videoLabels));
     return section;
   }
 
   function buildShowreel(content) {
     const data = content.sections.showreel;
     const section = sectionElement("showreel", "editorial-section split-section");
-    section.append(sectionHeading(data), contentText("p", "section-copy reveal", data.copy), videoComponent(data.video, "split-section__media reveal"));
+    section.append(sectionHeading(data), contentText("p", "section-copy reveal", data.copy), videoComponent(data.video, "split-section__media reveal", content.page.videoLabels));
     return section;
   }
 
@@ -155,7 +155,7 @@
       meta.append(element("span", "release-card__index", `R / ${String(index + 1).padStart(2, "0")}`), element("span", "release-card__year", release.year));
       const title = element("div", "release-card__title");
       title.append(element("h3", "", release.title), contentText("p", "release-card__credit", release.credit));
-      article.append(meta, title, videoComponent(release, "release-card__video"));
+      article.append(meta, title, videoComponent(release, "release-card__video", content.page.videoLabels));
       list.append(article);
     });
     section.append(intro, list);
@@ -198,7 +198,7 @@
     section.append(
       sectionHeading(data),
       contentText("p", "section-copy reveal", data.copy),
-      videoComponent(data.video, "split-section__media reveal")
+      videoComponent(data.video, "split-section__media reveal", content.page.videoLabels)
     );
     return section;
   }
@@ -214,14 +214,14 @@
       const meta = element("div", "release-card__meta");
       meta.append(element("span", "release-card__index", `C / ${String(index + 1).padStart(2, "0")}`));
       const title = element("div", "release-card__title");
-      title.append(element("h3", "", clip.title), contentText("p", "release-card__credit", clip.credit));
-      article.append(meta, title);
+      title.append(element("h3", "", clip.title));
+
       if (Array.isArray(clip.description) && clip.description.length) {
         const description = element("div", "film-clip__description");
         clip.description.forEach((paragraph) => description.append(contentText("p", "", paragraph)));
-        article.append(description);
+        title.append(description);
       }
-      article.append(videoComponent(clip, "release-card__video"));
+      article.append(meta, title, videoComponent(clip, "release-card__video", content.page.videoLabels));
       list.append(article);
     });
     section.append(intro, list);
@@ -252,7 +252,22 @@
     const footer = element("footer", "music-footer");
     const home = element("a", "", "Return home");
     home.href = "hi.html";
-    footer.append(element("span", "", content.page.label), contentText("span", "", content.page.copyright), home);
+    const socialLinks = Array.isArray(content.page.socialLinks) ? content.page.socialLinks : [];
+    footer.append(element("span", "", content.page.label), contentText("span", "", content.page.copyright));
+    if (socialLinks.length) {
+      const socials = element("nav", "music-footer__socials");
+      socials.setAttribute("aria-label", "Social profiles");
+      socialLinks.forEach((social) => {
+        const link = element("a", "social-link");
+        link.href = safeContactUrl(social.url);
+        link.setAttribute("aria-label", social.label);
+        link.append(socialIcon(social.icon));
+        socials.append(link);
+      });
+      footer.classList.add("has-socials");
+      footer.append(socials);
+    }
+    footer.append(home);
     return footer;
   }
 
@@ -268,7 +283,7 @@
     return block;
   }
 
-  function videoComponent(video, className) {
+  function videoComponent(video, className, labels = {}) {
     const figure = element("figure", `video-component ${className}`.trim());
     const frame = element("div", "video-frame");
     const id = youtubeId(video.url);
@@ -295,9 +310,9 @@
     }
     const caption = element("figcaption", "video-caption");
     const status = element("p", "video-caption__status");
-    status.append(element("span", "", "Captions"), contentText("span", "", video.captions));
+    status.append(element("span", "", labels.captions || "Captions"), contentText("span", "", video.captions));
     const transcript = element("details", "transcript");
-    transcript.append(element("summary", "", "Transcript"), contentText("p", "", video.transcript));
+    transcript.append(element("summary", "", labels.transcript || "Transcript"), contentText("p", "", video.transcript));
     caption.append(contentText("h3", "video-caption__title", video.title), status, transcript);
     figure.append(frame, caption);
     return figure;
@@ -370,6 +385,35 @@
   function safeContactUrl(url) {
     if (typeof url !== "string") return "#";
     return url.startsWith("mailto:") || url.startsWith("https://") ? url : "#";
+  }
+
+  function socialIcon(name) {
+    const namespace = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(namespace, "svg");
+    svg.setAttribute("class", "social-icon");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+
+    const shapes = {
+      youtube: [
+        ["path", { d: "M21.6 7.2a2.8 2.8 0 0 0-2-2C17.8 4.7 12 4.7 12 4.7s-5.8 0-7.6.5a2.8 2.8 0 0 0-2 2A29 29 0 0 0 2 12a29 29 0 0 0 .4 4.8 2.8 2.8 0 0 0 2 2c1.8.5 7.6.5 7.6.5s5.8 0 7.6-.5a2.8 2.8 0 0 0 2-2A29 29 0 0 0 22 12a29 29 0 0 0-.4-4.8Z" }],
+        ["path", { d: "m10 15.3 5-3.3-5-3.3v6.6Z", class: "social-icon__cutout" }]
+      ],
+      instagram: [
+        ["rect", { x: "3", y: "3", width: "18", height: "18", rx: "5" }],
+        ["circle", { cx: "12", cy: "12", r: "4.1", class: "social-icon__cutout" }],
+        ["circle", { cx: "17.4", cy: "6.7", r: "1.1", class: "social-icon__cutout" }]
+      ],
+      linkedin: [
+        ["path", { d: "M5.4 8.6H2.2V21h3.2V8.6ZM3.8 3A1.9 1.9 0 1 0 3.8 6.8 1.9 1.9 0 0 0 3.8 3ZM21.8 14.1c0-3.7-2-5.8-4.8-5.8-2.2 0-3.2 1.2-3.8 2.1V8.6H10V21h3.2v-6.1c0-1.6.3-3.2 2.3-3.2s2 1.8 2 3.3v6h3.3l1-6.9Z" }]
+      ]
+    };
+    (shapes[name] || shapes.linkedin).forEach(([tag, attributes]) => {
+      const shape = document.createElementNS(namespace, tag);
+      Object.entries(attributes).forEach(([attribute, value]) => shape.setAttribute(attribute, value));
+      svg.append(shape);
+    });
+    return svg;
   }
 
   function contentText(tagName, className, text, attributes = {}) {

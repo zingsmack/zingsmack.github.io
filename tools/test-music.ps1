@@ -25,7 +25,8 @@ $html = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'music.html'))
 $css = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'css\music.css'))
 $script = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'js\music.js'))
 $content = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'music-content.json')) | ConvertFrom-Json
-$filmContent = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'moviemakers-content.json')) | ConvertFrom-Json
+$filmJson = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'moviemakers-content.json'))
+$filmContent = $filmJson | ConvertFrom-Json
 $expectedTitle = 'Music ' + [char]0x2014 + ' Production, Releases & Collaboration'
 
 Assert-True ($content.page.title -eq $expectedTitle) 'The primary page title is not exact.'
@@ -40,7 +41,9 @@ Assert-True ($script -match 'moviemakers-content\.json') 'The film content targe
 Assert-True ($script -match 'youtube-nocookie\.com') 'Privacy-enhanced YouTube embeds are missing.'
 Assert-True ($script -notmatch 'autoplaying') 'Unexpected autoplay implementation found.'
 Assert-True ($css -match ':focus-visible') 'Visible focus styling is missing.'
-Assert-True ($css -match 'is-film-portfolio.*section-heading__title') 'Film-only heading wrapping is missing.'
+Assert-True ($css -match 'is-film-portfolio.*section-heading__title') 'Film-only heading styling is missing.'
+Assert-True ($css -match '(?s)#showreel \.section-heading__title.*?white-space:\s*nowrap') 'The film showreel heading is not kept on one line.'
+Assert-True ($css -match '\.film-clip-card \.release-card__title h3') 'Smaller film clip title styling is missing.'
 Assert-True ($css -match 'prefers-reduced-motion:\s*reduce') 'Reduced-motion styling is missing.'
 Assert-True ($css -match '(?s)prefers-reduced-motion:\s*reduce.*?\.js \.reveal\s*\{\s*opacity:\s*1;\s*transform:\s*none;') 'Reduced-motion reveals are not forced visible.'
 Assert-True ($script -match 'matchMedia\("\(prefers-reduced-motion: reduce\)"\)') 'Reduced-motion JavaScript handling is missing.'
@@ -53,9 +56,47 @@ Assert-True (($sectionNames -join ',') -eq ($expectedSections -join ',')) 'Music
 $filmSectionNames = @($filmContent.sections.PSObject.Properties.Name)
 $expectedFilmSections = @('introduction', 'showreel', 'releases', 'recognition', 'montage', 'filmClips', 'workingTogether')
 Assert-True (($filmSectionNames -join ',') -eq ($expectedFilmSections -join ',')) 'Film sections are not in the required order.'
-Assert-True (($filmContent.sections.recognition | ConvertTo-Json -Depth 20 -Compress) -eq ($content.sections.recognition | ConvertTo-Json -Depth 20 -Compress)) 'Film section 04 no longer matches Music section 04.'
-Assert-True (($filmContent.sections.montage | ConvertTo-Json -Depth 20 -Compress) -eq ($content.sections.montage | ConvertTo-Json -Depth 20 -Compress)) 'Film section 05 no longer matches Music section 05.'
-Assert-True (($filmContent.media | ConvertTo-Json -Depth 20 -Compress) -eq ($content.media | ConvertTo-Json -Depth 20 -Compress)) 'Film media no longer matches the shared Music media.'
+Assert-True ($filmContent.sections.recognition.awardImage -eq $content.sections.recognition.awardImage) 'Film section 04 no longer uses the shared award image.'
+Assert-True ($filmContent.sections.recognition.testimonialsImage -eq $content.sections.recognition.testimonialsImage) 'Film section 04 no longer uses the shared testimonial image.'
+Assert-True (($filmContent.sections.montage.items.image -join ',') -eq ($content.sections.montage.items.image -join ',')) 'Film section 05 no longer uses the shared montage images.'
+foreach ($property in $content.media.PSObject.Properties) {
+    $filmMedia = $filmContent.media.PSObject.Properties[$property.Name].Value
+    Assert-True ($null -ne $filmMedia) "Film media is missing: $($property.Name)"
+    Assert-True ($filmMedia.source -eq $property.Value.source) "Film media source changed: $($property.Name)"
+    Assert-True ($filmMedia.width -eq $property.Value.width -and $filmMedia.height -eq $property.Value.height) "Film media dimensions changed: $($property.Name)"
+}
+
+Assert-True ($filmJson -notmatch 'TBC') 'A TBC placeholder remains in the moviemakers content.'
+Assert-True ($filmContent.page.intro -eq 'Welcome to my portfolio!  Please press play to watch the video below.') 'Film page introduction copy is incorrect.'
+Assert-True ($filmContent.sections.showreel.copy -eq 'A selection of music i have created, accompanied by visual footage I have shot.') 'Film showreel copy is incorrect.'
+Assert-True ($filmContent.sections.releases.copy -eq 'a selection of personal tracks I released') 'Film release copy is incorrect.'
+Assert-True ($filmContent.sections.recognition.copy -eq 'Now owned by the parents of Akai and Moog, Native Instruments have provided music creators with pioneering tools since 1996 and are considered a music technology industry-leader.') 'Film recognition copy is incorrect.'
+Assert-True ($filmContent.sections.recognition.testimonialsTranscription -eq 'Above is a collection of lovely comments on music that I have worked on.') 'Film testimonial copy is incorrect.'
+Assert-True ($filmContent.sections.montage.copy -eq 'this is our world') 'Film montage introduction is incorrect.'
+$expectedOverlays = @(
+    'sometimes i look like this',
+    'recording foley',
+    'faders and rotaries are sum of...',
+    'music anywhere',
+    'dialogue and singing are two separate angels',
+    'all day all night',
+    'sometimes i look with this',
+    'part-country, part-urban, part-suburban',
+    'is midnight time for techno',
+    'sometime i look at this'
+)
+Assert-True (($filmContent.sections.montage.items.overlay -join ',') -eq ($expectedOverlays -join ',')) 'A film montage overlay is incorrect.'
+Assert-True ($filmContent.sections.filmClips.copy -eq 'a selection of music scored to visual footage') 'Film clip introduction is incorrect.'
+Assert-True ($filmContent.page.copyright -eq ([char]0x00A9 + ' 2026 Leon Briggs. All rights reserved.')) 'Film copyright is incorrect.'
+Assert-True ($filmContent.page.videoLabels.captions -eq '-' -and $filmContent.page.videoLabels.transcript -eq '*') 'Film-only video labels are incorrect.'
+$expectedSocialUrls = @(
+    'https://www.youtube.com/@LEONLIII',
+    'https://instagram.com/leonliii',
+    'https://linkedin.com/in/leon-briggs-09387656'
+)
+Assert-True (($filmContent.page.socialLinks.url -join ',') -eq ($expectedSocialUrls -join ',')) 'A film footer social URL is incorrect.'
+Assert-True ($script -match 'socialIcon') 'Social icon rendering is missing.'
+Assert-True ($script -match 'content\.page\.videoLabels') 'Content-specific video labels are missing.'
 
 $expectedFilmUrls = @(
     'https://youtube.com/shorts/FGa79I45HzE',
@@ -90,13 +131,14 @@ Assert-True ($script -match 'video\.poster') 'Custom video poster support is mis
 Assert-True ($script -match 'pathname\.startsWith\("/shorts/"\)') 'YouTube Shorts URL support is missing.'
 Assert-True ($filmContent.sections.releases.items.Count -eq 3) 'The film release collection must contain three cards.'
 Assert-True ($filmContent.sections.filmClips.items.Count -eq 3) 'The Music to TV / Film collection must contain three cards.'
-$expectedClipCredits = @(
-    'HBO/Westworld Scoring',
+$expectedClipTitles = @(
+    'HBO/Westworld',
     'The Captain / 8Dio',
-    'The Wonders and Hardships of Love in a Hopeless Place'
+    'The Wonders and Hardships'
 )
 $expectedDescriptionCounts = @(3, 2, 6)
-Assert-True (($filmContent.sections.filmClips.items.credit -join ',') -eq ($expectedClipCredits -join ',')) 'A film clip title changed unexpectedly.'
+Assert-True (($filmContent.sections.filmClips.items.title -join ',') -eq ($expectedClipTitles -join ',')) 'A film clip title changed unexpectedly.'
+Assert-True (-not ($filmContent.sections.filmClips.items | Where-Object { $_.PSObject.Properties['credit'] })) 'A duplicate film clip credit remains.'
 $descriptionCounts = @($filmContent.sections.filmClips.items | ForEach-Object { @($_.description).Count })
 Assert-True (($descriptionCounts -join ',') -eq ($expectedDescriptionCounts -join ',')) 'A film clip description paragraph is missing.'
 foreach ($clip in $filmContent.sections.filmClips.items) {

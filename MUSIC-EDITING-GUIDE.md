@@ -15,7 +15,7 @@ JSON has a few strict rules:
 
 - Keep double quotes around field names and text.
 - Keep commas between items, but do not add a comma after the final item in an object or list.
-- Use `TBC` for anything not yet supplied.
+- Use `TBC` for unsupplied `musicmakers` content. The current `moviemakers` design uses a single dot (`.`) for intentionally minimal placeholders.
 - Do not paste HTML into copy fields; the page displays content as plain text.
 
 After editing, run:
@@ -63,9 +63,13 @@ In `sections.releases.items`, each release has `title`, `year`, `url`, `credit`,
 
 ## Update the film clips
 
-In `moviemakers-content.json`, section 06 is `sections.filmClips`. Each clip has `title`, `url`, `credit`, `description`, `captions`, and `transcript`. Keep its three objects in the order you want them displayed; the page labels them C / 01 through C / 03 automatically.
+In `moviemakers-content.json`, section 06 is `sections.filmClips`. Each clip has `title`, `url`, `description`, `captions`, and `transcript`. Keep its three objects in the order you want them displayed; the page labels them C / 01 through C / 03 automatically.
 
 The `description` field is a list of quoted paragraphs. Add, remove, or reorder those quoted items to change the compact text shown in the left-hand column beside each clip.
+
+## Update social links
+
+The `moviemakers` footer icons are controlled by `page.socialLinks`. Update a profile's `url`, but keep its `label` and `icon` values so the link remains understandable to screen readers and retains the correct icon.
 
 ## Update testimonials
 

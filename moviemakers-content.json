@@ -2,31 +2,52 @@
     "page":  {
                  "title":  "Music — Production, Releases \u0026 Collaboration",
                  "label":  "LEONLIII / MUSIC",
-                 "intro":  "TBC",
-                 "copyright":  "TBC"
+                 "intro":  "Welcome to my portfolio!  Please press play to watch the video below.",
+                 "copyright":  "© 2026 Leon Briggs. All rights reserved.",
+                 "videoLabels":  {
+                                     "captions":  "-",
+                                     "transcript":  "*"
+                                 },
+                 "socialLinks":  [
+                                     {
+                                         "label":  "YouTube",
+                                         "url":  "https://www.youtube.com/@LEONLIII",
+                                         "icon":  "youtube"
+                                     },
+                                     {
+                                         "label":  "Instagram",
+                                         "url":  "https://instagram.com/leonliii",
+                                         "icon":  "instagram"
+                                     },
+                                     {
+                                         "label":  "LinkedIn",
+                                         "url":  "https://linkedin.com/in/leon-briggs-09387656",
+                                         "icon":  "linkedin"
+                                     }
+                                 ]
              },
     "sections":  {
                      "introduction":  {
                                           "number":  "01",
                                           "heading":  "Introduction",
-                                          "copy":  "TBC",
+                                          "copy":  ".",
                                           "video":  {
                                                         "title":  "LEONLIII introduction",
                                                         "url":  "https://youtube.com/shorts/FGa79I45HzE",
-                                                        "captions":  "TBC",
-                                                        "transcript":  "TBC"
+                                                        "captions":  ".",
+                                                        "transcript":  "."
                                                     },
                                           "navLabel":  "Introduction"
                                       },
                      "showreel":  {
                                       "number":  "02",
                                       "heading":  "ambient/tv/film productions",
-                                      "copy":  "TBC",
+                                      "copy":  "A selection of music i have created, accompanied by visual footage I have shot.",
                                       "video":  {
                                                     "title":  "ambient/tv/film music showreel",
                                                     "url":  "https://youtu.be/BvV3s_7KNGQ",
-                                                    "captions":  "TBC",
-                                                    "transcript":  "TBC",
+                                                    "captions":  ".",
+                                                    "transcript":  ".",
                                                     "poster":  "assets/musicassetsextrafilm/optimized/02.jpg"
                                                 },
                                       "navLabel":  "ambient/tv/film productions"
@@ -34,32 +55,32 @@
                      "releases":  {
                                       "number":  "03",
                                       "heading":  "selected releases",
-                                      "copy":  "TBC",
+                                      "copy":  "a selection of personal tracks I released",
                                       "items":  [
                                                     {
                                                         "title":  "the intentions and directions of vines",
-                                                        "year":  "TBC",
+                                                        "year":  ".",
                                                         "url":  "https://www.youtube.com/watch?v=tS7JZtRBbiI",
-                                                        "credit":  "TBC",
-                                                        "captions":  "TBC",
-                                                        "transcript":  "TBC"
+                                                        "credit":  ".",
+                                                        "captions":  ".",
+                                                        "transcript":  "."
                                                     },
                                                     {
                                                         "title":  "emporium divinorum",
-                                                        "year":  "TBC",
+                                                        "year":  ".",
                                                         "url":  "https://www.youtube.com/watch?v=QuPaTz6wl5I",
-                                                        "credit":  "TBC",
-                                                        "captions":  "TBC",
-                                                        "transcript":  "TBC",
+                                                        "credit":  ".",
+                                                        "captions":  ".",
+                                                        "transcript":  ".",
                                                         "poster":  "assets/musicassetsextrafilm/optimized/03_02.jpg"
                                                     },
                                                     {
                                                         "title":  "the forgotten feelings of fun and freedom at the dancehall",
-                                                        "year":  "TBC",
+                                                        "year":  ".",
                                                         "url":  "https://www.youtube.com/watch?v=ZuCNQZj7xjw",
-                                                        "credit":  "TBC",
-                                                        "captions":  "TBC",
-                                                        "transcript":  "TBC",
+                                                        "credit":  ".",
+                                                        "captions":  ".",
+                                                        "transcript":  ".",
                                                         "poster":  "assets/musicassetsextrafilm/optimized/03_03.jpg"
                                                     }
                                                 ],
@@ -68,56 +89,56 @@
                      "recognition":  {
                                          "number":  "04",
                                          "heading":  "Native Instruments grand-prize recognition",
-                                         "copy":  "TBC",
+                                         "copy":  "Now owned by the parents of Akai and Moog, Native Instruments have provided music creators with pioneering tools since 1996 and are considered a music technology industry-leader.",
                                          "awardImage":  "award",
                                          "testimonialsImage":  "testimonials",
-                                         "testimonialsTranscription":  "TBC",
+                                         "testimonialsTranscription":  "Above is a collection of lovely comments on music that I have worked on.",
                                          "navLabel":  "Recognition"
                                      },
                      "montage":  {
                                      "number":  "05",
                                      "heading":  "Artist Studio Montage",
-                                     "copy":  "TBC",
+                                     "copy":  "this is our world",
                                      "items":  [
                                                    {
                                                        "image":  "portrait-1",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "sometimes i look like this"
                                                    },
                                                    {
                                                        "image":  "studio-room",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "recording foley"
                                                    },
                                                    {
                                                        "image":  "studio-controls",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "faders and rotaries are sum of..."
                                                    },
                                                    {
                                                        "image":  "portrait-2",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "music anywhere"
                                                    },
                                                    {
                                                        "image":  "studio-mic",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "dialogue and singing are two separate angels"
                                                    },
                                                    {
                                                        "image":  "studio-keys",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "all day all night"
                                                    },
                                                    {
                                                        "image":  "portrait-3",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "sometimes i look with this"
                                                    },
                                                    {
                                                        "image":  "studio-guitar",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "part-country, part-urban, part-suburban"
                                                    },
                                                    {
                                                        "image":  "studio-electronics",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "is midnight time for techno"
                                                    },
                                                    {
                                                        "image":  "portrait-4",
-                                                       "overlay":  "TBC"
+                                                       "overlay":  "sometime i look at this"
                                                    }
                                                ],
                                      "navLabel":  "Studio"
@@ -125,15 +146,14 @@
                      "filmClips":  {
                                        "number":  "06",
                                        "heading":  "Music to TV / Film",
-                                       "copy":  "TBC",
+                                       "copy":  "a selection of music scored to visual footage",
                                        "items":  [
                                                      {
-                                                         "title":  "clip1",
+                                                         "title":  "HBO/Westworld",
                                                          "year":  "",
                                                          "url":  "https://youtube.com/watch?v=cRHXCJmf1XA",
-                                                         "credit":  "HBO/Westworld Scoring",
-                                                         "captions":  "TBC",
-                                                         "transcript":  "TBC",
+                                                         "captions":  ".",
+                                                         "transcript":  ".",
                                                          "poster":  "assets/musicassetsextrafilm/optimized/06_01.jpg",
                                                          "description":  [
                                                                              "The brief was to compose a full score and sound design for this 4min+ piece of footage provided by HBO WestWorld courtesy of Spitfire.",
@@ -142,24 +162,22 @@
                                                                          ]
                                                      },
                                                      {
-                                                         "title":  "clip2",
+                                                         "title":  "The Captain / 8Dio",
                                                          "year":  "",
                                                          "url":  "https://www.youtube.com/watch?v=Ki4mFaVpLrc",
-                                                         "credit":  "The Captain / 8Dio",
-                                                         "captions":  "TBC",
-                                                         "transcript":  "TBC",
+                                                         "captions":  ".",
+                                                         "transcript":  ".",
                                                          "description":  [
                                                                              "The brief was to compose an original score to this 3min+ piece of silent footage provided by 8DIO.",
                                                                              "Music composition, audio production, sound design, mixing and mastering all completed by LEONLIII."
                                                                          ]
                                                      },
                                                      {
-                                                         "title":  "clip3",
+                                                         "title":  "The Wonders and Hardships",
                                                          "year":  "",
                                                          "url":  "https://youtu.be/HS8tS66gStI",
-                                                         "credit":  "The Wonders and Hardships of Love in a Hopeless Place",
-                                                         "captions":  "TBC",
-                                                         "transcript":  "TBC",
+                                                         "captions":  ".",
+                                                         "transcript":  ".",
                                                          "description":  [
                                                                              "This is a song for a movie.",
                                                                              "The original static artwork picture was provided by: https://www.artstation.com/artwork/8w...",
@@ -228,7 +246,7 @@
                             },
                   "testimonials":  {
                                        "source":  "assets/musicassets/optimized/testimonials.jpg",
-                                       "alt":  "Grouped testimonial graphics supplied for the Music page; text transcription TBC",
+                                       "alt":  "Grouped testimonial graphics supplied for the Music page; text transcription .",
                                        "width":  2200,
                                        "height":  706
                                    },
