@@ -69,6 +69,24 @@ $expectedFilmUrls = @(
 )
 $filmVideos = @($filmContent.sections.introduction.video, $filmContent.sections.showreel.video) + @($filmContent.sections.releases.items) + @($filmContent.sections.filmClips.items)
 Assert-True (($filmVideos.url -join ',') -eq ($expectedFilmUrls -join ',')) 'A supplied film video URL changed unexpectedly.'
+$expectedFilmPosters = @(
+    '',
+    'assets/musicassetsextrafilm/optimized/02.jpg',
+    '',
+    'assets/musicassetsextrafilm/optimized/03_02.jpg',
+    'assets/musicassetsextrafilm/optimized/03_03.jpg',
+    'assets/musicassetsextrafilm/optimized/06_01.jpg',
+    '',
+    ''
+)
+$filmPosters = @($filmVideos | ForEach-Object {
+    if ($_.PSObject.Properties['poster']) { [string]$_.poster } else { '' }
+})
+Assert-True (($filmPosters -join ',') -eq ($expectedFilmPosters -join ',')) 'A supplied film poster mapping changed unexpectedly.'
+foreach ($poster in $filmPosters | Where-Object { $_ }) {
+    Assert-True (Test-Path -LiteralPath (Join-Path $repoRoot $poster) -PathType Leaf) "Missing film poster: $poster"
+}
+Assert-True ($script -match 'video\.poster') 'Custom video poster support is missing.'
 Assert-True ($script -match 'pathname\.startsWith\("/shorts/"\)') 'YouTube Shorts URL support is missing.'
 Assert-True ($filmContent.sections.releases.items.Count -eq 3) 'The film release collection must contain three cards.'
 Assert-True ($filmContent.sections.filmClips.items.Count -eq 3) 'The Music to TV / Film collection must contain three cards.'

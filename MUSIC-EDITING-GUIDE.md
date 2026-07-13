@@ -43,6 +43,14 @@ https://www.youtube.com/watch?v=VIDEO_ID
 
 The page derives the poster automatically. It does not create the YouTube player until the visitor presses Play.
 
+To override a YouTube thumbnail, add a `poster` field to that video in the relevant content file. Film poster originals use the section numbering convention in `assets/musicassetsextrafilm`, such as `02.PNG` or `03_02.PNG`; optimized page versions live in `assets/musicassetsextrafilm/optimized`:
+
+```json
+"poster": "assets/musicassetsextrafilm/optimized/03_02.jpg"
+```
+
+If `poster` is omitted or set to `TBC`, the page keeps the automatic YouTube thumbnail fallback.
+
 For every video, also update:
 
 - `title`: accessible player title and visible caption.

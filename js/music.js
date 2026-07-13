@@ -271,7 +271,9 @@
       button.type = "button";
       button.setAttribute("aria-label", `Play ${video.title}`);
       const poster = element("img", "video-poster__image");
-      poster.src = `https://i.ytimg.com/vi/${encodeURIComponent(id)}/maxresdefault.jpg`;
+      poster.src = typeof video.poster === "string" && video.poster !== "TBC"
+        ? video.poster
+        : `https://i.ytimg.com/vi/${encodeURIComponent(id)}/maxresdefault.jpg`;
       poster.alt = "";
       poster.loading = "lazy";
       poster.decoding = "async";
