@@ -2,6 +2,10 @@
   "use strict";
 
   const CONTENT_PATH = "music-content.json";
+  const CONTENT_PATHS_BY_WORD = Object.freeze({
+    musicmakers: CONTENT_PATH,
+    moviemakers: "moviemakers-content.json"
+  });
 
   document.documentElement.classList.add("js");
   window.addEventListener("DOMContentLoaded", initialiseGate);
@@ -23,7 +27,8 @@
 
       const enteredWord = passwordInput.value.trim().toLowerCase();
       passwordInput.value = "";
-      if (enteredWord !== "musicmakers") {
+      const contentPath = CONTENT_PATHS_BY_WORD[enteredWord];
+      if (!contentPath) {
         status.textContent = "That word did not open the portfolio. Check it and try again.";
         passwordInput.focus();
         return;
@@ -34,7 +39,7 @@
       document.body.setAttribute("aria-busy", "true");
 
       try {
-        const content = await fetchJson(CONTENT_PATH);
+        const content = await fetchJson(contentPath);
         renderPortfolio(content);
       } catch (error) {
         console.warn("The Music page content could not be loaded.", error);
@@ -57,6 +62,7 @@
     if (!main) throw new Error("Page root is unavailable");
     document.body.classList.remove("is-locked");
     document.body.classList.add("is-unlocked");
+    document.body.classList.toggle("is-film-portfolio", Boolean(content.sections.filmClips));
     document.body.removeAttribute("aria-busy");
     document.querySelector(".gate-header")?.remove();
     main.replaceChildren(buildPortfolio(content));
@@ -66,6 +72,9 @@
 
   function buildPortfolio(content) {
     const fragment = document.createDocumentFragment();
+    const sectionSix = content.sections.filmClips
+      ? buildFilmClips(content)
+      : buildStudioVideo(content);
     fragment.append(
       buildHeader(content),
       buildIntroduction(content),
@@ -73,7 +82,7 @@
       buildReleases(content),
       buildRecognition(content),
       buildMontage(content),
-      buildStudioVideo(content),
+      sectionSix,
       buildWorkingTogether(content),
       buildFooter(content)
     );
@@ -90,13 +99,16 @@
     const logo = portfolioImage(content.media["logo-glyph"], "music-header__logo");
     const nav = element("nav", "music-nav");
     nav.setAttribute("aria-label", "Music page sections");
+    const sectionSix = content.sections.filmClips
+      ? ["film-clips", content.sections.filmClips.navLabel || content.sections.filmClips.heading]
+      : ["mobile-studio-montage", content.sections.studioVideo.navLabel || content.sections.studioVideo.heading];
     const destinations = [
       ["introduction", content.sections.introduction.navLabel || content.sections.introduction.heading],
       ["showreel", content.sections.showreel.navLabel || content.sections.showreel.heading],
       ["releases", content.sections.releases.navLabel || content.sections.releases.heading],
       ["recognition", content.sections.recognition.navLabel || content.sections.recognition.heading],
       ["studio", content.sections.montage.navLabel || content.sections.montage.heading],
-      ["mobile-studio-montage", content.sections.studioVideo.navLabel || content.sections.studioVideo.heading],
+      sectionSix,
       ["working-together", content.sections.workingTogether.navLabel || content.sections.workingTogether.heading]
     ];
     destinations.forEach(([id, label], index) => {
@@ -188,6 +200,25 @@
       contentText("p", "section-copy reveal", data.copy),
       videoComponent(data.video, "split-section__media reveal")
     );
+    return section;
+  }
+
+  function buildFilmClips(content) {
+    const data = content.sections.filmClips;
+    const section = sectionElement("film-clips", "editorial-section releases-section");
+    const intro = element("div", "releases-section__intro");
+    intro.append(sectionHeading(data), contentText("p", "section-copy reveal", data.copy));
+    const list = element("div", "release-list");
+    data.items.forEach((clip, index) => {
+      const article = element("article", "release-card reveal");
+      const meta = element("div", "release-card__meta");
+      meta.append(element("span", "release-card__index", `C / ${String(index + 1).padStart(2, "0")}`));
+      const title = element("div", "release-card__title");
+      title.append(element("h3", "", clip.title), contentText("p", "release-card__credit", clip.credit));
+      article.append(meta, title, videoComponent(clip, "release-card__video"));
+      list.append(article);
+    });
+    section.append(intro, list);
     return section;
   }
 

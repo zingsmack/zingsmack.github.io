@@ -10,7 +10,7 @@ The root `index.html`, `main` branch, repository name, and root `CNAME` indicate
 
 Change only `music.html`, served at `https://leonliii.com/music.html` and `https://zingsmack.github.io/music.html`.
 
-The old under-construction CSS and JavaScript remain untouched. The redesigned route uses `css/music.css`, `js/music.js`, and `music-content.json`.
+The old under-construction CSS and JavaScript remain untouched. The redesigned route uses `css/music.css`, `js/music.js`, `music-content.json`, and `moviemakers-content.json`.
 
 ## 3. Visual concepts
 
@@ -66,13 +66,13 @@ A more austere direction inspired by independent-film credits and recording logs
 
 ## 6. Content structure
 
-All editable copy, YouTube links, captions status, transcripts, credits, contact details, alt text, overlays, and image paths live in one file: `music-content.json`.
+Each portfolio variant keeps all of its editable copy, YouTube links, captions status, transcripts, credits, contact details, alt text, overlays, and image paths in one file. `music-content.json` controls `musicmakers`; `moviemakers-content.json` controls `moviemakers`.
 
-The file is deliberately plain JSON and uses `TBC` wherever material has not been supplied. `MUSIC-EDITING-GUIDE.md` documents each field. The file is public because GitHub Pages is public and the requested word gate is presentational only.
+Both files are deliberately plain JSON and use `TBC` wherever material has not been supplied. `MUSIC-EDITING-GUIDE.md` documents each field. The files are public because GitHub Pages is public and the requested word gate is presentational only.
 
 ## 7. Interaction and component behaviour
 
-- The initial screen asks for the shared word `musicmakers` and reveals the portfolio after a matching entry.
+- The initial screen reveals the existing Music portfolio for `musicmakers` and the alternate film portfolio for `moviemakers`.
 - Section navigation uses ordinary anchors and native scrolling.
 - YouTube components display poster buttons and create `youtube-nocookie.com` iframes only after activation.
 - Transcript disclosures use native `details` and `summary` elements.
@@ -82,7 +82,7 @@ The file is deliberately plain JSON and uses `TBC` wherever material has not bee
 ## 8. Media-performance plan
 
 - Use the supplied originals as the editing source and optimized JPEG derivatives for page display.
-- Keep width, height, and `aspect-ratio` metadata in `music-content.json` to prevent layout shift.
+- Keep width, height, and `aspect-ratio` metadata in each content JSON file to prevent layout shift.
 - Lazy-load images with `loading="lazy"` and decode asynchronously.
 - Use YouTube poster images before playback and create no iframe until Play is pressed.
 - Use `youtube-nocookie.com` for players and never autoplay before user activation.
@@ -100,7 +100,7 @@ The file is deliberately plain JSON and uses `TBC` wherever material has not bee
 
 ## 10. Word-gate plan and limitation
 
-GitHub Pages is static, so this lightweight word gate is not security. The word `musicmakers`, page copy, JSON, links, credits, and image URLs can be discovered by anyone who views the public source or requests the files directly. `noindex, nofollow` asks search engines not to index the route but is not an access-control mechanism.
+GitHub Pages is static, so this lightweight word gate is not security. The words `musicmakers` and `moviemakers`, page copy, JSON, links, credits, and image URLs can be discovered by anyone who views the public source or requests the files directly. `noindex, nofollow` asks search engines not to index the route but is not an access-control mechanism.
 
 That limitation is accepted for this version because the goal is a personalised viewing moment, not confidentiality. If the material later needs real protection, the site must move behind authenticated hosting or use an encrypted/private delivery architecture.
 
@@ -108,6 +108,8 @@ That limitation is accepted for this version because the goal is a personalised 
 
 - `music.html`
 - `music-content.json`
+- `moviemakers-content.json`
+- `assets/musicassetsextrafilm/ambitvfilmtemplate.txt`
 - `css/music.css`
 - `js/music.js`
 - `assets/musicassets/optimized/*.jpg`
@@ -124,7 +126,7 @@ Do not modify `CNAME`, unrelated HTML pages, existing analytics or metadata on u
 - Sections appear in the requested order and use supplied media/content where available; missing copy is `TBC`.
 - The Studio Contact Sheet design works without overflow at 375px, 768px, and 1440px.
 - The three release cards stack cleanly on narrow screens.
-- Entering `musicmakers` reveals the page; a wrong word leaves the gate visible and announces an error.
+- Entering `musicmakers` reveals the unchanged Music portfolio, entering `moviemakers` reveals the alternate film portfolio, and a wrong word leaves the gate visible and announces an error.
 - `music.html` includes `noindex, nofollow` metadata.
 - No audio autoplays, no YouTube iframe loads before activation, and no scroll hijacking occurs.
 - Every video exposes captions status and a transcript placeholder.

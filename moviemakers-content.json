@@ -1,0 +1,275 @@
+{
+    "page":  {
+                 "title":  "Music — Production, Releases \u0026 Collaboration",
+                 "label":  "LEONLIII / MUSIC",
+                 "intro":  "TBC",
+                 "copyright":  "TBC"
+             },
+    "sections":  {
+                     "introduction":  {
+                                          "number":  "01",
+                                          "heading":  "Introduction",
+                                          "copy":  "TBC",
+                                          "video":  {
+                                                        "title":  "LEONLIII introduction",
+                                                        "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                        "captions":  "TBC",
+                                                        "transcript":  "TBC"
+                                                    },
+                                          "navLabel":  "Introduction"
+                                      },
+                     "showreel":  {
+                                      "number":  "02",
+                                      "heading":  "ambient/tv/film productions",
+                                      "copy":  "TBC",
+                                      "video":  {
+                                                    "title":  "ambient/tv/film music showreel",
+                                                    "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                    "captions":  "TBC",
+                                                    "transcript":  "TBC"
+                                                },
+                                      "navLabel":  "ambient/tv/film productions"
+                                  },
+                     "releases":  {
+                                      "number":  "03",
+                                      "heading":  "selected releases",
+                                      "copy":  "TBC",
+                                      "items":  [
+                                                    {
+                                                        "title":  "the intentions and directions of vines",
+                                                        "year":  "TBC",
+                                                        "url":  "https://www.youtube.com/watch?v=tS7JZtRBbiI",
+                                                        "credit":  "TBC",
+                                                        "captions":  "TBC",
+                                                        "transcript":  "TBC"
+                                                    },
+                                                    {
+                                                        "title":  "emporium divinorum",
+                                                        "year":  "TBC",
+                                                        "url":  "https://www.youtube.com/watch?v=QuPaTz6wl5I",
+                                                        "credit":  "TBC",
+                                                        "captions":  "TBC",
+                                                        "transcript":  "TBC"
+                                                    },
+                                                    {
+                                                        "title":  "the forgotten feelings of fun and freedom at the dancehall",
+                                                        "year":  "TBC",
+                                                        "url":  "https://www.youtube.com/watch?v=ZuCNQZj7xjw",
+                                                        "credit":  "TBC",
+                                                        "captions":  "TBC",
+                                                        "transcript":  "TBC"
+                                                    }
+                                                ],
+                                      "navLabel":  "selected releases"
+                                  },
+                     "recognition":  {
+                                         "number":  "04",
+                                         "heading":  "Native Instruments grand-prize recognition",
+                                         "copy":  "TBC",
+                                         "awardImage":  "award",
+                                         "testimonialsImage":  "testimonials",
+                                         "testimonialsTranscription":  "TBC",
+                                         "navLabel":  "Recognition"
+                                     },
+                     "montage":  {
+                                     "number":  "05",
+                                     "heading":  "Artist Studio Montage",
+                                     "copy":  "TBC",
+                                     "items":  [
+                                                   {
+                                                       "image":  "portrait-1",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "studio-room",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "studio-controls",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "portrait-2",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "studio-mic",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "studio-keys",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "portrait-3",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "studio-guitar",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "studio-electronics",
+                                                       "overlay":  "TBC"
+                                                   },
+                                                   {
+                                                       "image":  "portrait-4",
+                                                       "overlay":  "TBC"
+                                                   }
+                                               ],
+                                     "navLabel":  "Studio"
+                                 },
+                     "filmClips":  {
+                                       "number":  "06",
+                                       "heading":  "Music to TV / Film",
+                                       "copy":  "TBC",
+                                       "items":  [
+                                                     {
+                                                         "title":  "clip1",
+                                                         "year":  "",
+                                                         "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                         "credit":  "HBO/Westworld",
+                                                         "captions":  "TBC",
+                                                         "transcript":  "TBC"
+                                                     },
+                                                     {
+                                                         "title":  "clip2",
+                                                         "year":  "",
+                                                         "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                         "credit":  "The Captain / 8dio",
+                                                         "captions":  "TBC",
+                                                         "transcript":  "TBC"
+                                                     },
+                                                     {
+                                                         "title":  "clip3",
+                                                         "year":  "",
+                                                         "url":  "https://www.youtube.com/watch?v=hx4aRwIlr5U",
+                                                         "credit":  "the wonders and hardship of love in a hopeless place",
+                                                         "captions":  "TBC",
+                                                         "transcript":  "TBC"
+                                                     }
+                                                 ],
+                                       "navLabel":  "Music to TV / Film"
+                                   },
+                     "workingTogether":  {
+                                             "number":  "07",
+                                             "heading":  "working together",
+                                             "subheading":  "Technical details",
+                                             "paragraphs":  [
+                                                                "Firstly, if you have any specific inspirations or references for any part, please tell me, as it will help me to achieve your vision.",
+                                                                "If you have existing audio that you would like mixed, I would need to receive the stems as 32-bit, 48kHz WAV files. Please label them appropriately in the following format: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION_DRYorFX. For example: A24_Midsommar_000222_GroupedDialogue_Dry.",
+                                                                "The time is written in the format [hhmmss], and will be for the rough starting time in the guide_video provided (wether that guide video is full or a scene or a clip) being worked on.",
+                                                                "If providing stems for a full mix of audio, then please ensure character names are provided, and depending on recording method, stems isolated to specific characters (where possible) or scenenames (if no dubbing and room/overhead mics were used).",
+                                                                "You can upload stems to a Google Drive folder (remember to set permissions), Dropbox, WeTransfer, or another file-sharing service. Please send the email link to orangetalisman@outlook.com.",
+                                                                "I will provide the following final output file as a 48kHz, 24-bit stereo WAV file.",
+                                                                "I won\u0027t use any AI or machine-learning processing on your stems. To produce your track, I will use my DAW and a selection of industry-standard plugins in addition to outboard hardware, where appropriate. Where necessary, I may rework some stems in order to fulfil the demands of the production.",
+                                                                "Your stems will only be used for the purposes of creating this track. If you agree for me to use any of those stems for another purpose, such as in a remix, demo or promotional material, or another production, that will be covered by a separate agreement.",
+                                                                "The ownership of any music I create will be retained by me, and the filmmaker will be granted a non-exclusive licence to use that music only in the film provided.",
+                                                                "For any music sent to me to be incorporated into a production, I will assume that the relevant copyright permissions have been obtained, and that the filmmaker is aware of related implications.",
+                                                                "As you now have my number and email, please feel free to message or leave me a voice note at any time."
+                                                            ],
+                                             "tldr":  [
+                                                          "Please send song references, inspirations, or track aspirations.",
+                                                          "Export your existing stems as 32-bit, 48kHz WAV files.",
+                                                          "Name files PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION_DRYorFX. If there is no BPM, write FREE.",
+                                                          "Please provide only one piece of visual footage.",
+                                                          "Email the download link to orangetalisman@outlook.com."
+                                                      ],
+                                             "contactLabel":  "Discuss a project",
+                                             "contactUrl":  "mailto:orangetalisman@outlook.com",
+                                             "navLabel":  "Working Together"
+                                         }
+                 },
+    "media":  {
+                  "logo-name":  {
+                                    "source":  "assets/musicassets/logos/music_logo_dark_name.PNG",
+                                    "alt":  "LEONLIII music logo",
+                                    "width":  500,
+                                    "height":  500
+                                },
+                  "logo-glyph":  {
+                                     "source":  "assets/musicassets/logos/music_logo_dark_glyph.PNG",
+                                     "alt":  "LEONLIII music glyph",
+                                     "width":  500,
+                                     "height":  500
+                                 },
+                  "pattern":  {
+                                  "source":  "assets/musicassets/optimized/pattern.jpg",
+                                  "alt":  "Gold tree-pattern artwork supplied for the Music page",
+                                  "width":  1080,
+                                  "height":  720
+                              },
+                  "award":  {
+                                "source":  "assets/musicassets/optimized/award.jpg",
+                                "alt":  "Native Instruments grand-prize recognition graphic supplied for the Music page",
+                                "width":  722,
+                                "height":  770
+                            },
+                  "testimonials":  {
+                                       "source":  "assets/musicassets/optimized/testimonials.jpg",
+                                       "alt":  "Grouped testimonial graphics supplied for the Music page; text transcription TBC",
+                                       "width":  2200,
+                                       "height":  706
+                                   },
+                  "portrait-1":  {
+                                     "source":  "assets/musicassets/optimized/portrait-1.jpg",
+                                     "alt":  "Artist portrait photograph 1",
+                                     "width":  1800,
+                                     "height":  780
+                                 },
+                  "portrait-2":  {
+                                     "source":  "assets/musicassets/optimized/portrait-2.jpg",
+                                     "alt":  "Artist portrait photograph 2",
+                                     "width":  1500,
+                                     "height":  2000
+                                 },
+                  "portrait-3":  {
+                                     "source":  "assets/musicassets/optimized/portrait-3.jpg",
+                                     "alt":  "Artist portrait photograph 3",
+                                     "width":  1333,
+                                     "height":  2000
+                                 },
+                  "portrait-4":  {
+                                     "source":  "assets/musicassets/optimized/portrait-4.jpg",
+                                     "alt":  "Artist portrait photograph 4",
+                                     "width":  638,
+                                     "height":  919
+                                 },
+                  "studio-controls":  {
+                                          "source":  "assets/musicassets/optimized/studio-controls.jpg",
+                                          "alt":  "Studio controls",
+                                          "width":  1426,
+                                          "height":  697
+                                      },
+                  "studio-electronics":  {
+                                             "source":  "assets/musicassets/optimized/studio-electronics.jpg",
+                                             "alt":  "Studio electronics",
+                                             "width":  906,
+                                             "height":  591
+                                         },
+                  "studio-guitar":  {
+                                        "source":  "assets/musicassets/optimized/studio-guitar.jpg",
+                                        "alt":  "Guitar in the studio",
+                                        "width":  1179,
+                                        "height":  680
+                                    },
+                  "studio-keys":  {
+                                      "source":  "assets/musicassets/optimized/studio-keys.jpg",
+                                      "alt":  "Keyboard in the studio",
+                                      "width":  1477,
+                                      "height":  706
+                                  },
+                  "studio-mic":  {
+                                     "source":  "assets/musicassets/optimized/studio-mic.jpg",
+                                     "alt":  "Microphone in the studio",
+                                     "width":  1088,
+                                     "height":  602
+                                 },
+                  "studio-room":  {
+                                      "source":  "assets/musicassets/optimized/studio-room.jpg",
+                                      "alt":  "Recording room in the studio",
+                                      "width":  1358,
+                                      "height":  565
+                                  }
+              }
+}

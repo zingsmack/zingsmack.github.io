@@ -455,6 +455,10 @@ a {
   text-wrap: balance;
 }
 
+.is-film-portfolio .section-heading__title {
+  overflow-wrap: anywhere;
+}
+
 .section-copy {
   max-width: 540px;
   margin: 28px 0 0;
