@@ -332,6 +332,38 @@ a {
   border-bottom: 1px solid var(--line);
 }
 
+.is-film-portfolio .music-header {
+  position: sticky;
+  z-index: 40;
+  top: 0;
+  background: rgba(9, 9, 11, 0.96);
+  backdrop-filter: blur(16px);
+}
+
+.is-film-portfolio .music-nav {
+  flex-wrap: wrap;
+  overflow-x: visible;
+  row-gap: 8px;
+  scrollbar-width: none;
+}
+
+.is-film-portfolio .home-link,
+.is-film-portfolio .music-nav a,
+.is-film-portfolio .eyebrow,
+.is-film-portfolio .section-folio,
+.is-film-portfolio .video-poster__play,
+.is-film-portfolio .video-caption__status,
+.is-film-portfolio .transcript summary,
+.is-film-portfolio .working-section__subheading,
+.is-film-portfolio .contact-link,
+.is-film-portfolio .music-footer {
+  text-transform: none;
+}
+
+.is-film-portfolio .working-section__rail {
+  top: 140px;
+}
+
 .music-header__logo {
   width: 48px;
   min-width: 48px;
@@ -1242,6 +1274,11 @@ a {
   .music-nav {
     margin-right: calc(var(--page-gutter) * -1);
     padding-right: var(--page-gutter);
+  }
+
+  .is-film-portfolio .music-nav {
+    margin-right: 0;
+    padding-right: 0;
   }
 
   .intro-section,

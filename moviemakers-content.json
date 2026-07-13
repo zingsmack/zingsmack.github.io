@@ -1,12 +1,13 @@
 {
     "page":  {
-                 "title":  "Music — Production, Releases \u0026 Collaboration",
+                 "title":  "music — production, releases \u0026 collaboration",
                  "label":  "LEONLIII / MUSIC",
-                 "intro":  "Welcome to my portfolio!  Please press play to watch the video below.",
-                 "copyright":  "© 2026 Leon Briggs. All rights reserved.",
+                 "intro":  "welcome to my portfolio!  please press play to watch the video below.",
+                 "copyright":  "© 2026 Leon Briggs. all rights reserved.",
                  "videoLabels":  {
                                      "captions":  "-",
-                                     "transcript":  "*"
+                                     "transcript":  "*",
+                                     "play":  "play"
                                  },
                  "socialLinks":  [
                                      {
@@ -24,12 +25,21 @@
                                          "url":  "https://linkedin.com/in/leon-briggs-09387656",
                                          "icon":  "linkedin"
                                      }
-                                 ]
+                                 ],
+                 "uiLabels":  {
+                                  "home":  "home",
+                                  "homeAria":  "return to the home page",
+                                  "navigation":  "music page sections",
+                                  "testimonials":  "testimonials / text alternative",
+                                  "technicalDetails":  "technical details / TLDR",
+                                  "returnHome":  "return home",
+                                  "socialProfiles":  "social profiles"
+                              }
              },
     "sections":  {
                      "introduction":  {
                                           "number":  "01",
-                                          "heading":  "Introduction",
+                                          "heading":  "introduction",
                                           "copy":  ".",
                                           "video":  {
                                                         "title":  "LEONLIII introduction",
@@ -37,12 +47,12 @@
                                                         "captions":  ".",
                                                         "transcript":  "."
                                                     },
-                                          "navLabel":  "Introduction"
+                                          "navLabel":  "introduction"
                                       },
                      "showreel":  {
                                       "number":  "02",
                                       "heading":  "ambient/tv/film productions",
-                                      "copy":  "A selection of music i have created, accompanied by visual footage I have shot.",
+                                      "copy":  "a selection of music i have created, accompanied by visual footage i have shot.",
                                       "video":  {
                                                     "title":  "ambient/tv/film music showreel",
                                                     "url":  "https://youtu.be/BvV3s_7KNGQ",
@@ -55,7 +65,7 @@
                      "releases":  {
                                       "number":  "03",
                                       "heading":  "selected releases",
-                                      "copy":  "a selection of personal tracks I released",
+                                      "copy":  "a selection of personal tracks i released",
                                       "items":  [
                                                     {
                                                         "title":  "the intentions and directions of vines",
@@ -89,20 +99,20 @@
                      "recognition":  {
                                          "number":  "04",
                                          "heading":  "Native Instruments grand-prize recognition",
-                                         "copy":  "Now owned by the parents of Akai and Moog, Native Instruments have provided music creators with pioneering tools since 1996 and are considered a music technology industry-leader.",
+                                         "copy":  "now owned by the parents of Akai and Moog, Native Instruments have provided music creators with pioneering tools since 1996 and are considered a music technology industry-leader.",
                                          "awardImage":  "award",
                                          "testimonialsImage":  "testimonials",
-                                         "testimonialsTranscription":  "Above is a collection of lovely comments on music that I have worked on.",
-                                         "navLabel":  "Recognition"
+                                         "testimonialsTranscription":  "above is a collection of lovely comments on music that i have worked on.",
+                                         "navLabel":  "recognition"
                                      },
                      "montage":  {
                                      "number":  "05",
-                                     "heading":  "Artist Studio Montage",
-                                     "copy":  "this is our world",
+                                     "heading":  "artist studio montage",
+                                     "copy":  "this part of the earth looks like...",
                                      "items":  [
                                                    {
                                                        "image":  "portrait-1",
-                                                       "overlay":  "sometimes i look like this"
+                                                       "overlay":  "sometimes i look like this, made you look!"
                                                    },
                                                    {
                                                        "image":  "studio-room",
@@ -141,11 +151,11 @@
                                                        "overlay":  "sometime i look at this"
                                                    }
                                                ],
-                                     "navLabel":  "Studio"
+                                     "navLabel":  "studio"
                                  },
                      "filmClips":  {
                                        "number":  "06",
-                                       "heading":  "Music to TV / Film",
+                                       "heading":  "music to TV / film",
                                        "copy":  "a selection of music scored to visual footage",
                                        "items":  [
                                                      {
@@ -156,67 +166,67 @@
                                                          "transcript":  ".",
                                                          "poster":  "assets/musicassetsextrafilm/optimized/06_01.jpg",
                                                          "description":  [
-                                                                             "The brief was to compose a full score and sound design for this 4min+ piece of footage provided by HBO WestWorld courtesy of Spitfire.",
-                                                                             "I composed, produced, mixed and mastered the music, audio arrangement and sound design.",
-                                                                             "The full final mix and master for the entire audio (which included the dialogue, and a few sound effects such as gunshots, car screeching), is not demonstrated here."
+                                                                             "the brief was to compose a full score and sound design for this 4min+ piece of footage provided by HBO WestWorld courtesy of Spitfire.",
+                                                                             "i composed, produced, mixed and mastered the music, audio arrangement and sound design.",
+                                                                             "the full final mix and master for the entire audio (which included the dialogue, and a few sound effects such as gunshots, car screeching), is not demonstrated here."
                                                                          ]
                                                      },
                                                      {
-                                                         "title":  "The Captain / 8Dio",
+                                                         "title":  "the Captain / 8Dio",
                                                          "year":  "",
                                                          "url":  "https://www.youtube.com/watch?v=Ki4mFaVpLrc",
                                                          "captions":  ".",
                                                          "transcript":  ".",
                                                          "description":  [
-                                                                             "The brief was to compose an original score to this 3min+ piece of silent footage provided by 8DIO.",
-                                                                             "Music composition, audio production, sound design, mixing and mastering all completed by LEONLIII."
+                                                                             "the brief was to compose an original score to this 3min+ piece of silent footage provided by 8DIO.",
+                                                                             "music composition, audio production, sound design, mixing and mastering all completed by LEONLIII."
                                                                          ]
                                                      },
                                                      {
-                                                         "title":  "The Wonders and Hardships",
+                                                         "title":  "the wonders and hardships",
                                                          "year":  "",
                                                          "url":  "https://youtu.be/HS8tS66gStI",
                                                          "captions":  ".",
                                                          "transcript":  ".",
                                                          "description":  [
-                                                                             "This is a song for a movie.",
-                                                                             "The original static artwork picture was provided by: https://www.artstation.com/artwork/8w...",
-                                                                             "The brief was to make an original score under 90 seconds inspired by this image.",
-                                                                             "I imagined that this told the story of two star-crossed lovers in a time where all human meetings are prescheduled and authorised / denied by a controlling system, and when the person on the bike gets conscripted for war, this is the last chance they get to meet, and possibly the last time they\u0027ll ever see each other.",
-                                                                             "I then created some musical sketches, settling on one of a number of ideas I made for this, experimenting a lot with sound design. To finish it, I found a vocal sample that I felt gave it Dune-esque vibes.",
-                                                                             "I then broke out the elements of the original static artwork image into photoshop and premiere pro, to turn the still image into a dynamic animation."
+                                                                             "this is a song for a movie.",
+                                                                             "the static artwork image was provided via Artstation \u0027link in Youtube description\u0027",
+                                                                             "the brief was to make an original score under 90 seconds inspired by this image.",
+                                                                             "i imagined that this told the story of two star-crossed lovers in a time where all human meetings are prescheduled and authorised / denied by a controlling system, and when the person on the bike gets conscripted for war, this is the last chance they get to meet, and possibly the last time they\u0027ll ever see each other.",
+                                                                             "i then created some musical sketches, settling on one of a number of ideas i made for this, experimenting a lot with sound design. to finish it, i found a vocal sample that i felt gave it Dune-esque vibes.",
+                                                                             "i then broke out the elements of the original static artwork image into photoshop and premiere pro, to turn the still image into a dynamic animation."
                                                                          ]
                                                      }
                                                  ],
-                                       "navLabel":  "Music to TV / Film"
+                                       "navLabel":  "music to TV / film"
                                    },
                      "workingTogether":  {
                                              "number":  "07",
                                              "heading":  "working together",
-                                             "subheading":  "Technical details",
+                                             "subheading":  "technical details",
                                              "paragraphs":  [
-                                                                "Firstly, if you have any specific inspirations or references for any part, please tell me, as it will help me to achieve your vision.",
-                                                                "If you have existing audio that you would like mixed, I would need to receive the stems as 32-bit, 48kHz WAV files. Please label them appropriately in the following format: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION. For example: A24_Midsommar_000222_GroupedDialogue",
-                                                                "The time is written in the format [hhmmss], and will be for the rough starting time in the \u0027guide video\u0027 provided (wether that guide video is the full movie or just a scene or a clip). If the audio is already synced or you are unsure please input \u0027000000\u0027.",
-                                                                "If providing stems for a full mix of audio, then please ensure character names are provided in the description, and depending on recording method, stems isolated to specific characters (where possible) or scene names/codes (in the cases of no dubbing or where room/overhead mics were used).",
-                                                                "You can upload stems to a Google Drive folder (remember to set permissions), Dropbox, WeTransfer, or another file-sharing service. Please send the email link to orangetalisman@outlook.com.",
-                                                                "I will provide the following final output file as a 48kHz, 24-bit stereo WAV file.",
-                                                                "I won\u0027t use any AI or machine-learning processing on material you provide to me. To produce your track, I will use my DAW and a selection of industry-standard plugins in addition to outboard hardware, where appropriate. Where necessary, I may rework some stems in order to fulfil the demands of the production.",
-                                                                "Material you provide to me will only be used for the purposes of fulfilling the requirements of this project. If you agree for me to use any of that material for another purpose, such as in a remix, demo or promotional material, or another production, that will be covered by a separate agreement.",
-                                                                "The ownership of any music I create will be retained by myself, and the filmmaker will be granted a non-exclusive licence to use that music only in the project provided, without any alterations. If the exported audio is desired for use in further processing, such as in a remaster, then i can provide an unmastered audio for this purpose, and this would be under a separate agreement, where it would be required that I give final cut approval on any audio used.",
-                                                                "For any music sent to me to be incorporated into a production, I will assume that the relevant copyright permissions have been obtained, and that the filmmaker is aware of related implications.",
-                                                                "I\u0027m happy to answer any questions you may have and as you now have my number and email, please feel free to message or leave me a voice note at any time."
+                                                                "firstly, if you have any specific inspirations or references for any part, please tell me, as it will help me to achieve your vision.",
+                                                                "if you have existing audio that you would like mixed, i would need to receive the stems as 32-bit, 48kHz WAV files. please label them appropriately in the following format: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION. for example: A24_Midsommar_000222_GroupedDialogue",
+                                                                "the time is written in the format [hhmmss], and will be for the rough starting time in the \u0027guide video\u0027 provided (wether that guide video is the full movie or just a scene or a clip). if the audio is already synced or you are unsure please input \u0027000000\u0027.",
+                                                                "if providing stems for a full mix of audio, then please ensure character names are provided in the description, and depending on recording method, stems isolated to specific characters (where possible) or scene names/codes (in the cases of no dubbing or where room/overhead mics were used).",
+                                                                "you can upload stems to a Google Drive folder (remember to set permissions), Dropbox, WeTransfer, or another file-sharing service. please send the email link to orangetalisman@outlook.com.",
+                                                                "i will provide the following final output file as a 48kHz, 24-bit stereo WAV file.",
+                                                                "i won\u0027t use any AI or machine-learning processing on material you provide to me. to produce your track, i will use my DAW and a selection of industry-standard plugins in addition to outboard hardware, where appropriate. where necessary, i may rework some stems in order to fulfil the demands of the production.",
+                                                                "material you provide to me will only be used for the purposes of fulfilling the requirements of this project. if you agree for me to use any of that material for another purpose, such as in a remix, demo or promotional material, or another production, that will be covered by a separate agreement.",
+                                                                "the ownership of any music i create will be retained by myself, and the filmmaker will be granted a non-exclusive licence to use that music only in the project provided, without any alterations. if the exported audio is desired for use in further processing, such as in a remaster, then i can provide an unmastered audio for this purpose, and this would be under a separate agreement, where it would be required that i give final cut approval on any audio used.",
+                                                                "for any music sent to me to be incorporated into a production, i will assume that the relevant copyright permissions have been obtained, and that the filmmaker is aware of related implications.",
+                                                                "i\u0027m happy to answer any questions you may have and as you now have my number and email, please feel free to message or leave me a voice note at any time."
                                                             ],
                                              "tldr":  [
-                                                          "Please send references, inspirations, or aspirations.",
-                                                          "Export your existing stems as 32-bit, 48kHz WAV files.",
-                                                          "Name files in the following convention: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION.",
+                                                          "please send references, inspirations, or aspirations.",
+                                                          "export your existing stems as 32-bit, 48kHz WAV files.",
+                                                          "name files in the following convention: PRODUCERNAME_FILMNAME_TIMESTART_SOUNDDESCRIPTION.",
                                                           "please provide only one piece of visual footage, that the audio will be synched to.",
-                                                          "Email the download link to orangetalisman@outlook.com."
+                                                          "email the download link to orangetalisman@outlook.com."
                                                       ],
-                                             "contactLabel":  "Discuss a project",
+                                             "contactLabel":  "discuss a project",
                                              "contactUrl":  "mailto:orangetalisman@outlook.com",
-                                             "navLabel":  "Working Together"
+                                             "navLabel":  "working together"
                                          }
                  },
     "media":  {
@@ -234,79 +244,79 @@
                                  },
                   "pattern":  {
                                   "source":  "assets/musicassets/optimized/pattern.jpg",
-                                  "alt":  "Gold tree-pattern artwork supplied for the Music page",
+                                  "alt":  "gold tree-pattern artwork supplied for the music page",
                                   "width":  1080,
                                   "height":  720
                               },
                   "award":  {
                                 "source":  "assets/musicassets/optimized/award.jpg",
-                                "alt":  "Native Instruments grand-prize recognition graphic supplied for the Music page",
+                                "alt":  "Native Instruments grand-prize recognition graphic supplied for the music page",
                                 "width":  722,
                                 "height":  770
                             },
                   "testimonials":  {
                                        "source":  "assets/musicassets/optimized/testimonials.jpg",
-                                       "alt":  "Grouped testimonial graphics supplied for the Music page; text transcription .",
+                                       "alt":  "grouped testimonial graphics supplied for the music page; text transcription .",
                                        "width":  2200,
                                        "height":  706
                                    },
                   "portrait-1":  {
                                      "source":  "assets/musicassets/optimized/portrait-1.jpg",
-                                     "alt":  "Artist portrait photograph 1",
+                                     "alt":  "artist portrait photograph 1",
                                      "width":  1800,
                                      "height":  780
                                  },
                   "portrait-2":  {
                                      "source":  "assets/musicassets/optimized/portrait-2.jpg",
-                                     "alt":  "Artist portrait photograph 2",
+                                     "alt":  "artist portrait photograph 2",
                                      "width":  1500,
                                      "height":  2000
                                  },
                   "portrait-3":  {
                                      "source":  "assets/musicassets/optimized/portrait-3.jpg",
-                                     "alt":  "Artist portrait photograph 3",
+                                     "alt":  "artist portrait photograph 3",
                                      "width":  1333,
                                      "height":  2000
                                  },
                   "portrait-4":  {
                                      "source":  "assets/musicassets/optimized/portrait-4.jpg",
-                                     "alt":  "Artist portrait photograph 4",
+                                     "alt":  "artist portrait photograph 4",
                                      "width":  638,
                                      "height":  919
                                  },
                   "studio-controls":  {
                                           "source":  "assets/musicassets/optimized/studio-controls.jpg",
-                                          "alt":  "Studio controls",
+                                          "alt":  "studio controls",
                                           "width":  1426,
                                           "height":  697
                                       },
                   "studio-electronics":  {
                                              "source":  "assets/musicassets/optimized/studio-electronics.jpg",
-                                             "alt":  "Studio electronics",
+                                             "alt":  "studio electronics",
                                              "width":  906,
                                              "height":  591
                                          },
                   "studio-guitar":  {
                                         "source":  "assets/musicassets/optimized/studio-guitar.jpg",
-                                        "alt":  "Guitar in the studio",
+                                        "alt":  "guitar in the studio",
                                         "width":  1179,
                                         "height":  680
                                     },
                   "studio-keys":  {
                                       "source":  "assets/musicassets/optimized/studio-keys.jpg",
-                                      "alt":  "Keyboard in the studio",
+                                      "alt":  "keyboard in the studio",
                                       "width":  1477,
                                       "height":  706
                                   },
                   "studio-mic":  {
                                      "source":  "assets/musicassets/optimized/studio-mic.jpg",
-                                     "alt":  "Microphone in the studio",
+                                     "alt":  "microphone in the studio",
                                      "width":  1088,
                                      "height":  602
                                  },
                   "studio-room":  {
                                       "source":  "assets/musicassets/optimized/studio-room.jpg",
-                                      "alt":  "Recording room in the studio",
+                                      "alt":  "recording room in the studio",
                                       "width":  1358,
                                       "height":  565
                                   }

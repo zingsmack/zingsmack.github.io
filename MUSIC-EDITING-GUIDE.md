@@ -32,6 +32,8 @@ The `musicmakers` sections are `introduction`, `showreel`, `releases`, `recognit
 
 Long technical copy is stored in `workingTogether.paragraphs`. Each quoted item is one paragraph. The short checklist is `workingTogether.tldr`.
 
+Film-only interface wording such as `home`, `play`, testimonial labels, and footer labels is stored in `moviemakers-content.json` under `page.uiLabels` and `page.videoLabels`. These values do not affect `musicmakers`.
+
 ## Update video links
 
 Each video has a `url` field. Paste a full YouTube link in either of these forms:

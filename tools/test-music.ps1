@@ -44,6 +44,10 @@ Assert-True ($css -match ':focus-visible') 'Visible focus styling is missing.'
 Assert-True ($css -match 'is-film-portfolio.*section-heading__title') 'Film-only heading styling is missing.'
 Assert-True ($css -match '(?s)#showreel \.section-heading__title.*?white-space:\s*nowrap') 'The film showreel heading is not kept on one line.'
 Assert-True ($css -match '\.film-clip-card \.release-card__title h3') 'Smaller film clip title styling is missing.'
+Assert-True ($css -match '(?s)\.is-film-portfolio \.music-header\s*\{.*?position:\s*sticky;.*?top:\s*0;') 'The moviemakers header is not pinned.'
+Assert-True ($css -match '(?s)\.is-film-portfolio \.music-nav\s*\{.*?flex-wrap:\s*wrap;.*?overflow-x:\s*visible;') 'The moviemakers navigation can still scroll horizontally.'
+Assert-True ($css -match '(?s)\.is-film-portfolio \.music-nav a.*?text-transform:\s*none;') 'Film navigation capitalization is not preserved from content.'
+Assert-True ($css -match '(?s)\.montage-item__overlay\s*\{.*?text-transform:\s*uppercase;') 'Montage tags are no longer uppercase.'
 Assert-True ($css -match 'prefers-reduced-motion:\s*reduce') 'Reduced-motion styling is missing.'
 Assert-True ($css -match '(?s)prefers-reduced-motion:\s*reduce.*?\.js \.reveal\s*\{\s*opacity:\s*1;\s*transform:\s*none;') 'Reduced-motion reveals are not forced visible.'
 Assert-True ($script -match 'matchMedia\("\(prefers-reduced-motion: reduce\)"\)') 'Reduced-motion JavaScript handling is missing.'
@@ -67,14 +71,14 @@ foreach ($property in $content.media.PSObject.Properties) {
 }
 
 Assert-True ($filmJson -notmatch 'TBC') 'A TBC placeholder remains in the moviemakers content.'
-Assert-True ($filmContent.page.intro -eq 'Welcome to my portfolio!  Please press play to watch the video below.') 'Film page introduction copy is incorrect.'
-Assert-True ($filmContent.sections.showreel.copy -eq 'A selection of music i have created, accompanied by visual footage I have shot.') 'Film showreel copy is incorrect.'
-Assert-True ($filmContent.sections.releases.copy -eq 'a selection of personal tracks I released') 'Film release copy is incorrect.'
-Assert-True ($filmContent.sections.recognition.copy -eq 'Now owned by the parents of Akai and Moog, Native Instruments have provided music creators with pioneering tools since 1996 and are considered a music technology industry-leader.') 'Film recognition copy is incorrect.'
-Assert-True ($filmContent.sections.recognition.testimonialsTranscription -eq 'Above is a collection of lovely comments on music that I have worked on.') 'Film testimonial copy is incorrect.'
-Assert-True ($filmContent.sections.montage.copy -eq 'this is our world') 'Film montage introduction is incorrect.'
+Assert-True ($filmContent.page.intro -eq 'welcome to my portfolio!  please press play to watch the video below.') 'Film page introduction copy is incorrect.'
+Assert-True ($filmContent.sections.showreel.copy -eq 'a selection of music i have created, accompanied by visual footage i have shot.') 'Film showreel copy is incorrect.'
+Assert-True ($filmContent.sections.releases.copy -eq 'a selection of personal tracks i released') 'Film release copy is incorrect.'
+Assert-True ($filmContent.sections.recognition.copy -eq 'now owned by the parents of Akai and Moog, Native Instruments have provided music creators with pioneering tools since 1996 and are considered a music technology industry-leader.') 'Film recognition copy is incorrect.'
+Assert-True ($filmContent.sections.recognition.testimonialsTranscription -eq 'above is a collection of lovely comments on music that i have worked on.') 'Film testimonial copy is incorrect.'
+Assert-True ($filmContent.sections.montage.copy -eq 'this part of the earth looks like...') 'Film montage introduction is incorrect.'
 $expectedOverlays = @(
-    'sometimes i look like this',
+    'sometimes i look like this, made you look!',
     'recording foley',
     'faders and rotaries are sum of...',
     'music anywhere',
@@ -87,8 +91,12 @@ $expectedOverlays = @(
 )
 Assert-True (($filmContent.sections.montage.items.overlay -join ',') -eq ($expectedOverlays -join ',')) 'A film montage overlay is incorrect.'
 Assert-True ($filmContent.sections.filmClips.copy -eq 'a selection of music scored to visual footage') 'Film clip introduction is incorrect.'
-Assert-True ($filmContent.page.copyright -eq ([char]0x00A9 + ' 2026 Leon Briggs. All rights reserved.')) 'Film copyright is incorrect.'
+Assert-True ($filmContent.page.copyright -eq ([char]0x00A9 + ' 2026 Leon Briggs. all rights reserved.')) 'Film copyright is incorrect.'
 Assert-True ($filmContent.page.videoLabels.captions -eq '-' -and $filmContent.page.videoLabels.transcript -eq '*') 'Film-only video labels are incorrect.'
+Assert-True ($filmContent.page.videoLabels.play -eq 'play') 'The film play label is not lowercase.'
+Assert-True ($filmContent.page.uiLabels.home -eq 'home' -and $filmContent.page.uiLabels.returnHome -eq 'return home') 'Film-only interface labels are incorrect.'
+Assert-True ($script -match 'document\.title = content\.page\.title') 'The selected portfolio title is not applied to the document.'
+Assert-True ($filmJson -cnotmatch '(?<![A-Za-z0-9])I(?![A-Za-z0-9])') 'A standalone uppercase I remains in moviemakers content.'
 $expectedSocialUrls = @(
     'https://www.youtube.com/@LEONLIII',
     'https://instagram.com/leonliii',
@@ -133,14 +141,15 @@ Assert-True ($filmContent.sections.releases.items.Count -eq 3) 'The film release
 Assert-True ($filmContent.sections.filmClips.items.Count -eq 3) 'The Music to TV / Film collection must contain three cards.'
 $expectedClipTitles = @(
     'HBO/Westworld',
-    'The Captain / 8Dio',
-    'The Wonders and Hardships'
+    'the Captain / 8Dio',
+    'the wonders and hardships'
 )
 $expectedDescriptionCounts = @(3, 2, 6)
 Assert-True (($filmContent.sections.filmClips.items.title -join ',') -eq ($expectedClipTitles -join ',')) 'A film clip title changed unexpectedly.'
 Assert-True (-not ($filmContent.sections.filmClips.items | Where-Object { $_.PSObject.Properties['credit'] })) 'A duplicate film clip credit remains.'
 $descriptionCounts = @($filmContent.sections.filmClips.items | ForEach-Object { @($_.description).Count })
 Assert-True (($descriptionCounts -join ',') -eq ($expectedDescriptionCounts -join ',')) 'A film clip description paragraph is missing.'
+Assert-True ($filmContent.sections.filmClips.items[2].description[1] -eq 'the static artwork image was provided via Artstation ''link in Youtube description''') 'The Artstation attribution text is incorrect.'
 foreach ($clip in $filmContent.sections.filmClips.items) {
     Assert-True (-not (@($clip.description) | Where-Object { [string]::IsNullOrWhiteSpace($_) })) "A film clip description contains an empty paragraph: $($clip.title)"
 }

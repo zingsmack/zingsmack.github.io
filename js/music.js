@@ -60,6 +60,7 @@
   function renderPortfolio(content) {
     const main = document.querySelector("#music-main");
     if (!main) throw new Error("Page root is unavailable");
+    document.title = content.page.title;
     document.body.classList.remove("is-locked");
     document.body.classList.add("is-unlocked");
     document.body.classList.toggle("is-film-portfolio", Boolean(content.sections.filmClips));
@@ -90,15 +91,16 @@
   }
 
   function buildHeader(content) {
+    const labels = content.page.uiLabels || {};
     const header = element("header", "music-header");
     const home = element("a", "home-link");
     home.href = "hi.html";
-    home.setAttribute("aria-label", "Return to the home page");
-    home.append(element("span", "", "\u2190"), element("span", "", "Home"));
+    home.setAttribute("aria-label", labels.homeAria || "Return to the home page");
+    home.append(element("span", "", "\u2190"), element("span", "", labels.home || "Home"));
     home.firstElementChild.setAttribute("aria-hidden", "true");
     const logo = portfolioImage(content.media["logo-glyph"], "music-header__logo");
     const nav = element("nav", "music-nav");
-    nav.setAttribute("aria-label", "Music page sections");
+    nav.setAttribute("aria-label", labels.navigation || "Music page sections");
     const sectionSix = content.sections.filmClips
       ? ["film-clips", content.sections.filmClips.navLabel || content.sections.filmClips.heading]
       : ["mobile-studio-montage", content.sections.studioVideo.navLabel || content.sections.studioVideo.heading];
@@ -166,7 +168,7 @@
     const data = content.sections.recognition;
     const section = sectionElement("recognition", "editorial-section recognition-section");
     const transcription = element("div", "testimonial-transcription reveal");
-    transcription.append(element("p", "eyebrow", "Testimonials / text alternative"), contentText("p", "", data.testimonialsTranscription));
+    transcription.append(element("p", "eyebrow", content.page.uiLabels?.testimonials || "Testimonials / text alternative"), contentText("p", "", data.testimonialsTranscription));
     section.append(
       sectionHeading(data),
       contentText("p", "section-copy recognition-section__copy reveal", data.copy),
@@ -239,7 +241,7 @@
     const details = element("div", "working-section__details");
     data.paragraphs.forEach((paragraph) => details.append(contentText("p", "reveal", paragraph)));
     const tldr = element("aside", "tldr reveal");
-    tldr.append(element("p", "eyebrow", "Technical details / TLDR"));
+    tldr.append(element("p", "eyebrow", content.page.uiLabels?.technicalDetails || "Technical details / TLDR"));
     const list = element("ol", "");
     data.tldr.forEach((item) => list.append(contentText("li", "", item)));
     tldr.append(list);
@@ -250,13 +252,13 @@
 
   function buildFooter(content) {
     const footer = element("footer", "music-footer");
-    const home = element("a", "", "Return home");
+    const home = element("a", "", content.page.uiLabels?.returnHome || "Return home");
     home.href = "hi.html";
     const socialLinks = Array.isArray(content.page.socialLinks) ? content.page.socialLinks : [];
     footer.append(element("span", "", content.page.label), contentText("span", "", content.page.copyright));
     if (socialLinks.length) {
       const socials = element("nav", "music-footer__socials");
-      socials.setAttribute("aria-label", "Social profiles");
+      socials.setAttribute("aria-label", content.page.uiLabels?.socialProfiles || "Social profiles");
       socialLinks.forEach((social) => {
         const link = element("a", "social-link");
         link.href = safeContactUrl(social.url);
@@ -290,7 +292,8 @@
     if (id) {
       const button = element("button", "video-poster");
       button.type = "button";
-      button.setAttribute("aria-label", `Play ${video.title}`);
+      const playLabel = labels.play || "Play";
+      button.setAttribute("aria-label", `${playLabel} ${video.title}`);
       const poster = element("img", "video-poster__image");
       poster.src = typeof video.poster === "string" && video.poster !== "TBC"
         ? video.poster
@@ -300,7 +303,7 @@
       poster.decoding = "async";
       poster.width = 1280;
       poster.height = 720;
-      const play = element("span", "video-poster__play", "Play");
+      const play = element("span", "video-poster__play", playLabel);
       play.setAttribute("aria-hidden", "true");
       button.append(poster, play);
       button.addEventListener("click", () => loadYoutubePlayer(frame, id, video.title));
